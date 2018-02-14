@@ -35,7 +35,7 @@ namespace MSM
             {
                 UpdateCheck.StartUpdateCheck();
             }
-        }
+		}
 
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new VisualStudioToolStripExtender();
 
@@ -43,7 +43,9 @@ namespace MSM
         {
             if (e.CloseReason != CloseReason.UserClosing) return;
 
-            Service.Events.ShutDown();
+			Properties.Settings.Default.Save();
+
+			Service.Events.ShutDown();
             e.Cancel = true;
         }
 
@@ -55,20 +57,55 @@ namespace MSM
 
         private void SetTheme(Object sender, EventArgs e)
         {
+			string theme = "";
+
             if (sender == ToolStripMenuItem_Light)
             {
                 DockPanel.Theme = new VS2015LightTheme();
+				theme = "light";
             }
             else if (sender == ToolStripMenuItem_Blue)
             {
                 DockPanel.Theme = new VS2015BlueTheme();
-            }
+				theme = "blue";
+			}
             else if (sender == ToolStripMenuItem_Dark)
             {
                 DockPanel.Theme = new VS2015DarkTheme();
-            }
+				theme = "dark";
+			}
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
+
+			if (theme != "")
+			{
+				Properties.Settings.Default.theme = theme;
+			}
         }
-    }
+
+		private void SetSize(object sender, EventArgs e)
+		{
+			Properties.Settings.Default.size = Size;
+		}
+
+		private void LoadHandler(object sender, EventArgs e)
+		{
+			Size = Properties.Settings.Default.size;
+
+			switch (Properties.Settings.Default.theme)
+			{
+				case "light":
+					DockPanel.Theme = new VS2015LightTheme();
+					break;
+
+				case "blue":
+					DockPanel.Theme = new VS2015BlueTheme();
+					break;
+
+				case "dark":
+					DockPanel.Theme = new VS2015DarkTheme();
+					break;
+			}
+		}
+	}
 }
