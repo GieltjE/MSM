@@ -45,7 +45,7 @@
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(675, 163);
             this.richTextBox1.TabIndex = 0;
-			this.richTextBox1.Text = "";
+			this.richTextBox1.Text = "    This program is free software: you can redistribute it and/or modify\n    it under the terms of the GNU General Public License as published by\n    the Free Software Foundation, either version 3 of the License, or\n    (at your option) any later version.\n\n    This program is distributed in the hope that it will be useful,\n    but WITHOUT ANY WARRANTY; without even the implied warranty of\n    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n    GNU General Public License for more details.\n\n    You should have received a copy of the GNU General Public License\n    along with this program.  If not, see <http://www.gnu.org/licenses/>.";
             // 
             // groupBox1
             // 
@@ -79,8 +79,7 @@
             this.Label_QuartzNet.Name = "Label_QuartzNet";
             this.Label_QuartzNet.Size = new System.Drawing.Size(663, 18);
             this.Label_QuartzNet.TabIndex = 5;
-            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2." +
-    "0)";
+            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2.0)";
             // 
             // Label_GeneralCopyright
             // 
@@ -100,8 +99,7 @@
             this.Label_DockPanelSuite.Name = "Label_DockPanelSuite";
             this.Label_DockPanelSuite.Size = new System.Drawing.Size(663, 18);
             this.Label_DockPanelSuite.TabIndex = 7;
-            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)" +
-    "";
+            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)";
             // 
             // About
             // 
