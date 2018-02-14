@@ -139,18 +139,13 @@ namespace MSM
 			this.Controls.Add(this.DockPanel);
 			this.Controls.Add(this.StatusStrip);
 			this.Controls.Add(this.ToolStrip);
-			this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::MSM.Properties.Settings.Default, "location", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Location = global::MSM.Properties.Settings.Default.location;
 			this.Name = "Main";
 			this.Text = "Multi Server Manager";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainFormClosing);
-			this.Load += new System.EventHandler(this.LoadHandler);
-			this.ResizeEnd += new System.EventHandler(this.SetSize);
 			this.ToolStrip.ResumeLayout(false);
 			this.ToolStrip.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
-
         }
         #endregion
 

@@ -35,6 +35,8 @@ namespace MSM
             {
                 UpdateCheck.StartUpdateCheck();
             }
+
+            SetThemeHelper(Settings.SettingsClass.Theme);
 		}
 
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new VisualStudioToolStripExtender();
@@ -42,8 +44,6 @@ namespace MSM
         private void MainFormClosing(Object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason != CloseReason.UserClosing) return;
-
-			Properties.Settings.Default.Save();
 
 			Service.Events.ShutDown();
             e.Cancel = true;
@@ -57,55 +57,38 @@ namespace MSM
 
         private void SetTheme(Object sender, EventArgs e)
         {
-			string theme = "";
-
             if (sender == ToolStripMenuItem_Light)
             {
-                DockPanel.Theme = new VS2015LightTheme();
-				theme = "light";
+                Settings.SettingsClass.Theme = Enumerations.Themes.Light;
             }
             else if (sender == ToolStripMenuItem_Blue)
             {
-                DockPanel.Theme = new VS2015BlueTheme();
-				theme = "blue";
-			}
+                Settings.SettingsClass.Theme = Enumerations.Themes.Blue;
+            }
             else if (sender == ToolStripMenuItem_Dark)
             {
-                DockPanel.Theme = new VS2015DarkTheme();
-				theme = "dark";
-			}
+                Settings.SettingsClass.Theme = Enumerations.Themes.Dark;
+            }
+            SetThemeHelper(Settings.SettingsClass.Theme);
+        }
+        private void SetThemeHelper(Enumerations.Themes theme)
+        {
+            switch (theme)
+            {
+                case Enumerations.Themes.Light:
+                    DockPanel.Theme = new VS2015LightTheme();
+                    break;
+                case Enumerations.Themes.Blue:
+                    DockPanel.Theme = new VS2015BlueTheme();
+                    break;
+                case Enumerations.Themes.Dark:
+                    DockPanel.Theme = new VS2015DarkTheme();
+                    break;
+            }
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
 
-			if (theme != "")
-			{
-				Properties.Settings.Default.theme = theme;
-			}
+            Settings.Flush();
         }
-
-		private void SetSize(object sender, EventArgs e)
-		{
-			Properties.Settings.Default.size = Size;
-		}
-
-		private void LoadHandler(object sender, EventArgs e)
-		{
-			Size = Properties.Settings.Default.size;
-
-			switch (Properties.Settings.Default.theme)
-			{
-				case "light":
-					DockPanel.Theme = new VS2015LightTheme();
-					break;
-
-				case "blue":
-					DockPanel.Theme = new VS2015BlueTheme();
-					break;
-
-				case "dark":
-					DockPanel.Theme = new VS2015DarkTheme();
-					break;
-			}
-		}
 	}
 }

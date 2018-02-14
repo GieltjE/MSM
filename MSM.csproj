@@ -66,11 +66,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Functions\UI.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Include="Service\Cron.cs" />
     <Compile Include="Data\Enumerations.cs" />
     <Compile Include="Service\Events.cs" />
@@ -101,10 +96,6 @@
     <None Include="App.config" />
     <None Include="LICENSE">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="README.md" />
   </ItemGroup>

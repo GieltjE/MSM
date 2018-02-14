@@ -29,7 +29,6 @@ namespace MSM.Service
     {
         static Settings()
         {
-            String test = Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml");
             if (!File.Exists(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
             {
                 FileOperations.CreateFile(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml"));
@@ -79,6 +78,7 @@ namespace MSM.Service
                 using (StreamWriter writer = new StreamWriter(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
                 {
                     XMLSerializer.Serialize(writer, SettingsClass);
+                    writer.Flush();
                 }
             }
         }
@@ -102,6 +102,20 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Boolean _checkForUpdates;
+
+        public Enumerations.Themes Theme
+        {
+            get => _theme;
+            set
+            {
+                if (_theme != value)
+                {
+                    Dirty = true;
+                }
+                _theme = value;
+            }
+        }
+        [XmlIgnore] private Enumerations.Themes _theme = Enumerations.Themes.Dark;
     }
 
     [DisallowConcurrentExecution]

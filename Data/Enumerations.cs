@@ -78,5 +78,12 @@ namespace MSM.Data
             "sat",
             "sun"
         };
+
+        public enum Themes : byte
+        {
+            Light,
+            Blue,
+            Dark
+        }
     }
 }
