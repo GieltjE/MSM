@@ -27,7 +27,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.Label_NewtonsoftJson = new System.Windows.Forms.Label();
@@ -46,7 +45,7 @@
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(675, 163);
             this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
+			this.richTextBox1.Text = "";
             // 
             // groupBox1
             // 
@@ -91,7 +90,7 @@
             this.Label_GeneralCopyright.Name = "Label_GeneralCopyright";
             this.Label_GeneralCopyright.Size = new System.Drawing.Size(663, 18);
             this.Label_GeneralCopyright.TabIndex = 4;
-            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)";
+            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2018 - Michiel Hazelhof (michiel@hazelhof.nl), Chris Kruining (chris@kruining.eu)";
             // 
             // Label_DockPanelSuite
             // 
