@@ -107,10 +107,10 @@
       <Version>3.0.4</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.1-beta3</Version>
+      <Version>11.0.2</Version>
     </PackageReference>
     <PackageReference Include="Quartz">
-      <Version>3.0.2</Version>
+      <Version>3.0.4</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
