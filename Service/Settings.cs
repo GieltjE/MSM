@@ -80,6 +80,7 @@ namespace MSM.Service
                     XMLSerializer.Serialize(writer, SettingsClass);
                     writer.Flush();
                 }
+                SettingsClass.Dirty = false;
             }
         }
     }
