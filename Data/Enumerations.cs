@@ -16,6 +16,7 @@
 // If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.ComponentModel;
 
 namespace MSM.Data
 {
@@ -84,6 +85,16 @@ namespace MSM.Data
             Light,
             Blue,
             Dark
+        }
+
+        public enum CloseAction : byte
+        {
+            [Description("Close normally")]
+            Close,
+            [Description("Minimize")]
+            Minimize,
+            [Description("Minimize to the tray")]
+            MinimizeToTray,
         }
     }
 }

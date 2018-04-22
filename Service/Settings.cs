@@ -16,10 +16,13 @@
 // If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 using MSM.Data;
+using MSM.Extends;
 using MSM.Functions;
 using Quartz;
 
@@ -41,13 +44,13 @@ namespace MSM.Service
             {
                 using (StreamReader streamReader = new StreamReader(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
                 {
-                    SettingsClass = (MSMSettings) XMLSerializer.Deserialize(streamReader);
-                    SettingsClass.Dirty = false;
+                    Values = (Values) XMLSerializer.Deserialize(streamReader);
+                    Values.Dirty = false;
                 }
             }
             catch
             {
-                SettingsClass = new MSMSettings();
+                Values = new Values();
                 SetDefaults();
             }
 
@@ -63,33 +66,34 @@ namespace MSM.Service
 
         private static void SetDefaults()
         {
-            SettingsClass.CheckForUpdates = true;
+            Values.CheckForUpdates = true;
         }
 
-        public static MSMSettings SettingsClass = new MSMSettings();
+        public static Values Values = new Values();
 
-        private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(MSMSettings));
+        private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
         internal static void Flush()
         {
-            if (!SettingsClass.Dirty) return;
+            if (!Values.Dirty) return;
 
-            lock (SettingsClass)
+            lock (Values)
             {
                 using (StreamWriter writer = new StreamWriter(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
                 {
-                    XMLSerializer.Serialize(writer, SettingsClass);
+                    XMLSerializer.Serialize(writer, Values);
                     writer.Flush();
                 }
-                SettingsClass.Dirty = false;
+                Values.Dirty = false;
             }
         }
     }
 
     [Serializable]
-    public class MSMSettings
+    public class Values
     {
         [XmlIgnore] public Boolean Dirty;
         
+        [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean CheckForUpdates
         {
             get => _checkForUpdates;
@@ -104,6 +108,79 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _checkForUpdates;
 
+        [Category("UI"), DisplayName("Minimize to the tray instead of the taskbar"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean MinimizeToTray
+        {
+            get => _minimizeToTray;
+            set
+            {
+                if (_minimizeToTray != value)
+                {
+                    Dirty = true;
+                }
+                _minimizeToTray = value;
+            }
+        }
+        [XmlIgnore] private Boolean _minimizeToTray;
+
+        [Category("UI"), DisplayName("Always show the tray icon"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean AlwaysShowTrayIcon
+        {
+            get => _alwaysShowTrayIcon;
+            set
+            {
+                if (_alwaysShowTrayIcon != value)
+                {
+                    Dirty = true;
+                }
+
+                if (value)
+                {
+                    ((Main)Variables.MainForm).NotifyIcon.Visible = true;
+                }
+                else
+                {
+                    if (Variables.MainForm.WindowState != FormWindowState.Minimized)
+                    {
+                        ((Main)Variables.MainForm).NotifyIcon.Visible = false;
+                    }
+                }
+                _alwaysShowTrayIcon = value;
+            }
+        }
+        [XmlIgnore] private Boolean _alwaysShowTrayIcon = true;
+
+        [Category("UI"), DisplayName("Maximize on start"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean MaximizeOnStart
+        {
+            get => _maximizeOnStart;
+            set
+            {
+                if (_maximizeOnStart != value)
+                {
+                    Dirty = true;
+                }
+                _maximizeOnStart = value;
+            }
+        }
+        [XmlIgnore] private Boolean _maximizeOnStart = true;
+
+        [Category("UI"), DisplayName("Action to perform when closing"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.CloseAction>))]
+        public Enumerations.CloseAction CloseAction
+        {
+            get => _closeAction;
+            set
+            {
+                if (_closeAction != value)
+                {
+                    Dirty = true;
+                }
+                _closeAction = value;
+            }
+        }
+        [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
+
+        [Browsable(false)]
         public Enumerations.Themes Theme
         {
             get => _theme;

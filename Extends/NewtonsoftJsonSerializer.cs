@@ -27,7 +27,7 @@ namespace MSM.Extends
 
         public NewtonsoftJsonSerializer()
         {
-            _jsonSerializer = new Newtonsoft.Json.JsonSerializer { NullValueHandling = NullValueHandling.Include };
+            _jsonSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Include };
         }
 
         public String Serialize(Object obj)

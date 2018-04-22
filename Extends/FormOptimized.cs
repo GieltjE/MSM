@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
 // 
+
+using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace MSM.Extends
@@ -33,6 +36,8 @@ namespace MSM.Extends
         private void Init()
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+
+            Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
         }
     }
 }

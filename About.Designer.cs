@@ -27,12 +27,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Label_DockPanelSuite = new System.Windows.Forms.Label();
             this.Label_NewtonsoftJson = new System.Windows.Forms.Label();
             this.Label_QuartzNet = new System.Windows.Forms.Label();
             this.Label_GeneralCopyright = new System.Windows.Forms.Label();
-            this.Label_DockPanelSuite = new System.Windows.Forms.Label();
+            this.Label_SmashIcons = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -40,15 +42,17 @@
             // 
             this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 92);
+            this.richTextBox1.Location = new System.Drawing.Point(0, 124);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(675, 163);
+            this.richTextBox1.Size = new System.Drawing.Size(675, 171);
             this.richTextBox1.TabIndex = 0;
-			this.richTextBox1.Text = "    This program is free software: you can redistribute it and/or modify\n    it under the terms of the GNU General Public License as published by\n    the Free Software Foundation, either version 3 of the License, or\n    (at your option) any later version.\n\n    This program is distributed in the hope that it will be useful,\n    but WITHOUT ANY WARRANTY; without even the implied warranty of\n    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n    GNU General Public License for more details.\n\n    You should have received a copy of the GNU General Public License\n    along with this program.  If not, see <http://www.gnu.org/licenses/>.";
+            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
             // 
             // groupBox1
             // 
+            this.groupBox1.AutoSize = true;
+            this.groupBox1.Controls.Add(this.Label_SmashIcons);
             this.groupBox1.Controls.Add(this.Label_DockPanelSuite);
             this.groupBox1.Controls.Add(this.Label_NewtonsoftJson);
             this.groupBox1.Controls.Add(this.Label_QuartzNet);
@@ -56,10 +60,20 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(675, 92);
+            this.groupBox1.Size = new System.Drawing.Size(675, 124);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General";
+            // 
+            // Label_DockPanelSuite
+            // 
+            this.Label_DockPanelSuite.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Label_DockPanelSuite.Location = new System.Drawing.Point(6, 72);
+            this.Label_DockPanelSuite.Name = "Label_DockPanelSuite";
+            this.Label_DockPanelSuite.Size = new System.Drawing.Size(663, 18);
+            this.Label_DockPanelSuite.TabIndex = 7;
+            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)";
             // 
             // Label_NewtonsoftJson
             // 
@@ -91,21 +105,21 @@
             this.Label_GeneralCopyright.TabIndex = 4;
             this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2018 - Michiel Hazelhof (michiel@hazelhof.nl), Chris Kruining (chris@kruining.eu)";
             // 
-            // Label_DockPanelSuite
+            // Label_SmashIcons
             // 
-            this.Label_DockPanelSuite.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.Label_SmashIcons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.Label_DockPanelSuite.Location = new System.Drawing.Point(6, 72);
-            this.Label_DockPanelSuite.Name = "Label_DockPanelSuite";
-            this.Label_DockPanelSuite.Size = new System.Drawing.Size(663, 18);
-            this.Label_DockPanelSuite.TabIndex = 7;
-            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)";
+            this.Label_SmashIcons.Location = new System.Drawing.Point(6, 90);
+            this.Label_SmashIcons.Name = "Label_SmashIcons";
+            this.Label_SmashIcons.Size = new System.Drawing.Size(663, 18);
+            this.Label_SmashIcons.TabIndex = 8;
+            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)";
             // 
             // About
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(675, 255);
+            this.ClientSize = new System.Drawing.Size(675, 295);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.groupBox1);
             this.MaximizeBox = false;
@@ -117,6 +131,7 @@
             this.TopMost = true;
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
         }
         #endregion
 
@@ -126,5 +141,6 @@
         private System.Windows.Forms.Label Label_QuartzNet;
         private System.Windows.Forms.Label Label_GeneralCopyright;
         private System.Windows.Forms.Label Label_DockPanelSuite;
+        private System.Windows.Forms.Label Label_SmashIcons;
     }
 }

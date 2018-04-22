@@ -40,6 +40,9 @@
   <PropertyGroup>
     <StartupObject>MSM.Program</StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -56,6 +59,7 @@
     </Compile>
     <Compile Include="Data\Statics.cs" />
     <Compile Include="Extends\NewtonsoftJsonSerializer.cs" />
+    <Compile Include="Extends\PropertyGridHelpers.cs" />
     <Compile Include="Extends\StatusStripOptimized.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -64,6 +68,9 @@
     </Compile>
     <Compile Include="Extends\ToolstripOptimized.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Extends\UserControlOptimized.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Functions\UI.cs" />
     <Compile Include="Service\Cron.cs" />
@@ -91,6 +98,12 @@
     <Compile Include="Service\Settings.cs" />
     <Compile Include="Data\Variables.cs" />
     <Compile Include="Service\UpdateCheck.cs" />
+    <Compile Include="UIElements\Settings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UIElements\Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -112,6 +125,9 @@
     <PackageReference Include="Quartz">
       <Version>3.0.4</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
