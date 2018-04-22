@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
@@ -179,6 +180,21 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
+
+        [Category("Putty"), DisplayName("Putty executable"), EditorAttribute(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public String PuttyExecutable
+        {
+            get => _puttyExecutable;
+            set
+            {
+                if (_puttyExecutable != value)
+                {
+                    Dirty = true;
+                }
+                _puttyExecutable = value;
+            }
+        }
+        [XmlIgnore] private String _puttyExecutable;
 
         [Browsable(false)]
         public Enumerations.Themes Theme
