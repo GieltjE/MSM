@@ -35,20 +35,20 @@
             this.PropertyGrid_Settings.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PropertyGrid_Settings.HelpVisible = false;
             this.PropertyGrid_Settings.Location = new System.Drawing.Point(0, 0);
-            this.PropertyGrid_Settings.Size = new System.Drawing.Size(494, 322);
             this.PropertyGrid_Settings.Name = "PropertyGrid_Settings";
+            this.PropertyGrid_Settings.Size = new System.Drawing.Size(200, 200);
             this.PropertyGrid_Settings.TabIndex = 0;
             // 
             // Settings
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.Controls.Add(this.PropertyGrid_Settings);
-            this.Size = new System.Drawing.Size(494, 322);
             this.Name = "Settings";
+            this.Size = new System.Drawing.Size(200, 200);
             this.ResumeLayout(false);
         }
         #endregion
 
-        private System.Windows.Forms.PropertyGrid PropertyGrid_Settings;
+        public System.Windows.Forms.PropertyGrid PropertyGrid_Settings;
     }
 }
