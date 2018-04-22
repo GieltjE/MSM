@@ -96,5 +96,15 @@ namespace MSM.Data
             [Description("Minimize to the tray")]
             MinimizeToTray,
         }
+
+        public enum InitialSessions : byte
+        {
+            [Description("None")]
+            None,
+            [Description("Previous sessions")]
+            Previous,
+            [Description("Predefined")]
+            Predefined,
+        }
     }
 }

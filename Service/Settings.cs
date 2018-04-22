@@ -181,7 +181,7 @@ namespace MSM.Service
         }
         [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
 
-        [Category("Putty"), DisplayName("Putty executable"), EditorAttribute(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [Category("Putty"), DisplayName("Putty executable"), Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public String PuttyExecutable
         {
             get => _puttyExecutable;
@@ -195,6 +195,36 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private String _puttyExecutable;
+
+        [Category("Sessions"), DisplayName("Available keywords for marking sessions")]
+        public String[] Keywords
+        {
+            get => _keywords;
+            set
+            {
+                if (_keywords != value)
+                {
+                    Dirty = true;
+                }
+                _keywords = value;
+            }
+        }
+        [XmlIgnore] private String[] _keywords;
+
+        [Category("Sessions"), DisplayName("Which sessions to automatically start"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.InitialSessions>))]
+        public Enumerations.InitialSessions InitialSessions
+        {
+            get => _initialSessions;
+            set
+            {
+                if (_initialSessions != value)
+                {
+                    Dirty = true;
+                }
+                _initialSessions = value;
+            }
+        }
+        [XmlIgnore] private Enumerations.InitialSessions _initialSessions = Enumerations.InitialSessions.Previous;
 
         [Browsable(false)]
         public Enumerations.Themes Theme
