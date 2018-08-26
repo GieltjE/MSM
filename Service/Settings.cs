@@ -369,6 +369,25 @@ namespace MSM.Service
         }
         [XmlIgnore] private String _username;
 
+        [Category("Server"), DisplayName("Password"), Description("Warning: passwords ARE NOT ENCRYPTED")]
+        public String Password
+        {
+            get => _password;
+            set
+            {
+                if (!String.Equals(_password, value, StringComparison.Ordinal))
+                {
+                    Settings.Values.Dirty = true;
+                }
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    UI.ShowMessage(null, "Warning: passwords are NOT encrypted, please use other authentication methods!", "NO ENCRYPTION", MessageBoxIcon.Stop);
+                }
+                _password = value;
+            }
+        }
+        [XmlIgnore] private String _password;
+
         [Category("Server"), DisplayName("Port number")]
         public UInt16 Port
         {
