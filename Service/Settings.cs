@@ -140,13 +140,13 @@ namespace MSM.Service
 
                 if (value)
                 {
-                    ((Main)Variables.MainForm).NotifyIcon.Visible = true;
+                    ((Main)Data.Variables.MainForm).NotifyIcon.Visible = true;
                 }
                 else
                 {
-                    if (Variables.MainForm.WindowState != FormWindowState.Minimized)
+                    if (Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
                     {
-                        ((Main)Variables.MainForm).NotifyIcon.Visible = false;
+                        ((Main)Data.Variables.MainForm).NotifyIcon.Visible = false;
                     }
                 }
                 _alwaysShowTrayIcon = value;
@@ -244,7 +244,7 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _showServerList = true;
 
-        [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter))]
+        [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter)), XmlArrayItem(ElementName = "Keyword")]
         public String[] Keywords
         {
             get => _keywords;
@@ -258,23 +258,35 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private String[] _keywords = new String[0];
-        
+
+        [Category("Servers"), DisplayName("Available Variables"), TypeConverter(typeof(CsvConverter)), XmlArrayItem(ElementName = "Variable")]
+        public String[] Variables
+        {
+            get => _variables;
+            set
+            {
+                if (!_variables.Equals(value))
+                {
+                    Dirty = true;
+                }
+                _variables = value;
+            }
+        }
+        [XmlIgnore] private String[] _variables = new String[0];
+
         [Category("Servers"), DisplayName("Serverlist")]
         public CollectionConverter<Node> Servers
         {
             get => _nodeList;
             set
             {
-                if (_nodeList != value)
-                {
-                    Dirty = true;
-                }
+                Dirty = true;
                 _nodeList = value;
             }
         }
         [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
     }
-
+    [Serializable]
     public class Node
     {
         public override String ToString()
@@ -298,8 +310,18 @@ namespace MSM.Service
         [XmlIgnore] private String _nodeName = "/";
 
         [Category("Servers"), DisplayName("Serverlist")]
-        public CollectionConverter<Server> ServerList { get; set; }
+        public CollectionConverter<Server> ServerList
+        {
+            get => _serverList;
+            set
+            {
+                Settings.Values.Dirty = true;
+                _serverList = value;
+            }
+        }
+        private CollectionConverter<Server> _serverList = new CollectionConverter<Server>();
     }
+    [Serializable]
     public class Server
     {
         public override String ToString()
@@ -317,27 +339,11 @@ namespace MSM.Service
                 {
                     Settings.Values.Dirty = true;
                 }
+
                 _displayName = value;
             }
         }
         [XmlIgnore] private String _displayName;
-
-        [Category("Basic"), DisplayName("Keywords")]
-        [Editor(typeof(CheckedListBoxUITypeEditor), typeof(UITypeEditor)), TypeConverter(typeof(CsvConverter))]
-        [CheckedListBoxUITypeEditor.Arguments(Enumerations.CheckedListBoxSetting.ServerKeywords)]
-        public String[] Keywords
-        {
-            get => _keywords;
-            set
-            {
-                if (!_keywords.Equals(value))
-                {
-                    Settings.Values.Dirty = true;
-                }
-                _keywords = value;
-            }
-        }
-        [XmlIgnore] private String[] _keywords = new String[0];
 
         [Category("Server"), DisplayName("Hostname")]
         public String Hostname
@@ -349,6 +355,7 @@ namespace MSM.Service
                 {
                     Settings.Values.Dirty = true;
                 }
+
                 _hostName = value;
             }
         }
@@ -364,6 +371,7 @@ namespace MSM.Service
                 {
                     Settings.Values.Dirty = true;
                 }
+
                 _username = value;
             }
         }
@@ -379,10 +387,12 @@ namespace MSM.Service
                 {
                     Settings.Values.Dirty = true;
                 }
+
                 if (!String.IsNullOrWhiteSpace(value))
                 {
                     UI.ShowMessage(null, "Warning: passwords are NOT encrypted, please use other authentication methods!", "NO ENCRYPTION", MessageBoxIcon.Stop);
                 }
+
                 _password = value;
             }
         }
@@ -398,10 +408,46 @@ namespace MSM.Service
                 {
                     Settings.Values.Dirty = true;
                 }
+
                 _portNumber = value;
             }
         }
         [XmlIgnore] private UInt16 _portNumber = 22;
+
+        [Category("Basic"), DisplayName("Keywords"), XmlArrayItem(ElementName = "Keyword"), Editor(typeof(CheckedListBoxUITypeEditor), typeof(UITypeEditor)), TypeConverter(typeof(CsvConverter)), Arguments(Enumerations.CheckedListBoxSetting.ServerKeywords)]
+        public String[] Keywords
+        {
+            get => _keywords;
+            set
+            {
+                if (!_keywords.Equals(value))
+                {
+                    Settings.Values.Dirty = true;
+                }
+
+                _keywords = value;
+            }
+        }
+        [XmlIgnore] private String[] _keywords = new String[0];
+
+        [Browsable(false)]
+        public Variable[] Variables
+        {
+            get => _variables.Properties;
+            set => _variables.Properties = value;
+        }
+        [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
+        public BasicPropertyBag VariablesInternal
+        {
+            get => _variables;
+            set
+            {
+                Settings.Values.Dirty = true;
+
+                _variables = value;
+            }
+        }
+        [XmlIgnore] private BasicPropertyBag _variables = new BasicPropertyBag();
     }
 
     [DisallowConcurrentExecution]

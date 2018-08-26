@@ -53,8 +53,13 @@ namespace MSM.Extends
 
         public override Object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, Object value, Type destType)
         {
-            DescriptionAttribute descriptionAttribute = (DescriptionAttribute)Attribute.GetCustomAttribute(_enumType.GetField(Enum.GetName(_enumType, value)), typeof(DescriptionAttribute));
+            DescriptionAttribute descriptionAttribute = null;
+            if (value != null)
+            {
+                descriptionAttribute = (DescriptionAttribute)Attribute.GetCustomAttribute(_enumType.GetField(Enum.GetName(_enumType, value)), typeof(DescriptionAttribute));
+            }
 
+            // ReSharper disable once PossibleNullReferenceException
             return descriptionAttribute != null ? descriptionAttribute.Description : value.ToString();
         }
     }
@@ -149,14 +154,96 @@ namespace MSM.Extends
                 _checkedListBox.Items.Add(item, checkedItems != null && checkedItems.Contains(item));
             }
         }
-
-        public class ArgumentsAttribute : Attribute
+    }
+    public class ArgumentsAttribute : Attribute
+    {
+        public Enumerations.CheckedListBoxSetting CheckedListBoxSetting { get; }
+        public ArgumentsAttribute(Enumerations.CheckedListBoxSetting checkedListBoxSetting)
         {
-            public Enumerations.CheckedListBoxSetting CheckedListBoxSetting { get; }
-            public ArgumentsAttribute(Enumerations.CheckedListBoxSetting checkedListBoxSetting)
+            CheckedListBoxSetting = checkedListBoxSetting;
+        }
+    }
+    [Serializable]
+    public class Variable
+    {
+        public String Key;
+        public String Value;
+    }
+    [TypeConverter(typeof(BasicPropertyBagConverter))]
+    public class BasicPropertyBag
+    {
+        public override String ToString()
+        {
+            return "(variables)";
+        }
+
+        private readonly Dictionary<String, Object> _values = new Dictionary<String, Object>();
+
+        public Variable[] Properties
+        {
+            get
             {
-                CheckedListBoxSetting = checkedListBoxSetting;
+                List<Variable> toReturn = new List<Variable>();
+                foreach (KeyValuePair<String, Object> keyValuePair in _values)
+                {
+                    if (keyValuePair.Value != null && !String.IsNullOrWhiteSpace((String)keyValuePair.Value))
+                    {
+                        toReturn.Add(new Variable { Key = keyValuePair.Key, Value = (String)keyValuePair.Value });
+                    }
+                }
+                return toReturn.ToArray();
+            }
+            set
+            {
+                _values.Clear();
+                foreach (Variable variable in value)
+                {
+                    _values.Add(variable.Key, variable.Value);
+                }
             }
         }
+        public Object this[String key]
+        {
+            get => _values.TryGetValue(key, out Object value) ? value : null;
+            set { if (value == null) _values.Remove(key); else _values[key] = value; }
+        }
+    }
+    public class BasicPropertyBagConverter : ExpandableObjectConverter
+    {
+        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, Object value, Attribute[] attributes)
+        {
+            // ReSharper disable PossibleNullReferenceException
+            Enumerations.CheckedListBoxSetting setting = context.PropertyDescriptor.Attributes.OfType<ArgumentsAttribute>().First().CheckedListBoxSetting;
+            // ReSharper restore PossibleNullReferenceException
+
+            List<PropertyDescriptor> properties = new List<PropertyDescriptor>();
+            switch (setting)
+            {
+                case Enumerations.CheckedListBoxSetting.ServerVariables:
+                    foreach (String variable in Settings.Values.Variables)
+                    {
+                        properties.Add(new PropertyBagDescriptor(variable, typeof(String), new Attribute[] { new CategoryAttribute("Personal") }));
+                    }
+                    break;
+            }
+
+            return new PropertyDescriptorCollection(properties.ToArray());
+        }
+    }
+    public class PropertyBagDescriptor : PropertyDescriptor
+    {
+        public PropertyBagDescriptor(String name, Type type, Attribute[] attributes) : base(name, attributes)
+        {
+            PropertyType = type;
+        }
+        public override Type PropertyType { get; }
+
+        public override Object GetValue(Object component) { return ((BasicPropertyBag)component)[Name]; }
+        public override void SetValue(Object component, Object value) { ((BasicPropertyBag)component)[Name] = (String)value; }
+        public override Boolean ShouldSerializeValue(Object component) { return GetValue(component) != null; }
+        public override Boolean CanResetValue(Object component) { return true; }
+        public override void ResetValue(Object component) { SetValue(component, null); }
+        public override Boolean IsReadOnly => false;
+        public override Type ComponentType => typeof(BasicPropertyBag);
     }
 }

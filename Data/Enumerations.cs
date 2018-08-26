@@ -109,7 +109,8 @@ namespace MSM.Data
 
         public enum CheckedListBoxSetting : byte
         {
-            ServerKeywords
+            ServerKeywords,
+            ServerVariables,
         }
     }
 }
