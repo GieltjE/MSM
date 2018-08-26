@@ -220,10 +220,7 @@ namespace MSM.Extends
             switch (setting)
             {
                 case Enumerations.CheckedListBoxSetting.ServerVariables:
-                    foreach (String variable in Settings.Values.Variables)
-                    {
-                        properties.Add(new PropertyBagDescriptor(variable, typeof(String), new Attribute[] { new CategoryAttribute("Personal") }));
-                    }
+                    properties.AddRange(Settings.Values.Variables.Select(variable => new PropertyBagDescriptor(variable, typeof(String), null)));
                     break;
             }
 

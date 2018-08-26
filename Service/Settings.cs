@@ -35,31 +35,46 @@ namespace MSM.Service
     {
         static Settings()
         {
-            if (!File.Exists(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
+            String portableSettingsFile = Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml");
+            String localSettingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
+            
+            if (File.Exists(portableSettingsFile))
             {
-                FileOperations.CreateFile(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml"));
-
-                // Load some defaults
-                SetDefaults();
+                SettingsFile = portableSettingsFile;
+                ReadSettings();
+            }
+            else if (File.Exists(localSettingsFile))
+            {
+                SettingsFile = localSettingsFile;
+                ReadSettings();
             }
 
+            if (SettingsFile == null)
+            {
+                SettingsFile = UI.AskQuestion(Variables.MainForm, "Create portable settings file?", "No settings file found", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes ? portableSettingsFile : localSettingsFile;
+                FileOperations.CreateFile(SettingsFile);
+                Values.Dirty = true;
+                Flush();
+            }
+
+            Statics.CronService.CreateJob<FlushTerminalSettings>(0, 0, 5, true);
+
+            Events.ShutDownFired += EventsShutDownFired;
+        }
+        private static void ReadSettings()
+        {
             try
             {
-                using (StreamReader streamReader = new StreamReader(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
+                using (StreamReader streamReader = new StreamReader(SettingsFile))
                 {
-                    Values = (Values) XMLSerializer.Deserialize(streamReader);
+                    Values = (Values)XMLSerializer.Deserialize(streamReader);
                     Values.Dirty = false;
                 }
             }
             catch
             {
                 Values = new Values();
-                SetDefaults();
             }
-
-            Statics.CronService.CreateJob<FlushTerminalSettings>(0, 0, 5, true);
-
-            Events.ShutDownFired += EventsShutDownFired;
         }
         private static void EventsShutDownFired()
         {
@@ -67,21 +82,17 @@ namespace MSM.Service
             Flush();
         }
 
-        private static void SetDefaults()
-        {
-            Values.CheckForUpdates = true;
-        }
-
         public static Values Values = new Values();
 
         private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
+        private static readonly String SettingsFile;
         internal static void Flush()
         {
             if (!Values.Dirty) return;
 
             lock (Values)
             {
-                using (StreamWriter writer = new StreamWriter(Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml")))
+                using (StreamWriter writer = new StreamWriter(SettingsFile))
                 {
                     XMLSerializer.Serialize(writer, Values);
                     writer.Flush();
@@ -110,7 +121,7 @@ namespace MSM.Service
                 _checkForUpdates = value;
             }
         }
-        [XmlIgnore] private Boolean _checkForUpdates;
+        [XmlIgnore] private Boolean _checkForUpdates = true;
 
         [Category("UI"), DisplayName("Minimize to the tray instead of the taskbar"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean MinimizeToTray
@@ -142,12 +153,9 @@ namespace MSM.Service
                 {
                     ((Main)Data.Variables.MainForm).NotifyIcon.Visible = true;
                 }
-                else
+                else if(Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
                 {
-                    if (Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
-                    {
-                        ((Main)Data.Variables.MainForm).NotifyIcon.Visible = false;
-                    }
+                    ((Main)Data.Variables.MainForm).NotifyIcon.Visible = false;
                 }
                 _alwaysShowTrayIcon = value;
             }
