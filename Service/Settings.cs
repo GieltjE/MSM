@@ -190,7 +190,7 @@ namespace MSM.Service
             get => _puttyExecutable;
             set
             {
-                if (_puttyExecutable != value)
+                if (!String.Equals(_puttyExecutable, value, StringComparison.Ordinal))
                 {
                     Dirty = true;
                 }
@@ -313,7 +313,7 @@ namespace MSM.Service
             get => _displayName;
             set
             {
-                if (_displayName != value)
+                if (!String.Equals(_displayName, value, StringComparison.Ordinal))
                 {
                     Settings.Values.Dirty = true;
                 }
@@ -345,7 +345,7 @@ namespace MSM.Service
             get => _hostName;
             set
             {
-                if (_hostName != value)
+                if (!String.Equals(_hostName, value, StringComparison.Ordinal))
                 {
                     Settings.Values.Dirty = true;
                 }
@@ -353,6 +353,21 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private String _hostName;
+
+        [Category("Server"), DisplayName("Username")]
+        public String Username
+        {
+            get => _username;
+            set
+            {
+                if (!String.Equals(_username, value, StringComparison.Ordinal))
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _username = value;
+            }
+        }
+        [XmlIgnore] private String _username;
 
         [Category("Server"), DisplayName("Port number")]
         public UInt16 Port
