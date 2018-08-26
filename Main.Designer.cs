@@ -1,4 +1,4 @@
-﻿using MSM.Extends;
+using MSM.Extends;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MSM
@@ -40,6 +40,7 @@ namespace MSM
             this.ToolStripMenuItem_Dark = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_Blue = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_Light = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStrip_ShowServerList = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new MSM.Extends.StatusStripOptimized();
             this.ToolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -93,7 +94,8 @@ namespace MSM
             this.ToolStrip_General.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStrip_General.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStrip_Settings,
-            this.ToolStrip_Theme});
+            this.ToolStrip_Theme,
+            this.ToolStrip_ShowServerList});
             this.ToolStrip_General.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.ToolStrip_General.Name = "ToolStrip_General";
             this.ToolStrip_General.Size = new System.Drawing.Size(60, 22);
@@ -102,7 +104,7 @@ namespace MSM
             // ToolStrip_Settings
             // 
             this.ToolStrip_Settings.Name = "ToolStrip_Settings";
-            this.ToolStrip_Settings.Size = new System.Drawing.Size(116, 22);
+            this.ToolStrip_Settings.Size = new System.Drawing.Size(180, 22);
             this.ToolStrip_Settings.Text = "Settings";
             this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
             // 
@@ -113,7 +115,7 @@ namespace MSM
             this.ToolStripMenuItem_Blue,
             this.ToolStripMenuItem_Light});
             this.ToolStrip_Theme.Name = "ToolStrip_Theme";
-            this.ToolStrip_Theme.Size = new System.Drawing.Size(116, 22);
+            this.ToolStrip_Theme.Size = new System.Drawing.Size(180, 22);
             this.ToolStrip_Theme.Text = "Theme";
             // 
             // ToolStripMenuItem_Dark
@@ -136,6 +138,14 @@ namespace MSM
             this.ToolStripMenuItem_Light.Size = new System.Drawing.Size(101, 22);
             this.ToolStripMenuItem_Light.Text = "Light";
             this.ToolStripMenuItem_Light.Click += new System.EventHandler(this.SetTheme);
+            // 
+            // ToolStrip_ShowServerList
+            // 
+            this.ToolStrip_ShowServerList.CheckOnClick = true;
+            this.ToolStrip_ShowServerList.Name = "ToolStrip_ShowServerList";
+            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowServerList.Text = "View serverlist";
+            this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripShowServerListClick);
             // 
             // StatusStrip
             // 
@@ -166,7 +176,6 @@ namespace MSM
             this.ToolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
         #endregion
 
@@ -181,5 +190,6 @@ namespace MSM
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Dark;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Blue;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Light;
+        private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;
     }
 }

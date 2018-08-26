@@ -1,4 +1,4 @@
-﻿// 
+// 
 // This file is a part of MSM (Multi Server Manager)
 // Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
@@ -16,12 +16,15 @@
 // If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Service;
+using MSM.UIElements;
 using WeifenLuo.WinFormsUI.Docking;
+using Settings = MSM.Service.Settings;
 
 namespace MSM
 {
@@ -71,6 +74,12 @@ namespace MSM
             _contextMenuStripTrayIcon.Items.AddRange(new ToolStripItem[] { _trayIconStripOpen, _trayIconStripExit });
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
+
+            if (Settings.Values.ShowServerList)
+            {
+                ToolStrip_ShowServerList.Checked = true;
+                ToolStripShowServerListClick(null, null);
+            }
 		}
         private void MainClosing(Object sender, FormClosingEventArgs e)
         {
@@ -140,6 +149,7 @@ namespace MSM
             NotifyIcon.Visible = false;
         }
 
+        private readonly Servers _serverList = new Servers();
         private void ToolStripMenuItemAboutClick(Object sender, EventArgs e)
         {
             new About(this).Show();
@@ -148,20 +158,27 @@ namespace MSM
         {
             AddDockContent("Settings", "Settings", new UIElements.Settings(), false);
         }
-
-        private void AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate)
+        private void ToolStripShowServerListClick(Object sender, EventArgs e)
         {
-            if (!allowDuplicate)
+            Settings.Values.ShowServerList = ToolStrip_ShowServerList.Checked;
+            if (Settings.Values.ShowServerList)
             {
-                foreach (IDockContent dockPanelContent in DockPanel.Contents)
-                {
-                    if (dockPanelContent.GetType() != typeof(DockContent)) continue;
-                    if (!String.Equals(((DockContent)dockPanelContent).Name, internalName, StringComparison.Ordinal)) continue;
+                AddDockContent("Serverlist", "Serverlist", _serverList, false, DockState.DockRight);
+            }
+            else
+            {
+                HideDockContent("Serverlist", false);
+            }
+        }
 
-                    ((DockContent)dockPanelContent).BringToFront();
-
-                    return;
-                }
+        private readonly Dictionary<String, DockContent> _availableDocks = new Dictionary<String, DockContent>(StringComparer.Ordinal);
+        private void AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
+        {
+            if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
+            {
+                _availableDocks[internalName].Show();
+                _availableDocks[internalName].BringToFront();
+                return;
             }
 
             DockContent newDockContent = new DockContent { Text = text, Name = internalName };
@@ -171,7 +188,24 @@ namespace MSM
             content.Margin = new Padding(0);
 
             newDockContent.Controls.Add(content);
-            newDockContent.Show(DockPanel, DockState.Document);
+            newDockContent.Show(DockPanel, dockState);
+
+            _availableDocks.Add(internalName, newDockContent);
+        }
+        private void HideDockContent(String internalName, Boolean remove)
+        {
+            if (!_availableDocks.ContainsKey(internalName)) return;
+
+            if (!remove)
+            {
+                _availableDocks[internalName].Hide();
+            }
+            else
+            {
+                _availableDocks[internalName].Close();
+                _availableDocks[internalName].Dispose();
+                _availableDocks.Remove(internalName);
+            }
         }
         private void SetTheme(Object sender, EventArgs e)
         {

@@ -99,6 +99,12 @@
     <Compile Include="Service\Settings.cs" />
     <Compile Include="Data\Variables.cs" />
     <Compile Include="Service\UpdateCheck.cs" />
+    <Compile Include="UIElements\Servers.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UIElements\Servers.Designer.cs">
+      <DependentUpon>Servers.cs</DependentUpon>
+    </Compile>
     <Compile Include="UIElements\Settings.cs">
       <SubType>UserControl</SubType>
     </Compile>
