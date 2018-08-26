@@ -1,4 +1,4 @@
-﻿// 
+// 
 // This file is a part of MSM (Multi Server Manager)
 // Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
@@ -17,6 +17,8 @@
 // 
 using System;
 using System.ComponentModel;
+using System.Drawing.Design;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,6 +28,7 @@ using MSM.Data;
 using MSM.Extends;
 using MSM.Functions;
 using Quartz;
+using String = System.String;
 
 namespace MSM.Service
 {
@@ -92,7 +95,7 @@ namespace MSM.Service
     [Serializable]
     public class Values
     {
-        [XmlIgnore] public Boolean Dirty;
+        [XmlIgnore] public Boolean Dirty { get; set; }
         
         [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean CheckForUpdates
@@ -181,7 +184,7 @@ namespace MSM.Service
         }
         [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
 
-        [Category("Putty"), DisplayName("Putty executable"), Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [Category("Putty"), DisplayName("Putty executable"), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
         public String PuttyExecutable
         {
             get => _puttyExecutable;
@@ -196,7 +199,7 @@ namespace MSM.Service
         }
         [XmlIgnore] private String _puttyExecutable;
 
-        [Category("Sessions"), DisplayName("Available keywords for marking sessions")]
+        [Category("Sessions"), DisplayName("Available keywords for marking sessions"), TypeConverter(typeof(CsvConverter))]
         public String[] Keywords
         {
             get => _keywords;
@@ -240,6 +243,114 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Enumerations.Themes _theme = Enumerations.Themes.Dark;
+
+        [Browsable(false)]
+        public Boolean ShowServerList
+        {
+            get => _showServerList;
+            set
+            {
+                if (_showServerList != value)
+                {
+                    Dirty = true;
+                }
+                _showServerList = value;
+            }
+        }
+        [XmlIgnore] private Boolean _showServerList = true;
+
+        [Category("Servers"), DisplayName("Serverlist")]
+        public CollectionConverter<Node> Servers
+        {
+            get => _nodeList;
+            set
+            {
+                if (_nodeList != value)
+                {
+                    Dirty = true;
+                }
+                _nodeList = value;
+            }
+        }
+        [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
+    }
+
+    public class Node
+    {
+        public override String ToString()
+        {
+            return String.IsNullOrEmpty(NodeName) ? "?" : NodeName;
+        }
+
+        [Category("Node"), DisplayName("Node name")]
+        public String NodeName
+        {
+            get => _nodeName;
+            set
+            {
+                if (_nodeName != value)
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _nodeName = value;
+            }
+        }
+        [XmlIgnore] private String _nodeName;
+
+        [Category("Servers"), DisplayName("Serverlist")]
+        public CollectionConverter<Server> ServerList { get; set; }
+    }
+    public class Server
+    {
+        public override String ToString()
+        {
+            return String.IsNullOrEmpty(DisplayName) ? "?" : DisplayName;
+        }
+
+        [Category("Basic"), DisplayName("Display name")]
+        public String DisplayName
+        {
+            get => _displayName;
+            set
+            {
+                if (_displayName != value)
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _displayName = value;
+            }
+        }
+        [XmlIgnore] private String _displayName;
+
+        [Category("Server"), DisplayName("Hostname")]
+        public String Hostname
+        {
+            get => _hostName;
+            set
+            {
+                if (_hostName != value)
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _hostName = value;
+            }
+        }
+        [XmlIgnore] private String _hostName;
+
+        [Category("Server"), DisplayName("Port number")]
+        public UInt16 Port
+        {
+            get => _portNumber;
+            set
+            {
+                if (_portNumber != value)
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _portNumber = value;
+            }
+        }
+        [XmlIgnore] private UInt16 _portNumber = 22;
     }
 
     [DisallowConcurrentExecution]
