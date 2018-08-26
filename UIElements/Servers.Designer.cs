@@ -27,32 +27,28 @@ namespace MSM.UIElements
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("/");
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.Treeview_NodesAndServers = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
-            // treeView1
+            // Treeview_NodesAndServers
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Name = "treeView1";
-            treeNode1.Name = "Node0";
-            treeNode1.Text = "/";
-            this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
-            this.treeView1.Size = new System.Drawing.Size(200, 200);
-            this.treeView1.TabIndex = 0;
+            this.Treeview_NodesAndServers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Treeview_NodesAndServers.Location = new System.Drawing.Point(0, 0);
+            this.Treeview_NodesAndServers.Name = "Treeview_NodesAndServers";
+            this.Treeview_NodesAndServers.PathSeparator = "/";
+            this.Treeview_NodesAndServers.Size = new System.Drawing.Size(200, 200);
+            this.Treeview_NodesAndServers.TabIndex = 0;
             // 
             // Servers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.Controls.Add(this.treeView1);
+            this.Controls.Add(this.Treeview_NodesAndServers);
             this.Name = "Servers";
             this.Size = new System.Drawing.Size(200, 200);
             this.ResumeLayout(false);
         }
         #endregion
 
-        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView Treeview_NodesAndServers;
     }
 }

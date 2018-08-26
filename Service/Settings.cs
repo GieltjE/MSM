@@ -18,7 +18,6 @@
 using System;
 using System.ComponentModel;
 using System.Drawing.Design;
-using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -95,7 +94,8 @@ namespace MSM.Service
     [Serializable]
     public class Values
     {
-        [XmlIgnore] public Boolean Dirty { get; set; }
+        [XmlIgnore, Browsable(false)]
+        public Boolean Dirty { get; set; }
         
         [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean CheckForUpdates
@@ -199,21 +199,6 @@ namespace MSM.Service
         }
         [XmlIgnore] private String _puttyExecutable;
 
-        [Category("Sessions"), DisplayName("Available keywords for marking sessions"), TypeConverter(typeof(CsvConverter))]
-        public String[] Keywords
-        {
-            get => _keywords;
-            set
-            {
-                if (_keywords != value)
-                {
-                    Dirty = true;
-                }
-                _keywords = value;
-            }
-        }
-        [XmlIgnore] private String[] _keywords;
-
         [Category("Sessions"), DisplayName("Which sessions to automatically start"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.InitialSessions>))]
         public Enumerations.InitialSessions InitialSessions
         {
@@ -259,6 +244,21 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _showServerList = true;
 
+        [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter))]
+        public String[] Keywords
+        {
+            get => _keywords;
+            set
+            {
+                if (_keywords != value)
+                {
+                    Dirty = true;
+                }
+                _keywords = value;
+            }
+        }
+        [XmlIgnore] private String[] _keywords;
+        
         [Category("Servers"), DisplayName("Serverlist")]
         public CollectionConverter<Node> Servers
         {
@@ -295,7 +295,7 @@ namespace MSM.Service
                 _nodeName = value;
             }
         }
-        [XmlIgnore] private String _nodeName;
+        [XmlIgnore] private String _nodeName = "/";
 
         [Category("Servers"), DisplayName("Serverlist")]
         public CollectionConverter<Server> ServerList { get; set; }
@@ -321,6 +321,23 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private String _displayName;
+
+        [Category("Basic"), DisplayName("Keywords")]
+        [Editor(typeof(CheckedListBoxUITypeEditor), typeof(UITypeEditor)), TypeConverter(typeof(CsvConverter))]
+        [CheckedListBoxUITypeEditor.Arguments(Enumerations.CheckedListBoxSetting.ServerKeywords)]
+        public String[] Keywords
+        {
+            get => _keywords;
+            set
+            {
+                if (_keywords != value)
+                {
+                    Settings.Values.Dirty = true;
+                }
+                _keywords = value;
+            }
+        }
+        [XmlIgnore] private String[] _keywords;
 
         [Category("Server"), DisplayName("Hostname")]
         public String Hostname
