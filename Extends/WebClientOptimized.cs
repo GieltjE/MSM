@@ -1,4 +1,4 @@
-﻿// 
+// 
 // This file is a part of MSM (Multi Server Manager)
 // Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
@@ -37,9 +37,6 @@ namespace MSM.Extends
         public WebClientOptimized(Int32 timeout = 30, Boolean useCookieContainer = true, Boolean keepAlive = true)
         {
             CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-#if !INSECURE
-            Proxy = null;
-#endif
             _timeout = timeout;
             _useCookieContainer = useCookieContainer;
             _keepAlive = keepAlive;
@@ -54,9 +51,6 @@ namespace MSM.Extends
                 return "";
             }
 
-#if !INSECURE
-            req.Proxy = null;
-#endif
             req.SendChunked = false;
             req.ContentLength = 0;
 
@@ -182,7 +176,6 @@ namespace MSM.Extends
             HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
 
             if (request == null) return null;
-            request.Proxy = null;
 
             if (_useCookieContainer)
             {

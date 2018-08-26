@@ -1,4 +1,4 @@
-﻿// 
+// 
 // This file is a part of MSM (Multi Server Manager)
 // Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
 // 

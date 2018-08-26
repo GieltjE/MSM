@@ -1,4 +1,4 @@
-﻿namespace MSM.UIElements
+namespace MSM.UIElements
 {
     partial class Settings
     {
