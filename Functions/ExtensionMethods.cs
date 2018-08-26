@@ -1,4 +1,4 @@
-﻿// 
+// 
 // This file is a part of MSM (Multi Server Manager)
 // Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
@@ -77,6 +77,13 @@ namespace MSM.Functions
                 }
             }
             return -1;
+        }
+
+        public static Boolean Equals(this String[] inputArray, String[] compareToArray)
+        {
+            if (inputArray.Length != compareToArray.Length) return false;
+
+            return inputArray.All(input => compareToArray.Contains(input, StringComparer.Ordinal));
         }
 
         public delegate void CustomDelegate();

@@ -250,7 +250,7 @@ namespace MSM.Service
             get => _keywords;
             set
             {
-                if (_keywords != value)
+                if (!_keywords.Equals(value))
                 {
                     Dirty = true;
                 }
@@ -330,7 +330,7 @@ namespace MSM.Service
             get => _keywords;
             set
             {
-                if (_keywords != value)
+                if (!_keywords.Equals(value))
                 {
                     Settings.Values.Dirty = true;
                 }
