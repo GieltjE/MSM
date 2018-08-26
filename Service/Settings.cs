@@ -257,7 +257,7 @@ namespace MSM.Service
                 _keywords = value;
             }
         }
-        [XmlIgnore] private String[] _keywords;
+        [XmlIgnore] private String[] _keywords = new String[0];
         
         [Category("Servers"), DisplayName("Serverlist")]
         public CollectionConverter<Node> Servers
@@ -337,7 +337,7 @@ namespace MSM.Service
                 _keywords = value;
             }
         }
-        [XmlIgnore] private String[] _keywords;
+        [XmlIgnore] private String[] _keywords = new String[0];
 
         [Category("Server"), DisplayName("Hostname")]
         public String Hostname
