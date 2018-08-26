@@ -80,13 +80,6 @@ namespace MSM.Data
             "sun"
         };
 
-        public enum Themes : byte
-        {
-            Light,
-            Blue,
-            Dark
-        }
-
         public enum CloseAction : byte
         {
             [Description("Close normally")]

@@ -84,6 +84,8 @@ namespace MSM.Service
 
         public static Values Values = new Values();
 
+        public static event ExtensionMethods.CustomDelegate OnSettingsUpdatedEvent;
+
         private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
         private static readonly String SettingsFile;
         internal static void Flush()
@@ -99,6 +101,8 @@ namespace MSM.Service
                 }
                 Values.Dirty = false;
             }
+
+            OnSettingsUpdatedEvent?.Invoke();
         }
     }
 
@@ -223,21 +227,6 @@ namespace MSM.Service
         [XmlIgnore] private Enumerations.InitialSessions _initialSessions = Enumerations.InitialSessions.Previous;
 
         [Browsable(false)]
-        public Enumerations.Themes Theme
-        {
-            get => _theme;
-            set
-            {
-                if (_theme != value)
-                {
-                    Dirty = true;
-                }
-                _theme = value;
-            }
-        }
-        [XmlIgnore] private Enumerations.Themes _theme = Enumerations.Themes.Dark;
-
-        [Browsable(false)]
         public Boolean ShowServerList
         {
             get => _showServerList;
@@ -282,8 +271,8 @@ namespace MSM.Service
         }
         [XmlIgnore] private String[] _variables = new String[0];
 
-        [Category("Servers"), DisplayName("Serverlist")]
-        public CollectionConverter<Node> Servers
+        [Category("Nodes"), DisplayName("Nodelist")]
+        public CollectionConverter<Node> Nodes
         {
             get => _nodeList;
             set

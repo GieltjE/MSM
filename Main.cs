@@ -43,12 +43,14 @@ namespace MSM
             Variables.MainForm = this;
             InitializeComponent();
 
+            DockPanel.Theme = new VS2015DarkTheme();
+            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
+            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
+
             if (Settings.Values.CheckForUpdates)
             {
                 UpdateCheck.StartUpdateCheck();
             }
-
-            SetThemeHelper(Settings.Values.Theme);
 
             Service.Events.ShutDownFired += ShutDownFired;
 
@@ -148,8 +150,7 @@ namespace MSM
         {
             NotifyIcon.Visible = false;
         }
-
-        private readonly Servers _serverList = new Servers();
+        
         private void ToolStripMenuItemAboutClick(Object sender, EventArgs e)
         {
             new About(this).Show();
@@ -163,22 +164,27 @@ namespace MSM
             Settings.Values.ShowServerList = ToolStrip_ShowServerList.Checked;
             if (Settings.Values.ShowServerList)
             {
-                AddDockContent("Serverlist", "Serverlist", _serverList, false, DockState.DockRight);
+                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers(), false, DockState.DockRight);
+                dockContent.Closing += ServerListClosing;
             }
             else
             {
                 HideDockContent("Serverlist", false);
             }
         }
+        private void ServerListClosing(Object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ToolStrip_ShowServerList.Checked = false;
+        }
 
         private readonly Dictionary<String, DockContent> _availableDocks = new Dictionary<String, DockContent>(StringComparer.Ordinal);
-        private void AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
+        private DockContent AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
             {
                 _availableDocks[internalName].Show();
                 _availableDocks[internalName].BringToFront();
-                return;
+                return _availableDocks[internalName];
             }
 
             DockContent newDockContent = new DockContent { Text = text, Name = internalName };
@@ -191,10 +197,18 @@ namespace MSM
             newDockContent.Show(DockPanel, dockState);
 
             _availableDocks.Add(internalName, newDockContent);
+
+            return newDockContent;
         }
         private void HideDockContent(String internalName, Boolean remove)
         {
             if (!_availableDocks.ContainsKey(internalName)) return;
+
+            if (_availableDocks[internalName].IsDisposed)
+            {
+                _availableDocks.Remove(internalName);
+                return;
+            }
 
             if (!remove)
             {
@@ -206,41 +220,6 @@ namespace MSM
                 _availableDocks[internalName].Dispose();
                 _availableDocks.Remove(internalName);
             }
-        }
-        private void SetTheme(Object sender, EventArgs e)
-        {
-            if (sender == ToolStripMenuItem_Light)
-            {
-                Settings.Values.Theme = Enumerations.Themes.Light;
-            }
-            else if (sender == ToolStripMenuItem_Blue)
-            {
-                Settings.Values.Theme = Enumerations.Themes.Blue;
-            }
-            else if (sender == ToolStripMenuItem_Dark)
-            {
-                Settings.Values.Theme = Enumerations.Themes.Dark;
-            }
-            SetThemeHelper(Settings.Values.Theme);
-        }
-        private void SetThemeHelper(Enumerations.Themes theme)
-        {
-            switch (theme)
-            {
-                case Enumerations.Themes.Light:
-                    DockPanel.Theme = new VS2015LightTheme();
-                    break;
-                case Enumerations.Themes.Blue:
-                    DockPanel.Theme = new VS2015BlueTheme();
-                    break;
-                case Enumerations.Themes.Dark:
-                    DockPanel.Theme = new VS2015DarkTheme();
-                    break;
-            }
-            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
-            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
-
-            Settings.Flush();
         }
     }
 }

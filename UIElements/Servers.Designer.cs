@@ -1,3 +1,5 @@
+using MSM.Extends;
+
 namespace MSM.UIElements
 {
     partial class Servers
@@ -27,7 +29,7 @@ namespace MSM.UIElements
         /// </summary>
         private void InitializeComponent()
         {
-            this.Treeview_NodesAndServers = new System.Windows.Forms.TreeView();
+            this.Treeview_NodesAndServers = new TreeViewOptimized();
             this.SuspendLayout();
             // 
             // Treeview_NodesAndServers
@@ -38,6 +40,8 @@ namespace MSM.UIElements
             this.Treeview_NodesAndServers.PathSeparator = "/";
             this.Treeview_NodesAndServers.Size = new System.Drawing.Size(200, 200);
             this.Treeview_NodesAndServers.TabIndex = 0;
+            this.Treeview_NodesAndServers.CheckBoxes = true;
+            this.Treeview_NodesAndServers.MouseDoubleClick += TreeviewNodesAndServersMouseDoubleClick;
             // 
             // Servers
             // 
@@ -49,6 +53,6 @@ namespace MSM.UIElements
         }
         #endregion
 
-        private System.Windows.Forms.TreeView Treeview_NodesAndServers;
+        private TreeViewOptimized Treeview_NodesAndServers;
     }
 }

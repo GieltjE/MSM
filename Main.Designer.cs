@@ -36,10 +36,6 @@ namespace MSM
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_General = new MSM.Extends.ToolStripDropDownButtonOptimized();
             this.ToolStrip_Settings = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStrip_Theme = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_Dark = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_Blue = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_Light = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_ShowServerList = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new MSM.Extends.StatusStripOptimized();
             this.ToolStrip.SuspendLayout();
@@ -94,7 +90,6 @@ namespace MSM
             this.ToolStrip_General.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStrip_General.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStrip_Settings,
-            this.ToolStrip_Theme,
             this.ToolStrip_ShowServerList});
             this.ToolStrip_General.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.ToolStrip_General.Name = "ToolStrip_General";
@@ -107,37 +102,6 @@ namespace MSM
             this.ToolStrip_Settings.Size = new System.Drawing.Size(180, 22);
             this.ToolStrip_Settings.Text = "Settings";
             this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
-            // 
-            // ToolStrip_Theme
-            // 
-            this.ToolStrip_Theme.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_Dark,
-            this.ToolStripMenuItem_Blue,
-            this.ToolStripMenuItem_Light});
-            this.ToolStrip_Theme.Name = "ToolStrip_Theme";
-            this.ToolStrip_Theme.Size = new System.Drawing.Size(180, 22);
-            this.ToolStrip_Theme.Text = "Theme";
-            // 
-            // ToolStripMenuItem_Dark
-            // 
-            this.ToolStripMenuItem_Dark.Name = "ToolStripMenuItem_Dark";
-            this.ToolStripMenuItem_Dark.Size = new System.Drawing.Size(101, 22);
-            this.ToolStripMenuItem_Dark.Text = "Dark";
-            this.ToolStripMenuItem_Dark.Click += new System.EventHandler(this.SetTheme);
-            // 
-            // ToolStripMenuItem_Blue
-            // 
-            this.ToolStripMenuItem_Blue.Name = "ToolStripMenuItem_Blue";
-            this.ToolStripMenuItem_Blue.Size = new System.Drawing.Size(101, 22);
-            this.ToolStripMenuItem_Blue.Text = "Blue";
-            this.ToolStripMenuItem_Blue.Click += new System.EventHandler(this.SetTheme);
-            // 
-            // ToolStripMenuItem_Light
-            // 
-            this.ToolStripMenuItem_Light.Name = "ToolStripMenuItem_Light";
-            this.ToolStripMenuItem_Light.Size = new System.Drawing.Size(101, 22);
-            this.ToolStripMenuItem_Light.Text = "Light";
-            this.ToolStripMenuItem_Light.Click += new System.EventHandler(this.SetTheme);
             // 
             // ToolStrip_ShowServerList
             // 
@@ -179,17 +143,13 @@ namespace MSM
         }
         #endregion
 
-        private ToolstripOptimized ToolStrip;
+        public ToolstripOptimized ToolStrip;
         private StatusStripOptimized StatusStrip;
         private ToolStripDropDownButtonOptimized ToolStripButton_Help;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_About;
         private DockPanel DockPanel;
         private ToolStripDropDownButtonOptimized ToolStrip_General;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
-        private System.Windows.Forms.ToolStripMenuItem ToolStrip_Theme;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Dark;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Blue;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_Light;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;
     }
 }
