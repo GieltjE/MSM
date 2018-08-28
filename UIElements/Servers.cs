@@ -35,6 +35,12 @@ namespace MSM.UIElements
 
         private void LoadOrUpdateTree()
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(LoadOrUpdateTree));
+                return;
+            }
+
             Treeview_NodesAndServers.Nodes.Clear();
 
             foreach (Node node in Service.Settings.Values.Nodes)
