@@ -64,6 +64,9 @@
     <Compile Include="Extends\StatusStripOptimized.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Extends\Themes\MaterialDarkTheme.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Extends\ToolStripDropDownButtonOptimized.cs">
       <SubType>Component</SubType>
     </Compile>

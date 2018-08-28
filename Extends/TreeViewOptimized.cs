@@ -39,8 +39,8 @@ namespace MSM.Extends
             if (!DesignMode)
             {
                 // ReSharper disable RedundantBaseQualifier
-                base.BackColor = ((Main)Variables.MainForm).ToolStrip.BackColor;
-                base.ForeColor = ((Main)Variables.MainForm).ToolStrip.ForeColor;
+                base.BackColor = Variables.ColorPalette.MainWindowActive.Background;
+                base.ForeColor = Variables.ColorPalette.MainWindowStatusBarDefault.Text;
                 // ReSharper restore RedundantBaseQualifier
             }
         }

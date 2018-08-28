@@ -21,6 +21,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
+using MSM.Extends.Themes;
 using MSM.Service;
 using MSM.UIElements;
 using WeifenLuo.WinFormsUI.Docking;
@@ -43,7 +44,7 @@ namespace MSM
             Variables.MainForm = this;
             InitializeComponent();
 
-            DockPanel.Theme = new VS2015DarkTheme();
+            DockPanel.Theme = new MaterialDarkTheme();
             Variables.ColorPalette = DockPanel.Theme.ColorPalette;
 
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
