@@ -33,55 +33,63 @@ namespace MSM.UIElements
             Service.Settings.OnSettingsUpdatedEvent += LoadOrUpdateTree;
         }
 
+        private delegate void LoadOrUpdateTreeCallback();
         private void LoadOrUpdateTree()
         {
-            Treeview_NodesAndServers.Nodes.Clear();
-
-            foreach (Node node in Service.Settings.Values.Nodes)
+            if(Treeview_NodesAndServers.InvokeRequired)
             {
-                String[] splitted = node.NodeName.TrimStart('/').Split('/');
-                TreeNode lastNode = null; 
-                foreach (String part in splitted)
+                Invoke(new LoadOrUpdateTreeCallback(LoadOrUpdateTree));
+            }
+            else
+            {
+                Treeview_NodesAndServers.Nodes.Clear();
+
+                foreach (Node node in Service.Settings.Values.Nodes)
                 {
-                    String toFind = "/" + part;
-
-                    if (lastNode == null)
+                    String[] splitted = node.NodeName.TrimStart('/').Split('/');
+                    TreeNode lastNode = null;
+                    foreach (String part in splitted)
                     {
-                        foreach (TreeNode nodeFound in Treeview_NodesAndServers.Nodes)
-                        {
-                            if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
-
-                            lastNode = nodeFound;
-                            break;
-                        }
+                        String toFind = "/" + part;
 
                         if (lastNode == null)
                         {
-                            lastNode = Treeview_NodesAndServers.Nodes.Add(toFind);
+                            foreach (TreeNode nodeFound in Treeview_NodesAndServers.Nodes)
+                            {
+                                if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
+
+                                lastNode = nodeFound;
+                                break;
+                            }
+
+                            if (lastNode == null)
+                            {
+                                lastNode = Treeview_NodesAndServers.Nodes.Add(toFind);
+                            }
+                        }
+                        else
+                        {
+                            Boolean found = false;
+                            foreach (TreeNode nodeFound in lastNode.Nodes)
+                            {
+                                if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
+
+                                found = true;
+                                lastNode = nodeFound;
+                                break;
+                            }
+
+                            if (!found)
+                            {
+                                lastNode = lastNode.Nodes.Add(toFind);
+                            }
                         }
                     }
-                    else
+
+                    foreach (Server server in node.ServerList)
                     {
-                        Boolean found = false;
-                        foreach (TreeNode nodeFound in lastNode.Nodes)
-                        {
-                            if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
-
-                            found = true;
-                            lastNode = nodeFound;
-                            break;
-                        }
-
-                        if (!found)
-                        {
-                            lastNode = lastNode.Nodes.Add(toFind);
-                        }
+                        lastNode.Nodes.Add(server.DisplayName);
                     }
-                }
-
-                foreach (Server server in node.ServerList)
-                {
-                    lastNode.Nodes.Add(server.DisplayName);
                 }
             }
         }
