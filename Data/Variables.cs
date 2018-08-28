@@ -17,6 +17,7 @@
 // 
 using System;
 using System.Windows.Forms;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace MSM.Data
 {
@@ -24,5 +25,6 @@ namespace MSM.Data
     {
         public static Int32 ThreadAfterDoEventsSleep = 50;
         public static Form MainForm;
+        public static DockPanelColorPalette ColorPalette;
     }
 }

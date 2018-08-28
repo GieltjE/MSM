@@ -44,6 +44,8 @@ namespace MSM
             InitializeComponent();
 
             DockPanel.Theme = new VS2015DarkTheme();
+            Variables.ColorPalette = DockPanel.Theme.ColorPalette;
+
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
 
