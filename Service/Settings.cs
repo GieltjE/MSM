@@ -211,6 +211,21 @@ namespace MSM.Service
         }
         [XmlIgnore] private String _puttyExecutable;
 
+        [Category("Putty"), DisplayName("Putty extra parameters"), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+        public String PuttyExtraParamaters
+        {
+            get => _puttyExtraParamaters;
+            set
+            {
+                if (!String.Equals(_puttyExtraParamaters, value, StringComparison.Ordinal))
+                {
+                    Dirty = true;
+                }
+                _puttyExtraParamaters = value;
+            }
+        }
+        [XmlIgnore] private String _puttyExtraParamaters;
+
         [Category("Sessions"), DisplayName("Which sessions to automatically start"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.InitialSessions>))]
         public Enumerations.InitialSessions InitialSessions
         {
