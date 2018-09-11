@@ -19,6 +19,7 @@
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using MSM.Data;
 
 namespace MSM.Extends
 {
@@ -38,6 +39,13 @@ namespace MSM.Extends
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
             Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            SolidBrush b = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+
+            e.Graphics.FillRectangle(b, DisplayRectangle);
         }
     }
 }

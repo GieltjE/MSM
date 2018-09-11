@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using MSM.Data;
 using MSM.Functions;
 
 namespace MSM.Extends
@@ -29,8 +30,18 @@ namespace MSM.Extends
     {
         public UserControlOptimized()
         {
-            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
-            BorderStyle = BorderStyle.FixedSingle;
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+            BorderStyle = BorderStyle.None;
+
+
+            if (!DesignMode)
+            {
+                // ReSharper disable RedundantBaseQualifier
+                base.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                base.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                // ReSharper restore RedundantBaseQualifier
+            }
+
 
             base.AutoScaleMode = AutoScaleMode.Dpi;
         }
@@ -38,7 +49,7 @@ namespace MSM.Extends
         [DefaultValue(AutoScaleMode.Dpi)]
         public new AutoScaleMode AutoScaleMode => AutoScaleMode.Dpi;
 
-        [DefaultValue(BorderStyle.FixedSingle)]
+        [DefaultValue(BorderStyle.None)]
         public new BorderStyle BorderStyle { get => base.BorderStyle; set => base.BorderStyle = value; }
 
         protected override void OnPaint(PaintEventArgs e)

@@ -26,5 +26,6 @@ namespace MSM.Data
         public static Int32 ThreadAfterDoEventsSleep = 50;
         public static Form MainForm;
         public static DockPanelColorPalette ColorPalette;
+        public static Measures Measures;
     }
 }

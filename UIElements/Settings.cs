@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
 // 
+using System.Drawing;
+using System.Windows.Forms;
+using MSM.Data;
 using MSM.Extends;
 
 namespace MSM.UIElements
@@ -25,7 +28,33 @@ namespace MSM.UIElements
         {
             InitializeComponent();
 
-            PropertyGrid_Settings.SelectedObject = Service.Settings.Values;
+            if (!DesignMode)
+            {
+                PropertyGrid_Settings.SelectedObject = Service.Settings.Values;
+
+                PropertyGrid_Settings.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                PropertyGrid_Settings.CommandsBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                PropertyGrid_Settings.HelpBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                PropertyGrid_Settings.ViewBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+
+                PropertyGrid_Settings.CategorySplitterColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+
+                Color c = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+
+                PropertyGrid_Settings.LineColor = Color.FromArgb(c.A, c.R + 10, c.G + 10, c.B + 10);
+
+                PropertyGrid_Settings.CommandsBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                PropertyGrid_Settings.HelpBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                PropertyGrid_Settings.ViewBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+
+                PropertyGrid_Settings.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                PropertyGrid_Settings.CommandsForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                PropertyGrid_Settings.HelpForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                PropertyGrid_Settings.ViewForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                PropertyGrid_Settings.CategoryForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text; 
+                PropertyGrid_Settings.SelectedItemWithFocusForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                PropertyGrid_Settings.DisabledItemForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+            }
         }
     }
 }

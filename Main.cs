@@ -41,11 +41,15 @@ namespace MSM
 
         public Main()
         {
+            MaterialDarkTheme t = new MaterialDarkTheme();
+
             Variables.MainForm = this;
+            Variables.ColorPalette = t.ColorPalette;
+            Variables.Measures = t.Measures;
+
             InitializeComponent();
 
-            DockPanel.Theme = new MaterialDarkTheme();
-            Variables.ColorPalette = DockPanel.Theme.ColorPalette;
+            DockPanel.Theme = t;
 
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
@@ -180,8 +184,8 @@ namespace MSM
             ToolStrip_ShowServerList.Checked = false;
         }
 
-        private readonly Dictionary<String, DockContent> _availableDocks = new Dictionary<String, DockContent>(StringComparer.Ordinal);
-        private DockContent AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
+        private readonly Dictionary<String, DockContentOptimized> _availableDocks = new Dictionary<String, DockContentOptimized>(StringComparer.Ordinal);
+        private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
             {
@@ -190,7 +194,7 @@ namespace MSM
                 return _availableDocks[internalName];
             }
 
-            DockContent newDockContent = new DockContent { Text = text, Name = internalName };
+            DockContentOptimized newDockContent = new DockContentOptimized { Text = text, Name = internalName };
 
             content.Dock = DockStyle.Fill;
             content.Padding = new Padding(0);

@@ -32,15 +32,15 @@ namespace MSM.Extends
         public TreeViewOptimized()
         {
             // userpaint poses some problems
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.SupportsTransparentBackColor, true);
             BorderStyle = BorderStyle.FixedSingle;
             Sorted = true;
 
             if (!DesignMode)
             {
                 // ReSharper disable RedundantBaseQualifier
-                base.BackColor = Variables.ColorPalette.MainWindowActive.Background;
-                base.ForeColor = Variables.ColorPalette.MainWindowStatusBarDefault.Text;
+                base.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                base.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
                 // ReSharper restore RedundantBaseQualifier
             }
         }

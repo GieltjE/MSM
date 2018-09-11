@@ -30,7 +30,7 @@ namespace MSM
         /// </summary>
         private void InitializeComponent()
         {
-            this.DockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
+            this.DockPanel = new DockPanelOptimized();
             this.ToolStrip = new MSM.Extends.ToolstripOptimized();
             this.ToolStripButton_Help = new MSM.Extends.ToolStripDropDownButtonOptimized();
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
@@ -147,7 +147,7 @@ namespace MSM
         private StatusStripOptimized StatusStrip;
         private ToolStripDropDownButtonOptimized ToolStripButton_Help;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_About;
-        private DockPanel DockPanel;
+        private DockPanelOptimized DockPanel;
         private ToolStripDropDownButtonOptimized ToolStrip_General;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;

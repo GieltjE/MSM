@@ -59,6 +59,12 @@
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Statics.cs" />
+    <Compile Include="Extends\DockContentOptimized.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Extends\DockPanelOptimized.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Extends\NewtonsoftJsonSerializer.cs" />
     <Compile Include="Extends\PropertyGridHelpers.cs" />
     <Compile Include="Extends\StatusStripOptimized.cs">
