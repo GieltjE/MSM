@@ -10,8 +10,11 @@ namespace MSM.Extends
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
-            // ReSharper disable once RedundantBaseQualifier
-            base.BackColor = Variables.ColorPalette.DockTarget.Background;
+            if (!DesignMode && Variables.ColorPalette != null)
+            {
+                // ReSharper disable once RedundantBaseQualifier
+                base.BackColor = Variables.ColorPalette.DockTarget.Background;
+            }
         }
     }
 }
