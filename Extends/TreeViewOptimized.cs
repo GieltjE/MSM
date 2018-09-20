@@ -36,7 +36,7 @@ namespace MSM.Extends
             BorderStyle = BorderStyle.FixedSingle;
             Sorted = true;
 
-            if (!DesignMode)
+            if (!DesignMode && Variables.ColorPalette != null)
             {
                 // ReSharper disable RedundantBaseQualifier
                 base.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;

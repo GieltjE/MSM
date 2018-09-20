@@ -33,15 +33,13 @@ namespace MSM.Extends
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
             BorderStyle = BorderStyle.None;
 
-
-            if (!DesignMode)
+            if (!DesignMode && Variables.ColorPalette != null)
             {
                 // ReSharper disable RedundantBaseQualifier
                 base.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
                 base.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
                 // ReSharper restore RedundantBaseQualifier
             }
-
 
             base.AutoScaleMode = AutoScaleMode.Dpi;
         }
