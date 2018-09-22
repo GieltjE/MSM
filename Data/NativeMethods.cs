@@ -28,6 +28,25 @@ namespace MSM.Data
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern Boolean FlushFileBuffers(SafeFileHandle hFile);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, ref TVITEM lParam);
+
+        [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Auto)]
+        internal struct TVITEM
+        {
+            public Int32 mask;
+            public IntPtr hItem;
+            public Int32 state;
+            public Int32 stateMask;
+            [MarshalAs(UnmanagedType.LPTStr)]
+            public String lpszText;
+            public Int32 cchTextMax;
+            public Int32 iImage;
+            public Int32 iSelectedImage;
+            public Int32 cChildren;
+            public IntPtr lParam;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct Rect
         {

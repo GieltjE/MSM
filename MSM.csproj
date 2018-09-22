@@ -85,7 +85,13 @@
     <Compile Include="Extends\UserControlOptimized.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Functions\Generate.cs" />
     <Compile Include="Functions\UI.cs" />
+    <Compile Include="Graphics\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Service\Cron.cs" />
     <Compile Include="Data\Enumerations.cs" />
     <Compile Include="Service\Events.cs" />
@@ -146,7 +152,15 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Icon.ico" />
+    <Content Include="Graphics\Folder.ico" />
+    <Content Include="Graphics\Icon.ico" />
+    <Content Include="Graphics\Session.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

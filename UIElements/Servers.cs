@@ -19,20 +19,32 @@
 using System;
 using System.Windows.Forms;
 using MSM.Extends;
+using MSM.Graphics;
 using MSM.Service;
 
 namespace MSM.UIElements
 {
     public partial class Servers : UserControlOptimized
     {
+        private static ImageList _imageList;
         public Servers()
         {
             InitializeComponent();
 
             LoadOrUpdateTree();
-            Service.Settings.OnSettingsUpdatedEvent += LoadOrUpdateTree;
+            Service.Settings.OnSettingsServerUpdatedEvent += LoadOrUpdateTree;
+
+            if (_imageList == null)
+            {
+                _imageList = new ImageList();
+                _imageList.Images.Add(Resources.Folder);
+                _imageList.Images.Add(Resources.Session);
+            }
+            Treeview_NodesAndServers.ImageList = _imageList;
+            Treeview_NodesAndServers.AfterCheck += TreeviewNodesAndServersAfterCheck;
         }
 
+        private Boolean _firstLoad = true;
         private void LoadOrUpdateTree()
         {
             if (InvokeRequired)
@@ -41,54 +53,129 @@ namespace MSM.UIElements
                 return;
             }
 
-            Treeview_NodesAndServers.Nodes.Clear();
-
             foreach (Node node in Service.Settings.Values.Nodes)
             {
-                String[] splitted = node.NodeName.TrimStart('/').Split('/');
-                TreeNode lastNode = null; 
-                foreach (String part in splitted)
+                AddNode(node, null);
+            }
+
+retry:
+            foreach (TreeNode treeNode in Treeview_NodesAndServers.Nodes)
+            {
+                if (DeleteNode(treeNode, Service.Settings.Values.Nodes.ToArray()))
                 {
-                    String toFind = "/" + part;
+                    goto retry;
+                }
+            }
 
-                    if (lastNode == null)
+            _firstLoad = false;
+        }
+
+        private static Boolean DeleteNode(TreeNode node, Node[] nodes)
+        {
+            foreach (Node nodeToCheck in nodes)
+            {
+                if (String.Equals(node.Name, nodeToCheck.NodeID, StringComparison.Ordinal))
+                {
+                    foreach (TreeNode extraNode in node.Nodes)
                     {
-                        foreach (TreeNode nodeFound in Treeview_NodesAndServers.Nodes)
+                        if (extraNode.ImageIndex != 1)
                         {
-                            if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
-
-                            lastNode = nodeFound;
-                            break;
-                        }
-
-                        if (lastNode == null)
-                        {
-                            lastNode = Treeview_NodesAndServers.Nodes.Add(toFind);
+                            DeleteNode(extraNode, nodeToCheck.Nodes.ToArray());
                         }
                     }
-                    else
+
+                    return false;
+                }
+
+                foreach (Server server in nodeToCheck.ServerList)
+                {
+                    if (String.Equals(node.Name, server.NodeID, StringComparison.Ordinal))
                     {
-                        Boolean found = false;
-                        foreach (TreeNode nodeFound in lastNode.Nodes)
-                        {
-                            if (!String.Equals(nodeFound.Text, toFind, StringComparison.Ordinal)) continue;
-
-                            found = true;
-                            lastNode = nodeFound;
-                            break;
-                        }
-
-                        if (!found)
-                        {
-                            lastNode = lastNode.Nodes.Add(toFind);
-                        }
+                        return false;
                     }
                 }
+            }
 
-                foreach (Server server in node.ServerList)
+            node.Remove();
+            return true;
+        }
+        private void AddNode(Node node, TreeNode parent)
+        {
+            TreeNode newParent;
+            TreeNode nodeFound = FindTreeNode(node.NodeID, Treeview_NodesAndServers.Nodes);
+
+            if (nodeFound != null)
+            {
+                nodeFound.Text = node.NodeName;
+                newParent = nodeFound;
+            }
+            else
+            {
+                newParent = parent != null ? parent.Nodes.Add(node.NodeID, node.NodeName, 0, 0) : Treeview_NodesAndServers.Nodes.Add(node.NodeID, node.NodeName, 0, 0);
+                if (_firstLoad && Service.Settings.Values.SaveCheckedServers && Service.Settings.Values.CheckedNodes.Contains(node.NodeID))
                 {
-                    lastNode.Nodes.Add(server.DisplayName);
+                    newParent.Checked = true;
                 }
+            }
+
+            foreach (Server server in node.ServerList)
+            {
+                TreeNode serverNodeFound = FindTreeNode(server.NodeID, newParent.Nodes, false);
+                if (serverNodeFound != null)
+                {
+                    serverNodeFound.Text = server.DisplayName;
+                }
+                else
+                {
+                    TreeNode newNode = newParent.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
+                    if (_firstLoad && Service.Settings.Values.SaveCheckedServers && Service.Settings.Values.CheckedNodes.Contains(node.NodeID))
+                    {
+                        newNode.Checked = true;
+                    }
+                }
+            }
+
+            foreach (Node nextNode in node.Nodes)
+            {
+                AddNode(nextNode, newParent);
+            }
+        }
+        private static TreeNode FindTreeNode(String key, TreeNodeCollection collection, Boolean recursive = true)
+        {
+            foreach (TreeNode node in collection)
+            {
+                if (String.Equals(key, node.Name, StringComparison.Ordinal))
+                {
+                    return node;
+                }
+
+                if (node.Nodes.Count <= 0 || !recursive) continue;
+
+                TreeNode foundNode = FindTreeNode(key, node.Nodes);
+                if (foundNode != null)
+                {
+                    return foundNode;
+                }
+            }
+
+            return null;
+        }
+
+        private static void TreeviewNodesAndServersAfterCheck(Object sender, TreeViewEventArgs e)
+        {
+            if (!e.Node.Checked)
+            {
+                if (!Service.Settings.Values.CheckedNodes.Contains(e.Node.Name)) return;
+
+                Service.Settings.Values.CheckedNodes.Remove(e.Node.Name);
+                Service.Settings.Flush();
+            }
+            else
+            {
+                if (Service.Settings.Values.CheckedNodes.Contains(e.Node.Name)) return;
+
+                Service.Settings.Values.CheckedNodes.Add(e.Node.Name);
+                Service.Settings.Flush();
             }
         }
 

@@ -14,19 +14,19 @@
 // 
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-// 
+//
+
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Functions;
-using Quartz;
 using String = System.String;
 
 namespace MSM.Service
@@ -53,44 +53,40 @@ namespace MSM.Service
             {
                 SettingsFile = UI.AskQuestion(Variables.MainForm, "Create portable settings file?", "No settings file found", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes ? portableSettingsFile : localSettingsFile;
                 FileOperations.CreateFile(SettingsFile);
-                Values.Dirty = true;
                 Flush();
             }
-
-            Statics.CronService.CreateJob<FlushTerminalSettings>(0, 0, 5, true);
-
-            Events.ShutDownFired += EventsShutDownFired;
         }
         private static void ReadSettings()
         {
+            _readingSettings = true;
             try
             {
                 using (StreamReader streamReader = new StreamReader(SettingsFile))
                 {
                     Values = (Values)XMLSerializer.Deserialize(streamReader);
-                    Values.Dirty = false;
                 }
             }
             catch
             {
                 Values = new Values();
             }
-        }
-        private static void EventsShutDownFired()
-        {
-            Statics.CronService.RemoveJob<FlushTerminalSettings>();
-            Flush();
+            _readingSettings = false;
         }
 
         public static Values Values = new Values();
-
         public static event ExtensionMethods.CustomDelegate OnSettingsUpdatedEvent;
+        public static event ExtensionMethods.CustomDelegate OnSettingsServerUpdatedEvent;
+        public static void FireOnSettingsServerUpdatedEvent()
+        {
+            OnSettingsServerUpdatedEvent?.Invoke();
+        }
 
+        private static Boolean _readingSettings;
         private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
         private static readonly String SettingsFile;
         internal static void Flush()
         {
-            if (!Values.Dirty) return;
+            if (_readingSettings) return;
 
             lock (Values)
             {
@@ -99,7 +95,6 @@ namespace MSM.Service
                     XMLSerializer.Serialize(writer, Values);
                     writer.Flush();
                 }
-                Values.Dirty = false;
             }
 
             OnSettingsUpdatedEvent?.Invoke();
@@ -109,20 +104,19 @@ namespace MSM.Service
     [Serializable]
     public class Values
     {
-        [XmlIgnore, Browsable(false)]
-        public Boolean Dirty { get; set; }
-        
         [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean CheckForUpdates
         {
             get => _checkForUpdates;
             set
             {
-                if (_checkForUpdates != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _checkForUpdates != value;
                 _checkForUpdates = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Boolean _checkForUpdates = true;
@@ -133,11 +127,13 @@ namespace MSM.Service
             get => _minimizeToTray;
             set
             {
-                if (_minimizeToTray != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _minimizeToTray != value;
                 _minimizeToTray = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Boolean _minimizeToTray;
@@ -148,10 +144,7 @@ namespace MSM.Service
             get => _alwaysShowTrayIcon;
             set
             {
-                if (_alwaysShowTrayIcon != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _alwaysShowTrayIcon != value;
 
                 if (value)
                 {
@@ -162,6 +155,11 @@ namespace MSM.Service
                     ((Main)Data.Variables.MainForm).NotifyIcon.Visible = false;
                 }
                 _alwaysShowTrayIcon = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Boolean _alwaysShowTrayIcon = true;
@@ -172,11 +170,13 @@ namespace MSM.Service
             get => _maximizeOnStart;
             set
             {
-                if (_maximizeOnStart != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _maximizeOnStart != value;
                 _maximizeOnStart = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Boolean _maximizeOnStart = true;
@@ -187,11 +187,13 @@ namespace MSM.Service
             get => _closeAction;
             set
             {
-                if (_closeAction != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _closeAction != value;
                 _closeAction = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
@@ -202,11 +204,13 @@ namespace MSM.Service
             get => _puttyExecutable;
             set
             {
-                if (!String.Equals(_puttyExecutable, value, StringComparison.Ordinal))
-                {
-                    Dirty = true;
-                }
+                Boolean update = !String.Equals(_puttyExecutable, value, StringComparison.Ordinal);
                 _puttyExecutable = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _puttyExecutable;
@@ -217,11 +221,13 @@ namespace MSM.Service
             get => _puttyExtraParamaters;
             set
             {
-                if (!String.Equals(_puttyExtraParamaters, value, StringComparison.Ordinal))
-                {
-                    Dirty = true;
-                }
+                Boolean update = !String.Equals(_puttyExtraParamaters, value, StringComparison.Ordinal);
                 _puttyExtraParamaters = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _puttyExtraParamaters;
@@ -232,11 +238,13 @@ namespace MSM.Service
             get => _initialSessions;
             set
             {
-                if (_initialSessions != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _initialSessions != value;
                 _initialSessions = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Enumerations.InitialSessions _initialSessions = Enumerations.InitialSessions.Previous;
@@ -247,11 +255,13 @@ namespace MSM.Service
             get => _showServerList;
             set
             {
-                if (_showServerList != value)
-                {
-                    Dirty = true;
-                }
+                Boolean update = _showServerList != value;
                 _showServerList = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private Boolean _showServerList = true;
@@ -262,11 +272,13 @@ namespace MSM.Service
             get => _keywords;
             set
             {
-                if (!_keywords.Equals(value))
-                {
-                    Dirty = true;
-                }
+                Boolean update = !_keywords.Equals(value);
                 _keywords = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String[] _keywords = new String[0];
@@ -277,24 +289,50 @@ namespace MSM.Service
             get => _variables;
             set
             {
-                if (!_variables.Equals(value))
-                {
-                    Dirty = true;
-                }
+                Boolean update = !_variables.Equals(value);
                 _variables = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String[] _variables = new String[0];
 
-        [Category("Nodes"), DisplayName("Nodelist")]
-        public CollectionConverter<Node> Nodes
+        [Category("Servers"), DisplayName("Restore checked servers on startup"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean SaveCheckedServers
         {
-            get => _nodeList;
+            get => _saveCheckedServers;
             set
             {
-                Dirty = true;
-                _nodeList = value;
+                Boolean update = _saveCheckedServers != value;
+                _saveCheckedServers = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
+        }
+        [XmlIgnore] private Boolean _saveCheckedServers = true;
+
+        [Browsable(false)]
+        public HashSet<String> CheckedNodes = new HashSet<String>(StringComparer.Ordinal);
+
+        [Category("Nodes"), DisplayName("Node list")]
+        public CollectionConverter<Node> Nodes
+        {
+            get
+            {
+                if (!_nodeList.AddedOrRemovedSet())
+                {
+                    _nodeList.AddedOrRemoved += Settings.Flush;
+                    _nodeList.AddedOrRemoved += Settings.FireOnSettingsServerUpdatedEvent;
+                }
+                return _nodeList;
+            }
+            set => _nodeList = value;
         }
         [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
     }
@@ -306,32 +344,57 @@ namespace MSM.Service
             return String.IsNullOrEmpty(NodeName) ? "?" : NodeName;
         }
 
+        [Browsable(false)]
+        public String NodeID { get; set; } = Generate.RandomUniqueID(10);
+
         [Category("Node"), DisplayName("Node name")]
         public String NodeName
         {
             get => _nodeName;
             set
             {
+                _nodeName = value;
+
                 if (_nodeName != value)
                 {
-                    Settings.Values.Dirty = true;
+                    Settings.FireOnSettingsServerUpdatedEvent();
+                    Settings.Flush();
                 }
-                _nodeName = value;
             }
         }
         [XmlIgnore] private String _nodeName = "/";
 
-        [Category("Servers"), DisplayName("Serverlist")]
+        [Category("Node"), DisplayName("Node list")]
+        public CollectionConverter<Node> Nodes
+        {
+            get
+            {
+                if (!_nodeList.AddedOrRemovedSet())
+                {
+                    _nodeList.AddedOrRemoved += Settings.Flush;
+                    _nodeList.AddedOrRemoved += Settings.FireOnSettingsServerUpdatedEvent;
+                }
+                return _nodeList;
+            }
+            set => _nodeList = value;
+        }
+        [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
+
+        [Category("Servers"), DisplayName("Server list")]
         public CollectionConverter<Server> ServerList
         {
-            get => _serverList;
-            set
+            get
             {
-                Settings.Values.Dirty = true;
-                _serverList = value;
+                if (!_serverList.AddedOrRemovedSet())
+                {
+                    _serverList.AddedOrRemoved += Settings.Flush;
+                    _serverList.AddedOrRemoved += Settings.FireOnSettingsServerUpdatedEvent;
+                }
+                return _serverList;
             }
+            set => _serverList = value;
         }
-        private CollectionConverter<Server> _serverList = new CollectionConverter<Server>();
+        [XmlIgnore] private CollectionConverter<Server> _serverList = new CollectionConverter<Server>();
     }
     [Serializable]
     public class Server
@@ -341,18 +404,28 @@ namespace MSM.Service
             return String.IsNullOrEmpty(DisplayName) ? "?" : DisplayName;
         }
 
+        [Browsable(false)]
+        public String NodeID { get; set; } = Generate.RandomUniqueID(10);
+
         [Category("Basic"), DisplayName("Display name")]
         public String DisplayName
         {
             get => _displayName;
             set
             {
+                Boolean update = false;
                 if (!String.Equals(_displayName, value, StringComparison.Ordinal))
                 {
-                    Settings.Values.Dirty = true;
+                    Settings.FireOnSettingsServerUpdatedEvent();
+                    update = true;
                 }
 
                 _displayName = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _displayName;
@@ -363,12 +436,13 @@ namespace MSM.Service
             get => _hostName;
             set
             {
-                if (!String.Equals(_hostName, value, StringComparison.Ordinal))
-                {
-                    Settings.Values.Dirty = true;
-                }
-
+                Boolean update = !String.Equals(_hostName, value, StringComparison.Ordinal);
                 _hostName = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _hostName;
@@ -379,12 +453,13 @@ namespace MSM.Service
             get => _username;
             set
             {
-                if (!String.Equals(_username, value, StringComparison.Ordinal))
-                {
-                    Settings.Values.Dirty = true;
-                }
-
+                Boolean update = !String.Equals(_username, value, StringComparison.Ordinal);
                 _username = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _username;
@@ -395,10 +470,7 @@ namespace MSM.Service
             get => _password;
             set
             {
-                if (!String.Equals(_password, value, StringComparison.Ordinal))
-                {
-                    Settings.Values.Dirty = true;
-                }
+                Boolean update = !String.Equals(_password, value, StringComparison.Ordinal);
 
                 if (!String.IsNullOrWhiteSpace(value))
                 {
@@ -406,6 +478,11 @@ namespace MSM.Service
                 }
 
                 _password = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String _password;
@@ -416,12 +493,13 @@ namespace MSM.Service
             get => _portNumber;
             set
             {
-                if (_portNumber != value)
-                {
-                    Settings.Values.Dirty = true;
-                }
-
+                Boolean update = _portNumber != value;
                 _portNumber = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private UInt16 _portNumber = 22;
@@ -432,12 +510,13 @@ namespace MSM.Service
             get => _keywords;
             set
             {
-                if (!_keywords.Equals(value))
-                {
-                    Settings.Values.Dirty = true;
-                }
-
+                Boolean update = !_keywords.Equals(value);
                 _keywords = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
             }
         }
         [XmlIgnore] private String[] _keywords = new String[0];
@@ -448,27 +527,13 @@ namespace MSM.Service
             get => _variables.Properties;
             set => _variables.Properties = value;
         }
+
         [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
         public BasicPropertyBag VariablesInternal
         {
             get => _variables;
-            set
-            {
-                Settings.Values.Dirty = true;
-
-                _variables = value;
-            }
+            set => _variables = value;
         }
         [XmlIgnore] private BasicPropertyBag _variables = new BasicPropertyBag();
-    }
-
-    [DisallowConcurrentExecution]
-    internal class FlushTerminalSettings : IJob
-    {
-        public virtual Task Execute(IJobExecutionContext context)
-        {
-            Settings.Flush();
-            return Task.CompletedTask;
-        }
     }
 }

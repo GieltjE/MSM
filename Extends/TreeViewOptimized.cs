@@ -14,7 +14,8 @@
 // 
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-// 
+//
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace MSM.Extends
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.SupportsTransparentBackColor, true);
             BorderStyle = BorderStyle.FixedSingle;
             Sorted = true;
-
+            
             if (!DesignMode && Variables.ColorPalette != null)
             {
                 // ReSharper disable RedundantBaseQualifier
@@ -56,6 +57,18 @@ namespace MSM.Extends
 
         [DefaultValue(true), Description("Wether to do smarter checkbox handling")]
         public Boolean CustomSmarterCheckboxHandling { get; set; } = true;
+
+        [DefaultValue(-1), Description("Only show checkbox for specified ImageIndex")]
+        public Int32 CustomOnlyShowCheckboxForImageIndex
+        {
+            get => _customOnlyShowCheckboxForImageIndex;
+            set
+            {
+                DrawMode = value != -1 ? TreeViewDrawMode.OwnerDrawText : TreeViewDrawMode.Normal;
+                _customOnlyShowCheckboxForImageIndex = value;
+            }
+        }
+        private Int32 _customOnlyShowCheckboxForImageIndex;
 
         private List<TreeNode> _treeNodeList = new List<TreeNode>();
         private void LoadTreeNode(IEnumerable nodes)
@@ -80,28 +93,7 @@ namespace MSM.Extends
 
             if (CustomForceParentSelectionOnAllChildSelection && e.Node.Parent != null)
             {
-                Boolean allChecked = true;
-                Boolean noneChecked = true;
-                foreach (TreeNode node in e.Node.Parent.Nodes)
-                {
-                    if (!node.Checked)
-                    {
-                        allChecked = false;
-                    }
-                    else
-                    {
-                        noneChecked = false;
-                    }
-                }
-                // ReSharper disable once RedundantCheckBeforeAssignment
-                if (!e.Node.Parent.Checked && allChecked)
-                {
-                    e.Node.Parent.Checked = true;
-                }
-                if (e.Node.Parent.Checked && noneChecked)
-                {
-                    e.Node.Parent.Checked = false;
-                }
+                CheckParentNodeIfAllNodesAreChecked(e.Node.Parent);
             }
 
             if (CustomOnlyAllowParentWhenAllChildsChecked)
@@ -110,6 +102,27 @@ namespace MSM.Extends
             }
 
             _onAfterCheckBusy = false;
+        }
+        protected override void OnDrawNode(DrawTreeNodeEventArgs e)
+        {
+            if (e.Node.ImageIndex != CustomOnlyShowCheckboxForImageIndex)
+            {
+                HideCheckBox(e.Node);
+            }
+            e.DrawDefault = true;
+            base.OnDrawNode(e);
+        }
+
+        public static void HideCheckBox(TreeNode node)
+        {
+            NativeMethods.TVITEM tvi = new NativeMethods.TVITEM
+            {
+                hItem = node.Handle,
+                mask = 0x8,
+                stateMask = 0xF000,
+                state = 0
+            };
+            NativeMethods.SendMessage(node.TreeView.Handle, 0x1100 + 63, IntPtr.Zero, ref tvi);
         }
         private static void CheckAllNodes(ICollection nodes, Boolean check)
         {
@@ -137,6 +150,43 @@ namespace MSM.Extends
 
             return true;
         }
+
+        private static void CheckParentNodeIfAllNodesAreChecked(TreeNode node)
+        {
+            Boolean allChecked = true;
+            Boolean noneChecked = true;
+
+            foreach (TreeNode parentChildNode in node.Nodes)
+            {
+                if (!parentChildNode.Checked)
+                {
+                    allChecked = false;
+                }
+                else
+                {
+                    noneChecked = false;
+                }
+            }
+
+            if (allChecked && !node.Checked)
+            {
+                node.Checked = true;
+            }
+
+            // ReSharper disable once RedundantCheckBeforeAssignment
+            if (node.Parent != null && !node.Parent.Checked && allChecked)
+            {
+                node.Checked = true;
+                if (node.Parent != null)
+                {
+                    CheckParentNodeIfAllNodesAreChecked(node.Parent);
+                }
+            }
+            if (node.Checked && noneChecked)
+            {
+                node.Checked = false;
+            }
+        }
         private static void UnCheckAllParentsIfNotAllChildsChecked(TreeNode node)
         {
             if (!AllNodesChecked(node.Nodes))
@@ -149,12 +199,12 @@ namespace MSM.Extends
             }
         }
 
-        public void CheckItems(List<String> itemsToCheck, Boolean toLower)
+        public void CheckItems(HashSet<String> itemsToCheck)
         {
             _treeNodeList = new List<TreeNode>();
             LoadTreeNode(Nodes);
 
-            foreach (TreeNode treeNode in from treeNode in _treeNodeList let searchItem = toLower ? treeNode.Text.ToLowerInvariant() : treeNode.Text where itemsToCheck.Contains(searchItem) select treeNode)
+            foreach (TreeNode treeNode in from treeNode in _treeNodeList let searchItem = treeNode.Name where itemsToCheck.Contains(searchItem) select treeNode)
             {
                 treeNode.Checked = true;
                 treeNode.Expand();
@@ -167,12 +217,12 @@ namespace MSM.Extends
                 }
             }
         }
-        public IEnumerable<String> GetCheckedItems()
+        public List<String> GetCheckedItems()
         {
             _treeNodeList = new List<TreeNode>();
             LoadTreeNode(Nodes);
 
-            return (from treeNode in _treeNodeList where treeNode.Checked select treeNode.Text).ToList();
+            return (from treeNode in _treeNodeList where treeNode.Checked select treeNode.Name).ToList();
         }
 
         public TreeNode FindTreeNode(String value, TreeNode treeNode, Boolean recursive)
