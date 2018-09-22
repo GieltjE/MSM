@@ -20,6 +20,7 @@ using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using MSM.Data;
+using SolidBrush = System.Drawing.SolidBrush;
 
 namespace MSM.Extends
 {
@@ -41,11 +42,17 @@ namespace MSM.Extends
             Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
         }
 
+        private SolidBrush _backBrush;
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            SolidBrush b = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+            if (DesignMode) return;
 
-            e.Graphics.FillRectangle(b, DisplayRectangle);
+            if (_backBrush == null)
+            {
+                _backBrush = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+            }
+
+            e.Graphics.FillRectangle(_backBrush, DisplayRectangle);
         }
     }
 }
