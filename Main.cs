@@ -41,15 +41,13 @@ namespace MSM
 
         public Main()
         {
-            MaterialDarkTheme t = new MaterialDarkTheme();
+            DockPanel.Theme = new MaterialDarkTheme();
 
             Variables.MainForm = this;
-            Variables.ColorPalette = t.ColorPalette;
-            Variables.Measures = t.Measures;
+            Variables.ColorPalette = DockPanel.Theme.ColorPalette;
+            Variables.Measures = DockPanel.Theme.Measures;
 
             InitializeComponent();
-
-            DockPanel.Theme = t;
 
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
