@@ -162,7 +162,7 @@ namespace MSM.Service
                 }
             }
         }
-        [XmlIgnore] private Boolean _alwaysShowTrayIcon = true;
+        [XmlIgnore] private Boolean _alwaysShowTrayIcon = false;
 
         [Category("UI"), DisplayName("Maximize on start"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean MaximizeOnStart

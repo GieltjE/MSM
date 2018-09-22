@@ -30,7 +30,7 @@ namespace MSM
         /// </summary>
         private void InitializeComponent()
         {
-            this.DockPanel = new DockPanelOptimized();
+            this.DockPanel = new MSM.Extends.DockPanelOptimized();
             this.ToolStrip = new MSM.Extends.ToolstripOptimized();
             this.ToolStripButton_Help = new MSM.Extends.ToolStripDropDownButtonOptimized();
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
@@ -99,7 +99,7 @@ namespace MSM
             // ToolStrip_Settings
             // 
             this.ToolStrip_Settings.Name = "ToolStrip_Settings";
-            this.ToolStrip_Settings.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_Settings.Size = new System.Drawing.Size(148, 22);
             this.ToolStrip_Settings.Text = "Settings";
             this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
             // 
@@ -107,7 +107,7 @@ namespace MSM
             // 
             this.ToolStrip_ShowServerList.CheckOnClick = true;
             this.ToolStrip_ShowServerList.Name = "ToolStrip_ShowServerList";
-            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(148, 22);
             this.ToolStrip_ShowServerList.Text = "View serverlist";
             this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripShowServerListClick);
             // 
