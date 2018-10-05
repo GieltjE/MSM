@@ -81,6 +81,33 @@ namespace MSM.Service
             OnSettingsServerUpdatedEvent?.Invoke();
         }
 
+        public static Server FindServer(String nodeID, CollectionConverter<Node> firstNode = null)
+        {
+            if (firstNode == null)
+            {
+                firstNode = Values.Nodes;
+            }
+
+            foreach (Node node in firstNode)
+            {
+                foreach (Server server in node.ServerList)
+                {
+                    if (String.Equals(server.NodeID, nodeID, StringComparison.Ordinal))
+                    {
+                        return server;
+                    }
+                }
+
+                Server foundServer = FindServer(nodeID, node.Nodes);
+                if (foundServer != null)
+                {
+                    return foundServer;
+                }
+            }
+
+            return null;
+        }
+
         private static Boolean _readingSettings;
         private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
         private static readonly String SettingsFile;
@@ -148,11 +175,11 @@ namespace MSM.Service
 
                 if (value)
                 {
-                    ((Main)Data.Variables.MainForm).NotifyIcon.Visible = true;
+                    Data.Variables.MainForm.NotifyIcon.Visible = true;
                 }
                 else if(Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
                 {
-                    ((Main)Data.Variables.MainForm).NotifyIcon.Visible = false;
+                    Data.Variables.MainForm.NotifyIcon.Visible = false;
                 }
                 _alwaysShowTrayIcon = value;
 

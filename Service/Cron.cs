@@ -190,7 +190,7 @@ namespace MSM.Service
 
                 await Scheduler.DeleteJob(new JobKey(name));
             }
-            catch { }
+            catch {}
             finally
             {
                 _schedulerSemaphore.Release();
@@ -214,7 +214,7 @@ namespace MSM.Service
                     return true;
                 }
             }
-            catch { }
+            catch {}
             finally
             {
                 _schedulerSemaphore.Release();

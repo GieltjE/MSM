@@ -18,6 +18,7 @@
 
 using System;
 using System.Windows.Forms;
+using MSM.Data;
 using MSM.Extends;
 using MSM.Graphics;
 using MSM.Service;
@@ -179,8 +180,11 @@ retry:
             }
         }
 
-        private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs e)
+        private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
         {
+            if (Treeview_NodesAndServers.SelectedNode == null || Treeview_NodesAndServers.SelectedNode.ImageIndex != 1) return;
+
+            Variables.MainForm.AddTerminal(Treeview_NodesAndServers.SelectedNode.Name);
         }
     }
 }

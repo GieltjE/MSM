@@ -14,9 +14,9 @@
 // 
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-// 
+//
+
 using System;
-using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MSM.Data
@@ -24,7 +24,7 @@ namespace MSM.Data
     public static class Variables
     {
         public static Int32 ThreadAfterDoEventsSleep = 50;
-        public static Form MainForm;
+        public static Main MainForm;
         public static DockPanelColorPalette ColorPalette;
         public static Measures Measures;
     }

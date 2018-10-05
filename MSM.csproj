@@ -59,6 +59,12 @@
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Statics.cs" />
+    <Compile Include="Extends\AppControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Extends\ControlOptimized.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Extends\DockContentOptimized.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +123,12 @@
     <Compile Include="Service\Settings.cs" />
     <Compile Include="Data\Variables.cs" />
     <Compile Include="Service\UpdateCheck.cs" />
+    <Compile Include="UIElements\Terminal.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UIElements\Terminal.Designer.cs">
+      <DependentUpon>Terminal.cs</DependentUpon>
+    </Compile>
     <Compile Include="UIElements\Servers.cs">
       <SubType>UserControl</SubType>
     </Compile>

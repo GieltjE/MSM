@@ -34,9 +34,9 @@ namespace MSM.Extends
 
     internal class ToolStripProfessionalRendererNoLine : ToolStripProfessionalRenderer
     {
-        public ToolStripProfessionalRendererNoLine(ProfessionalColorTable table) : base(table) { }
+        public ToolStripProfessionalRendererNoLine(ProfessionalColorTable table) : base(table) {}
 
-        protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) { }
+        protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) {}
     }
     public class CustomColorTableStatusStrip : ProfessionalColorTable
     {

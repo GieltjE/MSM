@@ -14,7 +14,8 @@
 // 
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-// 
+//
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -182,6 +183,17 @@ namespace MSM
             ToolStrip_ShowServerList.Checked = false;
         }
 
+        public void AddTerminal(String nodeID)
+        {
+            Server server = Settings.FindServer(nodeID);
+            if (server == null) return;
+
+            Terminal terminal = new Terminal(nodeID, server);
+            DockContent dockContent = AddDockContent(server.DisplayName, nodeID, terminal, true);
+            dockContent.Closing += terminal.terminalControl.Stop;
+            terminal.terminalControl.Load();
+        }
+
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new Dictionary<String, DockContentOptimized>(StringComparer.Ordinal);
         private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
         {
@@ -201,7 +213,10 @@ namespace MSM
             newDockContent.Controls.Add(content);
             newDockContent.Show(DockPanel, dockState);
 
-            _availableDocks.Add(internalName, newDockContent);
+            if (!allowDuplicate)
+            {
+                _availableDocks.Add(internalName, newDockContent);
+            }
 
             return newDockContent;
         }
