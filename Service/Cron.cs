@@ -26,7 +26,9 @@ using MSM.Functions;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
+using Quartz.Impl.Triggers;
 using Quartz.Simpl;
+using Quartz.Util;
 
 namespace MSM.Service
 {
@@ -114,7 +116,7 @@ namespace MSM.Service
                 _schedulerSemaphore.Release(1);
             }
         }
-        public async void CreateJob<T>(Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately) where T : IJob
+        public async void CreateJob<T>(Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately, Boolean refireImmediately = true) where T : IJob
         {
             if (Scheduler.IsShutdown) return;
 
@@ -136,7 +138,17 @@ namespace MSM.Service
             }
             try
             {
-                await Scheduler.ScheduleJob(JobBuilder.Create<T>().WithIdentity(name).Build(), TriggerBuilder.Create().WithIdentity(name).WithSimpleSchedule(x => x.RepeatForever().WithIntervalInSeconds(intervalSeconds + (intervalMinutes * 60) + (intervalHours * 3600)).WithMisfireHandlingInstructionFireNow()).StartAt(startFireingAfter).Build());
+                TriggerBuilder trigger = TriggerBuilder.Create().WithIdentity(name);
+                if (refireImmediately)
+                {
+                    trigger.WithSimpleSchedule(x => x.RepeatForever().WithIntervalInSeconds(intervalSeconds + (intervalMinutes * 60) + (intervalHours * 3600)).WithMisfireHandlingInstructionFireNow());
+                }
+                else
+                {
+                    trigger.WithSimpleSchedule(x => x.RepeatForever().WithIntervalInSeconds(intervalSeconds + (intervalMinutes * 60) + (intervalHours * 3600)).WithMisfireHandlingInstructionNextWithExistingCount());
+                }
+
+                await Scheduler.ScheduleJob(JobBuilder.Create<T>().WithIdentity(name).Build(), trigger.StartAt(startFireingAfter).Build());
             }
             catch (Exception exception)
             {
@@ -257,20 +269,29 @@ namespace MSM.Service
         }
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ResetTimerAfterRunCompletes : Attribute {}
+
     public class ExceptionOccuredJobListener : IJobListener
     {
         public String Name => "ExceptionOccuredJobListener";
 
-        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return Task.CompletedTask;
-        }
-        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return Task.CompletedTask;
-        }
+        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
+        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
         public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new CancellationToken())
         {
+            if (ObjectUtils.IsAttributePresent(context.JobDetail.JobType, typeof(ResetTimerAfterRunCompletes)))
+            {
+                TriggerKey triggerName = new TriggerKey(context.Trigger.Key.Name, ((AbstractTrigger)context.Trigger).Group);
+
+                Task<ITrigger> trigger = context.Scheduler.GetTrigger(triggerName, cancellationToken);
+                trigger.Wait(cancellationToken);
+
+                TriggerBuilder newTrigger = trigger.Result.GetTriggerBuilder();
+                newTrigger.StartAt(DateBuilder.FutureDate((Int32)((SimpleTriggerImpl)trigger.Result).RepeatInterval.TotalSeconds, IntervalUnit.Second));
+                context.Scheduler.RescheduleJob(triggerName, newTrigger.Build(), cancellationToken);
+            }
+
             if (jobException != null)
             {
                 Logging.LogErrorItem(jobException.GetBaseException());
