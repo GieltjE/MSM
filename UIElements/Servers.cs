@@ -43,7 +43,11 @@ namespace MSM.UIElements
                 _imageList.Images.Add(Resources.Session);
             }
             Treeview_NodesAndServers.ImageList = _imageList;
+
             Treeview_NodesAndServers.AfterCheck += TreeviewNodesAndServersAfterCheck;
+            Treeview_NodesAndServers.AfterExpand += TreeviewNodesAndServersAfterExpandOrCollapse;
+            Treeview_NodesAndServers.AfterCollapse += TreeviewNodesAndServersAfterExpandOrCollapse;
+            Treeview_NodesAndServers.MouseDoubleClick += TreeviewNodesAndServersMouseDoubleClick;
         }
 
         private Boolean _firstLoad = true;
@@ -57,55 +61,40 @@ namespace MSM.UIElements
 
             AddNode(Service.Settings.Values.Node.NodeList);
             AddServers(Service.Settings.Values.Node.ServerList, null);
-
-            List<TreeNode> nodes = Treeview_NodesAndServers.GetAllItems();
-            HashSet<String> available = Service.Settings.FindAllNodeIDs();
-            foreach (TreeNode treeNode in nodes)
+            
+            foreach (KeyValuePair<String, TreeNode> treeNode in Treeview_NodesAndServers.TreeNodes)
             {
-                if (!available.Contains(treeNode.Name))
+                if (!Service.Settings.AllNodes.ContainsKey(treeNode.Key) && !Service.Settings.AllServers.ContainsKey(treeNode.Key))
                 {
-                    treeNode.Remove();
+                    treeNode.Value.Remove();
                 }
             }
-            
+
+            Treeview_NodesAndServers.UpdateList();
+
             _firstLoad = false;
         }
-
         private void AddNode(CollectionConverter<Node> nodes, TreeNode parent = null)
         {
             foreach (Node nodeToUpdateOrAdd in nodes)
             {
-                TreeNode nodeFound = null;
-
-                if (parent == null)
+                TreeNode nodeFound;
+                if (Treeview_NodesAndServers.TreeNodes.ContainsKey(nodeToUpdateOrAdd.NodeID))
                 {
-                    foreach (TreeNode existingNode in Treeview_NodesAndServers.Nodes)
-                    {
-                        if (!String.Equals(existingNode.Name, nodeToUpdateOrAdd.NodeID, StringComparison.Ordinal)) continue;
-
-                        nodeFound = existingNode;
-                        nodeFound.Text = nodeToUpdateOrAdd.NodeName;
-                        break;
-                    }
-                    if (nodeFound == null)
-                    {
-                        nodeFound = Treeview_NodesAndServers.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
-                    }
+                    nodeFound = Treeview_NodesAndServers.TreeNodes[nodeToUpdateOrAdd.NodeID];
+                    nodeFound.Text = nodeToUpdateOrAdd.NodeName;
                 }
                 else
                 {
-                    foreach (TreeNode existingNode in parent.Nodes)
-                    {
-                        if (!String.Equals(existingNode.Name, nodeToUpdateOrAdd.NodeID, StringComparison.Ordinal)) continue;
-
-                        nodeFound = existingNode;
-                        nodeFound.Text = nodeToUpdateOrAdd.NodeName;
-                        break;
-                    }
-                    if (nodeFound == null)
-                    {
-                        nodeFound = parent.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
-                    }
+                    nodeFound = parent == null ? Treeview_NodesAndServers.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0) : parent.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
+                }
+                if (_firstLoad && Service.Settings.Values.SaveCheckedNodes && nodeToUpdateOrAdd.Checked)
+                {
+                    nodeFound.Checked = true;
+                }
+                if (_firstLoad && Service.Settings.Values.SaveExpandedNodes && nodeToUpdateOrAdd.Expanded)
+                {
+                    nodeFound.Expand();
                 }
 
                 AddNode(nodeToUpdateOrAdd.NodeList, nodeFound);
@@ -116,36 +105,15 @@ namespace MSM.UIElements
         {
             foreach (Server server in serverList)
             {
-                TreeNode serverNodeFound = null;
-                if (node != null)
+                TreeNode serverNodeFound;
+                if (Treeview_NodesAndServers.TreeNodes.ContainsKey(server.NodeID))
                 {
-                    foreach (TreeNode newNode in node.Nodes)
-                    {
-                        if (!String.Equals(newNode.Name, server.NodeID, StringComparison.Ordinal)) continue;
-
-                        serverNodeFound = newNode;
-                        serverNodeFound.Text = server.DisplayName;
-                        break;
-                    }
-                    if (serverNodeFound == null)
-                    {
-                        serverNodeFound = node.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
-                    }
+                    serverNodeFound = Treeview_NodesAndServers.TreeNodes[server.NodeID];
+                    serverNodeFound.Text = server.DisplayName;
                 }
                 else
                 {
-                    foreach (TreeNode newNode in Treeview_NodesAndServers.Nodes)
-                    {
-                        if (!String.Equals(newNode.Name, server.NodeID, StringComparison.Ordinal)) continue;
-
-                        serverNodeFound = newNode;
-                        serverNodeFound.Text = server.DisplayName;
-                        break;
-                    }
-                    if (serverNodeFound == null)
-                    {
-                        serverNodeFound = Treeview_NodesAndServers.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
-                    }
+                    serverNodeFound = node != null ? node.Nodes.Add(server.NodeID, server.DisplayName, 1, 1) : Treeview_NodesAndServers.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
                 }
 
                 if (_firstLoad && Service.Settings.Values.SaveCheckedNodes && server.Checked)
@@ -169,11 +137,19 @@ namespace MSM.UIElements
                 node.Checked = e.Node.Checked;
             }
         }
+        private static void TreeviewNodesAndServersAfterExpandOrCollapse(Object sender, TreeViewEventArgs e)
+        {
+            Node node = Service.Settings.FindNode(e.Node.Name);
+            if (node != null)
+            {
+                node.Expanded = e.Node.IsExpanded;
+            }
+        }
         private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
         {
             if (Treeview_NodesAndServers.SelectedNode == null || Treeview_NodesAndServers.SelectedNode.ImageIndex != 1) return;
 
-            Variables.MainForm.AddTerminal(Treeview_NodesAndServers.SelectedNode.Name);
+            Variables.MainForm.AddServer(Service.Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name));
         }
     }
 }

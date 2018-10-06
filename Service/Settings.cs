@@ -65,6 +65,7 @@ namespace MSM.Service
                 {
                     Values = (Values)XMLSerializer.Deserialize(streamReader);
                 }
+                UpdateNodesAndServers();
             }
             catch
             {
@@ -81,96 +82,43 @@ namespace MSM.Service
             OnSettingsServerUpdatedEvent?.Invoke();
         }
 
+        public static readonly Dictionary<String, Node> AllNodes = new Dictionary<String, Node>(StringComparer.Ordinal);
         public static Node FindNode(String nodeID)
         {
-            foreach (Node node in Values.Node.NodeList)
-            {
-                if (String.Equals(node.NodeID, nodeID, StringComparison.Ordinal))
-                {
-                    return node;
-                }
-
-                Node nodeFound = FindNode(nodeID, node.NodeList);
-                if (nodeFound != null)
-                {
-                    return nodeFound;
-                }
-            }
-
-            return null;
+            return AllNodes.ContainsKey(nodeID) ? AllNodes[nodeID] : null;
         }
-        private static Node FindNode(String nodeID, CollectionConverter<Node> firstNode)
+        private static void FindAllNodes(Node node)
         {
-            foreach (Node node in firstNode)
-            {
-                if (String.Equals(node.NodeID, nodeID, StringComparison.Ordinal))
-                {
-                    return node;
-                }
-
-                Node foundNode = FindNode(nodeID, node.NodeList);
-                if (foundNode != null)
-                {
-                    return foundNode;
-                }
-            }
-            return null;
-        }
-        public static Server FindServer(String nodeID)
-        {
-            foreach (Server server in Values.Node.ServerList)
-            {
-                if (String.Equals(server.NodeID, nodeID, StringComparison.Ordinal))
-                {
-                    return server;
-                }
-            }
-
-            return FindServer(nodeID, Values.Node.NodeList);
-        }
-        private static Server FindServer(String nodeID, CollectionConverter<Node> firstNode)
-        {
-            foreach (Node node in firstNode)
-            {
-                foreach (Server server in node.ServerList)
-                {
-                    if (String.Equals(server.NodeID, nodeID, StringComparison.Ordinal))
-                    {
-                        return server;
-                    }
-                }
-
-                Server foundServer = FindServer(nodeID, node.NodeList);
-                if (foundServer != null)
-                {
-                    return foundServer;
-                }
-            }
-            return null;
-        }
-        public static HashSet<String> FindAllNodeIDs()
-        {
-            IEnumerable<String> found = FindAllNodeIDs(Values.Node);
-            HashSet<String> toReturn = new HashSet<String>(StringComparer.Ordinal);
-            foreach (String id in found)
-            {
-                toReturn.Add(id);
-            }
-            return toReturn;
-        }
-        private static IEnumerable<String> FindAllNodeIDs(Node node)
-        {
-            List<String> toReturn = new List<String>();
             foreach (Node nodeFound in node.NodeList)
             {
-                toReturn.Add(nodeFound.NodeID);
-                toReturn.AddRange(FindAllNodeIDs(nodeFound));
+                AllNodes.Add(nodeFound.NodeID, nodeFound);
+                FindAllNodes(nodeFound);
             }
+        }
+        public static readonly Dictionary<String, Server> AllServers = new Dictionary<String, Server>(StringComparer.Ordinal);
+        public static Server FindServer(String nodeID)
+        {
+            return AllServers.ContainsKey(nodeID) ? AllServers[nodeID] : null;
+        }
+        private static void FindAllServers(Node node)
+        {
             foreach (Server server in node.ServerList)
             {
-                toReturn.Add(server.NodeID);
+                AllServers.Add(server.NodeID, server);
             }
-            return toReturn;
+
+            foreach (Node nodeFound in node.NodeList)
+            {
+                FindAllServers(nodeFound);
+            }
+        }
+
+        private static void UpdateNodesAndServers()
+        {
+            AllNodes.Clear();
+            FindAllNodes(Values.Node);
+            AllServers.Clear();
+            FindAllServers(Values.Node);
         }
 
         private static Boolean _readingSettings;
@@ -182,6 +130,8 @@ namespace MSM.Service
 
             lock (Values)
             {
+                UpdateNodesAndServers();
+
                 using (StreamWriter writer = new StreamWriter(SettingsFile))
                 {
                     XMLSerializer.Serialize(writer, Values);
@@ -409,6 +359,23 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _saveCheckedNodes = true;
 
+        [Category("Servers"), DisplayName("Save expanded nodes"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean SaveExpandedNodes
+        {
+            get => _saveExpandedNodes;
+            set
+            {
+                Boolean update = _saveExpandedNodes != value;
+                _saveExpandedNodes = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _saveExpandedNodes = true;
+
         [Category("Servers"), DisplayName("Server && node list"), TypeConverter(typeof(ExpandableObjectConverter))]
         public Node Node
         {
@@ -515,6 +482,23 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Boolean _checked;
+
+        [Browsable(false)]
+        public Boolean Expanded
+        {
+            get => _expanded;
+            set
+            {
+                Boolean update = _expanded != value;
+                _expanded = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _expanded;
     }
     [Serializable]
     public class Server
@@ -655,7 +639,7 @@ namespace MSM.Service
         }
 
         [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
-        public BasicPropertyBag VariablesInternal { get; set; }
+        public BasicPropertyBag VariablesInternal { get; set; } = new BasicPropertyBag();
 
         [Browsable(false)]
         public Boolean Checked

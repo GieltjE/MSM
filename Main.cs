@@ -186,13 +186,12 @@ namespace MSM
             ToolStrip_ShowServerList.Checked = false;
         }
 
-        public void AddTerminal(String nodeID)
+        public void AddServer(Server server)
         {
-            Server server = Settings.FindServer(nodeID);
             if (server == null) return;
 
             Terminal terminal = new Terminal(server);
-            DockContent dockContent = AddDockContent(server.DisplayName, nodeID, terminal, true);
+            DockContent dockContent = AddDockContent(server.DisplayName, server.NodeID, terminal, true);
             dockContent.Closing += terminal.TerminalControl.Stop;
             terminal.TerminalControl.Load();
         }

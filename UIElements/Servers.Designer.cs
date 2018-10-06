@@ -41,7 +41,6 @@ namespace MSM.UIElements
             this.Treeview_NodesAndServers.Size = new System.Drawing.Size(200, 200);
             this.Treeview_NodesAndServers.TabIndex = 0;
             this.Treeview_NodesAndServers.CheckBoxes = true;
-            this.Treeview_NodesAndServers.MouseDoubleClick += TreeviewNodesAndServersMouseDoubleClick;
             // 
             // Servers
             // 

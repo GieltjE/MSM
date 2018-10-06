@@ -21,7 +21,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using MSM.Data;
 
@@ -70,16 +69,6 @@ namespace MSM.Extends
         }
         private Int32 _customOnlyShowCheckboxForImageIndex;
 
-        private List<TreeNode> _treeNodeList = new List<TreeNode>();
-        private void LoadTreeNode(IEnumerable nodes)
-        {
-            foreach (TreeNode node in nodes)
-            {
-                _treeNodeList.Add(node);
-                LoadTreeNode(node.Nodes);
-            }
-        }
-
         private Boolean _onAfterCheckBusy;
         protected override void OnAfterCheck(TreeViewEventArgs e)
         {
@@ -99,6 +88,21 @@ namespace MSM.Extends
             if (CustomOnlyAllowParentWhenAllChildsChecked)
             {
                 UnCheckAllParentsIfNotAllChildsChecked(e.Node);
+            }
+
+            if (e.Node.Checked)
+            {
+                if (!CheckedItems.Contains(e.Node.Name))
+                {
+                    CheckedItems.Add(e.Node.Name);
+                }
+            }
+            else
+            {
+                if (CheckedItems.Contains(e.Node.Name))
+                {
+                    CheckedItems.Remove(e.Node.Name);
+                }
             }
 
             _onAfterCheckBusy = false;
@@ -199,38 +203,21 @@ namespace MSM.Extends
             }
         }
 
-        public List<String> GetCheckedItems()
+        public HashSet<String> CheckedItems = new HashSet<String>(StringComparer.Ordinal);
+        public Dictionary<String, TreeNode> TreeNodes = new Dictionary<String, TreeNode>();
+        public void UpdateList()
         {
-            _treeNodeList.Clear();
+            TreeNodes.Clear();
+
             LoadTreeNode(Nodes);
-
-            return (from treeNode in _treeNodeList where treeNode.Checked select treeNode.Name).ToList();
         }
-        public List<TreeNode> GetAllItems()
+        private void LoadTreeNode(IEnumerable nodes)
         {
-            _treeNodeList.Clear();
-            LoadTreeNode(Nodes);
-            return _treeNodeList;
-        }
-
-        public TreeNode FindTreeNode(String value, TreeNode treeNode, Boolean recursive)
-        {
-            if (treeNode.Text == value)
+            foreach (TreeNode node in nodes)
             {
-                return treeNode;
+                TreeNodes.Add(node.Name, node);
+                LoadTreeNode(node.Nodes);
             }
-
-            if (treeNode.Nodes.Count == 0 || !recursive) return new TreeNode();
-            for (Int32 i = 0; i < treeNode.Nodes.Count; i++)
-            {
-                TreeNode guess2 = FindTreeNode(value, treeNode.Nodes[i], true);
-                if (guess2.GetNodeCount(true) != 0)
-                {
-                    return guess2;
-                }
-            }
-
-            return new TreeNode();
         }
     }
 }
