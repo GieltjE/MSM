@@ -34,7 +34,7 @@ namespace MSM.Service
     {
         static Logging()
         {
-            Statics.CronService.CreateJob<LogJob>(0, 0, 3, true);
+            Cron.CreateJob<LogJob>(0, 0, 3, true);
 
             if (!File.Exists(Path.Combine(FileOperations.GetRunningDirectory(), "Log.txt")))
             {
@@ -48,7 +48,7 @@ namespace MSM.Service
         }
         private static void EventsShutDownFired()
         {
-            Statics.CronService.RemoveJob<LogJob>();
+            Cron.RemoveJob<LogJob>();
             LogItemWorker();
         }
 

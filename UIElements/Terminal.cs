@@ -33,6 +33,10 @@ namespace MSM.UIElements
         {
             _server = server;
         }
+        ~Terminal()
+        {
+            TerminalControl.Stop();
+        }
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -61,6 +65,7 @@ namespace MSM.UIElements
 
             TerminalControl = new AppControl(Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
             Controls.Add(TerminalControl);
+            TerminalControl.Load();
         }
     }
 }

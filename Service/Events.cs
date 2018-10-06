@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System.Windows.Forms;
+using MSM.Data;
 using MSM.Functions;
 
 namespace MSM.Service
@@ -25,6 +27,7 @@ namespace MSM.Service
         public static event ExtensionMethods.CustomDelegate ShutDownFired;
         public static void ShutDown()
         {
+            Variables.ShutDownFired = true;
             ShutDownFired?.Invoke();
 
             Application.Exit();

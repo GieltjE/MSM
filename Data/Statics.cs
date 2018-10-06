@@ -17,13 +17,11 @@
 //
 
 using MSM.Extends;
-using MSM.Service;
 
 namespace MSM.Data
 {
     public static class Statics
     {
         public static NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new NewtonsoftJsonSerializer();
-        public static Cron CronService = new Cron();
     }
 }

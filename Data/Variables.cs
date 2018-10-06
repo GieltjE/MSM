@@ -27,5 +27,6 @@ namespace MSM.Data
         public static Main MainForm;
         public static DockPanelColorPalette ColorPalette;
         public static Measures Measures;
+        public static Boolean ShutDownFired;
     }
 }

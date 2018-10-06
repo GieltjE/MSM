@@ -31,11 +31,11 @@ namespace MSM.Service
     {
         public static void StartUpdateCheck()
         {
-            Statics.CronService.CreateJob<UpdateCheckJob>(12, 0, 0, true);
+            Cron.CreateJob<UpdateCheckJob>(12, 0, 0, true);
         }
         public static void StopUpdateCheck()
         {
-            Statics.CronService.RemoveJob<UpdateCheckJob>();
+            Cron.RemoveJob<UpdateCheckJob>();
         }
 
         internal static void CheckForUpdates()

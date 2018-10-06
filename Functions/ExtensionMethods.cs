@@ -17,8 +17,11 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using MSM.Service;
 
 namespace MSM.Functions
 {
@@ -77,6 +80,28 @@ namespace MSM.Functions
                 }
             }
             return -1;
+        }
+
+        public static void AutoEndInvoke(this IAsyncResult result, ISynchronizeInvoke control)
+        {
+            // http://blogs.msdn.com/b/pfxteam/archive/2012/03/25/10287435.aspx
+            Task endInvokeTask = Task.Factory.StartNew(() => { AutoEndInvokeTask(result, control); }, TaskCreationOptions.PreferFairness);
+            endInvokeTask.ContinueWith(t => HandleException(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+        }
+        private static void AutoEndInvokeTask(IAsyncResult result, ISynchronizeInvoke control)
+        {
+            try
+            {
+                control.EndInvoke(result);
+            }
+            catch {}
+        }
+        private static void HandleException(AggregateException exception)
+        {
+            foreach (Exception ex in exception.Flatten().InnerExceptions)
+            {
+                Logging.LogErrorItem(ex);
+            }
         }
 
         public static Boolean Equals(this String[] inputArray, String[] compareToArray)

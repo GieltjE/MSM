@@ -92,6 +92,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Functions\Generate.cs" />
+    <Compile Include="Functions\Threading.cs" />
     <Compile Include="Functions\UI.cs" />
     <Compile Include="Graphics\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

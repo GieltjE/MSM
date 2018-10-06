@@ -24,6 +24,7 @@ using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Extends.Themes;
+using MSM.Functions;
 using MSM.Service;
 using MSM.UIElements;
 using WeifenLuo.WinFormsUI.Docking;
@@ -190,10 +191,13 @@ namespace MSM
         {
             if (server == null) return;
 
-            Terminal terminal = new Terminal(server);
-            DockContent dockContent = AddDockContent(server.DisplayName, server.NodeID, terminal, true);
-            dockContent.Closing += terminal.TerminalControl.Stop;
-            terminal.TerminalControl.Load();
+            ThreadHelpers thread = new ThreadHelpers();
+            thread.ExecuteThreadParameter(AddServerHelper, server, false, false);
+        }
+        private void AddServerHelper(Object server)
+        {
+            Terminal terminal = new Terminal((Server)server);
+            AddDockContent(((Server)server).DisplayName, ((Server)server).NodeID, terminal, true);
         }
 
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new Dictionary<String, DockContentOptimized>(StringComparer.Ordinal);
@@ -213,8 +217,14 @@ namespace MSM
             content.Margin = new Padding(0);
 
             newDockContent.Controls.Add(content);
-            newDockContent.Show(DockPanel_Main, dockState);
-            DockPanel_Main.SaveAsXml("test.xml", Encoding.UTF8);
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<DockPanelOptimized, DockState>(newDockContent.Show), DockPanel_Main, dockState).AutoEndInvoke(this);
+            }
+            else
+            {
+                newDockContent.Show(DockPanel_Main, dockState);
+            }
 
             if (!allowDuplicate)
             {
