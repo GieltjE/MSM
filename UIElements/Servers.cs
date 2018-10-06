@@ -59,6 +59,8 @@ namespace MSM.UIElements
                 return;
             }
 
+            Treeview_NodesAndServers.BeginUpdate();
+
             AddNode(Service.Settings.Values.Node.NodeList);
             AddServers(Service.Settings.Values.Node.ServerList, null);
             
@@ -71,6 +73,7 @@ namespace MSM.UIElements
             }
 
             Treeview_NodesAndServers.UpdateList();
+            Treeview_NodesAndServers.EndUpdate();
 
             _firstLoad = false;
         }
