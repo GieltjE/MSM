@@ -17,6 +17,7 @@
 // 
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -54,129 +55,118 @@ namespace MSM.UIElements
                 return;
             }
 
-            foreach (Node node in Service.Settings.Values.Nodes)
-            {
-                AddNode(node, null);
-            }
+            AddNode(Service.Settings.Values.Node.NodeList);
+            AddServers(Service.Settings.Values.Node.ServerList, null);
 
-retry:
-            foreach (TreeNode treeNode in Treeview_NodesAndServers.Nodes)
+            List<TreeNode> nodes = Treeview_NodesAndServers.GetAllItems();
+            HashSet<String> available = Service.Settings.FindAllNodeIDs();
+            foreach (TreeNode treeNode in nodes)
             {
-                if (DeleteNode(treeNode, Service.Settings.Values.Nodes.ToArray()))
+                if (!available.Contains(treeNode.Name))
                 {
-                    goto retry;
+                    treeNode.Remove();
                 }
             }
-
+            
             _firstLoad = false;
         }
 
-        private static Boolean DeleteNode(TreeNode node, Node[] nodes)
+        private void AddNode(CollectionConverter<Node> nodes, TreeNode parent = null)
         {
-            foreach (Node nodeToCheck in nodes)
+            foreach (Node nodeToUpdateOrAdd in nodes)
             {
-                if (String.Equals(node.Name, nodeToCheck.NodeID, StringComparison.Ordinal))
+                TreeNode nodeFound = null;
+
+                if (parent == null)
                 {
-                    foreach (TreeNode extraNode in node.Nodes)
+                    foreach (TreeNode existingNode in Treeview_NodesAndServers.Nodes)
                     {
-                        if (extraNode.ImageIndex != 1)
-                        {
-                            DeleteNode(extraNode, nodeToCheck.Nodes.ToArray());
-                        }
+                        if (!String.Equals(existingNode.Name, nodeToUpdateOrAdd.NodeID, StringComparison.Ordinal)) continue;
+
+                        nodeFound = existingNode;
+                        nodeFound.Text = nodeToUpdateOrAdd.NodeName;
+                        break;
                     }
-
-                    return false;
-                }
-
-                foreach (Server server in nodeToCheck.ServerList)
-                {
-                    if (String.Equals(node.Name, server.NodeID, StringComparison.Ordinal))
+                    if (nodeFound == null)
                     {
-                        return false;
+                        nodeFound = Treeview_NodesAndServers.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
                     }
-                }
-            }
-
-            node.Remove();
-            return true;
-        }
-        private void AddNode(Node node, TreeNode parent)
-        {
-            TreeNode newParent;
-            TreeNode nodeFound = FindTreeNode(node.NodeID, Treeview_NodesAndServers.Nodes);
-
-            if (nodeFound != null)
-            {
-                nodeFound.Text = node.NodeName;
-                newParent = nodeFound;
-            }
-            else
-            {
-                newParent = parent != null ? parent.Nodes.Add(node.NodeID, node.NodeName, 0, 0) : Treeview_NodesAndServers.Nodes.Add(node.NodeID, node.NodeName, 0, 0);
-                if (_firstLoad && Service.Settings.Values.SaveCheckedServers && Service.Settings.Values.CheckedNodes.Contains(node.NodeID))
-                {
-                    newParent.Checked = true;
-                }
-            }
-
-            foreach (Server server in node.ServerList)
-            {
-                TreeNode serverNodeFound = FindTreeNode(server.NodeID, newParent.Nodes, false);
-                if (serverNodeFound != null)
-                {
-                    serverNodeFound.Text = server.DisplayName;
                 }
                 else
                 {
-                    TreeNode newNode = newParent.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
-                    if (_firstLoad && Service.Settings.Values.SaveCheckedServers && Service.Settings.Values.CheckedNodes.Contains(node.NodeID))
+                    foreach (TreeNode existingNode in parent.Nodes)
                     {
-                        newNode.Checked = true;
+                        if (!String.Equals(existingNode.Name, nodeToUpdateOrAdd.NodeID, StringComparison.Ordinal)) continue;
+
+                        nodeFound = existingNode;
+                        nodeFound.Text = nodeToUpdateOrAdd.NodeName;
+                        break;
+                    }
+                    if (nodeFound == null)
+                    {
+                        nodeFound = parent.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
                     }
                 }
-            }
 
-            foreach (Node nextNode in node.Nodes)
-            {
-                AddNode(nextNode, newParent);
+                AddNode(nodeToUpdateOrAdd.NodeList, nodeFound);
+                AddServers(nodeToUpdateOrAdd.ServerList, nodeFound);
             }
         }
-        private static TreeNode FindTreeNode(String key, TreeNodeCollection collection, Boolean recursive = true)
+        private void AddServers(CollectionConverter<Server> serverList, TreeNode node)
         {
-            foreach (TreeNode node in collection)
+            foreach (Server server in serverList)
             {
-                if (String.Equals(key, node.Name, StringComparison.Ordinal))
+                TreeNode serverNodeFound = null;
+                if (node != null)
                 {
-                    return node;
+                    foreach (TreeNode newNode in node.Nodes)
+                    {
+                        if (!String.Equals(newNode.Name, server.NodeID, StringComparison.Ordinal)) continue;
+
+                        serverNodeFound = newNode;
+                        serverNodeFound.Text = server.DisplayName;
+                        break;
+                    }
+                    if (serverNodeFound == null)
+                    {
+                        serverNodeFound = node.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
+                    }
+                }
+                else
+                {
+                    foreach (TreeNode newNode in Treeview_NodesAndServers.Nodes)
+                    {
+                        if (!String.Equals(newNode.Name, server.NodeID, StringComparison.Ordinal)) continue;
+
+                        serverNodeFound = newNode;
+                        serverNodeFound.Text = server.DisplayName;
+                        break;
+                    }
+                    if (serverNodeFound == null)
+                    {
+                        serverNodeFound = Treeview_NodesAndServers.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
+                    }
                 }
 
-                if (node.Nodes.Count <= 0 || !recursive) continue;
-
-                TreeNode foundNode = FindTreeNode(key, node.Nodes);
-                if (foundNode != null)
+                if (_firstLoad && Service.Settings.Values.SaveCheckedNodes && server.Checked)
                 {
-                    return foundNode;
+                    serverNodeFound.Checked = true;
                 }
             }
-
-            return null;
         }
 
         private static void TreeviewNodesAndServersAfterCheck(Object sender, TreeViewEventArgs e)
         {
-            if (!e.Node.Checked)
+            Server server = Service.Settings.FindServer(e.Node.Name);
+            if (server != null)
             {
-                if (!Service.Settings.Values.CheckedNodes.Contains(e.Node.Name)) return;
-
-                Service.Settings.Values.CheckedNodes.Remove(e.Node.Name);
-                Service.Settings.Flush();
+                server.Checked = e.Node.Checked;
             }
-            else
-            {
-                if (Service.Settings.Values.CheckedNodes.Contains(e.Node.Name)) return;
 
-                Service.Settings.Values.CheckedNodes.Add(e.Node.Name);
-                Service.Settings.Flush();
+            Node node = Service.Settings.FindNode(e.Node.Name);
+            if (node != null)
+            {
+                node.Checked = e.Node.Checked;
             }
         }
 

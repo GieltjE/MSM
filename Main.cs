@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -44,14 +45,14 @@ namespace MSM
         {
             InitializeComponent();
 
-            DockPanel.Theme = new MaterialDarkTheme();
+            DockPanel_Main.Theme = new MaterialDarkTheme();
 
             Variables.MainForm = this;
-            Variables.ColorPalette = DockPanel.Theme.ColorPalette;
-            Variables.Measures = DockPanel.Theme.Measures;
+            Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
+            Variables.Measures = DockPanel_Main.Theme.Measures;
 
-            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
-            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel.Theme);
+            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
+            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
             if (Settings.Values.CheckForUpdates)
             {
@@ -170,8 +171,10 @@ namespace MSM
             Settings.Values.ShowServerList = ToolStrip_ShowServerList.Checked;
             if (Settings.Values.ShowServerList)
             {
-                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers(), false, DockState.DockRight);
+                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers() { Width = 100}, false, DockState.DockRight);
+                dockContent.Width = Settings.Values.ServerListWidth;
                 dockContent.Closing += ServerListClosing;
+                dockContent.SizeChanged += (o, args) => { Settings.Values.ServerListWidth = dockContent.Width; };
             }
             else
             {
@@ -188,10 +191,10 @@ namespace MSM
             Server server = Settings.FindServer(nodeID);
             if (server == null) return;
 
-            Terminal terminal = new Terminal(nodeID, server);
+            Terminal terminal = new Terminal(server);
             DockContent dockContent = AddDockContent(server.DisplayName, nodeID, terminal, true);
-            dockContent.Closing += terminal.terminalControl.Stop;
-            terminal.terminalControl.Load();
+            dockContent.Closing += terminal.TerminalControl.Stop;
+            terminal.TerminalControl.Load();
         }
 
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new Dictionary<String, DockContentOptimized>(StringComparer.Ordinal);
@@ -211,7 +214,8 @@ namespace MSM
             content.Margin = new Padding(0);
 
             newDockContent.Controls.Add(content);
-            newDockContent.Show(DockPanel, dockState);
+            newDockContent.Show(DockPanel_Main, dockState);
+            DockPanel_Main.SaveAsXml("test.xml", Encoding.UTF8);
 
             if (!allowDuplicate)
             {

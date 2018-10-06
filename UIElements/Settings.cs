@@ -53,6 +53,8 @@ namespace MSM.UIElements
             PropertyGrid_Settings.CategoryForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text; 
             PropertyGrid_Settings.SelectedItemWithFocusForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
             PropertyGrid_Settings.DisabledItemForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+
+            PropertyGrid_Settings.ExpandAllGridItems();
         }
     }
 }

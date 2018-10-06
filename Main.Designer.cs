@@ -30,7 +30,7 @@ namespace MSM
         /// </summary>
         private void InitializeComponent()
         {
-            this.DockPanel = new MSM.Extends.DockPanelOptimized();
+            this.DockPanel_Main = new MSM.Extends.DockPanelOptimized();
             this.ToolStrip = new MSM.Extends.ToolstripOptimized();
             this.ToolStripButton_Help = new MSM.Extends.ToolStripDropDownButtonOptimized();
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,15 +41,15 @@ namespace MSM
             this.ToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // DockPanel
+            // DockPanel_Main
             // 
-            this.DockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
-            this.DockPanel.Location = new System.Drawing.Point(0, 25);
-            this.DockPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.DockPanel.Name = "DockPanel";
-            this.DockPanel.Size = new System.Drawing.Size(882, 551);
-            this.DockPanel.TabIndex = 4;
+            this.DockPanel_Main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DockPanel_Main.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
+            this.DockPanel_Main.Location = new System.Drawing.Point(0, 25);
+            this.DockPanel_Main.Margin = new System.Windows.Forms.Padding(0);
+            this.DockPanel_Main.Name = "DockPanel_Main";
+            this.DockPanel_Main.Size = new System.Drawing.Size(882, 551);
+            this.DockPanel_Main.TabIndex = 4;
             // 
             // ToolStrip
             // 
@@ -129,7 +129,7 @@ namespace MSM
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 598);
-            this.Controls.Add(this.DockPanel);
+            this.Controls.Add(this.DockPanel_Main);
             this.Controls.Add(this.StatusStrip);
             this.Controls.Add(this.ToolStrip);
             this.Name = "Main";
@@ -140,6 +140,7 @@ namespace MSM
             this.ToolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
         #endregion
 
@@ -147,7 +148,7 @@ namespace MSM
         private StatusStripOptimized StatusStrip;
         private ToolStripDropDownButtonOptimized ToolStripButton_Help;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_About;
-        private DockPanelOptimized DockPanel;
+        private DockPanelOptimized DockPanel_Main;
         private ToolStripDropDownButtonOptimized ToolStrip_General;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;

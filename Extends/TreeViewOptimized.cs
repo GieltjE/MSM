@@ -199,30 +199,18 @@ namespace MSM.Extends
             }
         }
 
-        public void CheckItems(HashSet<String> itemsToCheck)
-        {
-            _treeNodeList = new List<TreeNode>();
-            LoadTreeNode(Nodes);
-
-            foreach (TreeNode treeNode in from treeNode in _treeNodeList let searchItem = treeNode.Name where itemsToCheck.Contains(searchItem) select treeNode)
-            {
-                treeNode.Checked = true;
-                treeNode.Expand();
-
-                TreeNode treeNode1 = treeNode.Parent;
-                while (treeNode1 != null)
-                {
-                    treeNode1.Expand();
-                    treeNode1 = treeNode.Parent;
-                }
-            }
-        }
         public List<String> GetCheckedItems()
         {
-            _treeNodeList = new List<TreeNode>();
+            _treeNodeList.Clear();
             LoadTreeNode(Nodes);
 
             return (from treeNode in _treeNodeList where treeNode.Checked select treeNode.Name).ToList();
+        }
+        public List<TreeNode> GetAllItems()
+        {
+            _treeNodeList.Clear();
+            LoadTreeNode(Nodes);
+            return _treeNodeList;
         }
 
         public TreeNode FindTreeNode(String value, TreeNode treeNode, Boolean recursive)

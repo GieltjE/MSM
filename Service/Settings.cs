@@ -81,13 +81,55 @@ namespace MSM.Service
             OnSettingsServerUpdatedEvent?.Invoke();
         }
 
-        public static Server FindServer(String nodeID, CollectionConverter<Node> firstNode = null)
+        public static Node FindNode(String nodeID)
         {
-            if (firstNode == null)
+            foreach (Node node in Values.Node.NodeList)
             {
-                firstNode = Values.Nodes;
+                if (String.Equals(node.NodeID, nodeID, StringComparison.Ordinal))
+                {
+                    return node;
+                }
+
+                Node nodeFound = FindNode(nodeID, node.NodeList);
+                if (nodeFound != null)
+                {
+                    return nodeFound;
+                }
             }
 
+            return null;
+        }
+        private static Node FindNode(String nodeID, CollectionConverter<Node> firstNode)
+        {
+            foreach (Node node in firstNode)
+            {
+                if (String.Equals(node.NodeID, nodeID, StringComparison.Ordinal))
+                {
+                    return node;
+                }
+
+                Node foundNode = FindNode(nodeID, node.NodeList);
+                if (foundNode != null)
+                {
+                    return foundNode;
+                }
+            }
+            return null;
+        }
+        public static Server FindServer(String nodeID)
+        {
+            foreach (Server server in Values.Node.ServerList)
+            {
+                if (String.Equals(server.NodeID, nodeID, StringComparison.Ordinal))
+                {
+                    return server;
+                }
+            }
+
+            return FindServer(nodeID, Values.Node.NodeList);
+        }
+        private static Server FindServer(String nodeID, CollectionConverter<Node> firstNode)
+        {
             foreach (Node node in firstNode)
             {
                 foreach (Server server in node.ServerList)
@@ -98,14 +140,37 @@ namespace MSM.Service
                     }
                 }
 
-                Server foundServer = FindServer(nodeID, node.Nodes);
+                Server foundServer = FindServer(nodeID, node.NodeList);
                 if (foundServer != null)
                 {
                     return foundServer;
                 }
             }
-
             return null;
+        }
+        public static HashSet<String> FindAllNodeIDs()
+        {
+            IEnumerable<String> found = FindAllNodeIDs(Values.Node);
+            HashSet<String> toReturn = new HashSet<String>(StringComparer.Ordinal);
+            foreach (String id in found)
+            {
+                toReturn.Add(id);
+            }
+            return toReturn;
+        }
+        private static IEnumerable<String> FindAllNodeIDs(Node node)
+        {
+            List<String> toReturn = new List<String>();
+            foreach (Node nodeFound in node.NodeList)
+            {
+                toReturn.Add(nodeFound.NodeID);
+                toReturn.AddRange(FindAllNodeIDs(nodeFound));
+            }
+            foreach (Server server in node.ServerList)
+            {
+                toReturn.Add(server.NodeID);
+            }
+            return toReturn;
         }
 
         private static Boolean _readingSettings;
@@ -128,7 +193,7 @@ namespace MSM.Service
         }
     }
 
-    [Serializable]
+    [Serializable, TypeConverter(typeof(ExpandableObjectConverter))]
     public class Values
     {
         [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
@@ -327,14 +392,14 @@ namespace MSM.Service
         }
         [XmlIgnore] private String[] _variables = new String[0];
 
-        [Category("Servers"), DisplayName("Restore checked servers on startup"), TypeConverter(typeof(BooleanYesNoConverter))]
-        public Boolean SaveCheckedServers
+        [Category("Servers"), DisplayName("Save checked nodes && servers"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean SaveCheckedNodes
         {
-            get => _saveCheckedServers;
+            get => _saveCheckedNodes;
             set
             {
-                Boolean update = _saveCheckedServers != value;
-                _saveCheckedServers = value;
+                Boolean update = _saveCheckedNodes != value;
+                _saveCheckedNodes = value;
 
                 if (update)
                 {
@@ -342,29 +407,40 @@ namespace MSM.Service
                 }
             }
         }
-        [XmlIgnore] private Boolean _saveCheckedServers = true;
+        [XmlIgnore] private Boolean _saveCheckedNodes = true;
+
+        [Category("Servers"), DisplayName("Server && node list"), TypeConverter(typeof(ExpandableObjectConverter))]
+        public Node Node
+        {
+            get => _node;
+            set
+            {
+                _node = value;
+                Settings.Flush();
+            }
+        }
+        [XmlIgnore] private Node _node = new Node();
 
         [Browsable(false)]
-        public HashSet<String> CheckedNodes = new HashSet<String>(StringComparer.Ordinal);
-
-        [Category("Nodes"), DisplayName("Node list")]
-        public CollectionConverter<Node> Nodes
+        public Int32 ServerListWidth
         {
-            get
+            get => _serverListWidth;
+            set
             {
-                if (!_nodeList.AddedOrRemovedSet())
+                Boolean update = _serverListWidth != value;
+                _serverListWidth = value;
+
+                if (update)
                 {
-                    _nodeList.AddedOrRemoved += Settings.Flush;
-                    _nodeList.AddedOrRemoved += Settings.FireOnSettingsServerUpdatedEvent;
+                    Settings.Flush();
                 }
-                return _nodeList;
             }
-            set => _nodeList = value;
         }
-        [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
+        [XmlIgnore] private Int32 _serverListWidth = 250;
     }
     [Serializable]
-    public class Node
+    [TypeConverter(typeof(ExpandableObjectConverter))]
+    public class Node : ExpandableObjectConverter
     {
         public override String ToString()
         {
@@ -392,7 +468,7 @@ namespace MSM.Service
         [XmlIgnore] private String _nodeName = "/";
 
         [Category("Node"), DisplayName("Node list")]
-        public CollectionConverter<Node> Nodes
+        public CollectionConverter<Node> NodeList
         {
             get
             {
@@ -422,6 +498,23 @@ namespace MSM.Service
             set => _serverList = value;
         }
         [XmlIgnore] private CollectionConverter<Server> _serverList = new CollectionConverter<Server>();
+
+        [Browsable(false)]
+        public Boolean Checked
+        {
+            get => _checked;
+            set
+            {
+                Boolean update = _checked != value;
+                _checked = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _checked;
     }
     [Serializable]
     public class Server
@@ -562,5 +655,22 @@ namespace MSM.Service
             set => _variables = value;
         }
         [XmlIgnore] private BasicPropertyBag _variables = new BasicPropertyBag();
+
+        [Browsable(false)]
+        public Boolean Checked
+        {
+            get => _checked;
+            set
+            {
+                Boolean update = _checked != value;
+                _checked = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _checked;
     }
 }

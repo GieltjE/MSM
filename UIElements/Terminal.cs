@@ -27,12 +27,10 @@ namespace MSM.UIElements
 {
     public partial class Terminal : UserControlOptimized
     {
-        internal AppControl terminalControl;
-        private String _nodeID;
-        private Server _server;
-        public Terminal(String nodeID, Server server)
+        internal AppControl TerminalControl;
+        private readonly Server _server;
+        public Terminal(Server server)
         {
-            _nodeID = nodeID;
             _server = server;
         }
 
@@ -40,10 +38,12 @@ namespace MSM.UIElements
         {
             base.OnHandleCreated(e);
 
+            //-ssh -P 222 -load "Default Settings"  -l root prolis.fyn.nl
             List<String> parameters = new List<String>
             {
                 "-ssh",
-                "-P " + _server.Port.ToString(CultureInfo.InvariantCulture)
+                "-P " + _server.Port.ToString(CultureInfo.InvariantCulture),
+                "-load \"Default Settings\"",
             };
             if (!String.IsNullOrWhiteSpace(Service.Settings.Values.PuttyExtraParamaters))
             {
@@ -55,15 +55,12 @@ namespace MSM.UIElements
             }
             if (!String.IsNullOrEmpty(_server.Username))
             {
-                parameters.Add("-l " + _server.Username + "@" + _server.Hostname);
+                parameters.Add("-l " + _server.Username);
             }
-            else
-            {
-                parameters.Add(_server.Hostname);
-            }
+            parameters.Add(_server.Hostname);
 
-            terminalControl = new AppControl(Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
-            Controls.Add(terminalControl);
+            TerminalControl = new AppControl(Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+            Controls.Add(TerminalControl);
         }
     }
 }
