@@ -635,26 +635,27 @@ namespace MSM.Service
 
                 if (update)
                 {
+                    KeywordsHashed.Clear();
+                    foreach (String keyword in _keywords)
+                    {
+                        KeywordsHashed.Add(keyword);
+                    }
                     Settings.Flush();
                 }
             }
         }
         [XmlIgnore] private String[] _keywords = new String[0];
+        [XmlIgnore] public HashSet<String> KeywordsHashed = new HashSet<String>(StringComparer.Ordinal);
 
         [Browsable(false)]
         public Variable[] Variables
         {
-            get => _variables.Properties;
-            set => _variables.Properties = value;
+            get => VariablesInternal.Properties;
+            set => VariablesInternal.Properties = value;
         }
 
         [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
-        public BasicPropertyBag VariablesInternal
-        {
-            get => _variables;
-            set => _variables = value;
-        }
-        [XmlIgnore] private BasicPropertyBag _variables = new BasicPropertyBag();
+        public BasicPropertyBag VariablesInternal { get; set; }
 
         [Browsable(false)]
         public Boolean Checked

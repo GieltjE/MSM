@@ -224,14 +224,13 @@ namespace MSM.Extends
             return "(variables)";
         }
 
-        private readonly Dictionary<String, Object> _values = new Dictionary<String, Object>();
-
+        public readonly Dictionary<String, String> Values = new Dictionary<String, String>(StringComparer.Ordinal);
         public Variable[] Properties
         {
             get
             {
                 List<Variable> toReturn = new List<Variable>();
-                foreach (KeyValuePair<String, Object> keyValuePair in _values)
+                foreach (KeyValuePair<String, String> keyValuePair in Values)
                 {
                     if (keyValuePair.Value != null && !String.IsNullOrWhiteSpace((String)keyValuePair.Value))
                     {
@@ -242,17 +241,17 @@ namespace MSM.Extends
             }
             set
             {
-                _values.Clear();
+                Values.Clear();
                 foreach (Variable variable in value)
                 {
-                    _values.Add(variable.Key, variable.Value);
+                    Values.Add(variable.Key, variable.Value);
                 }
             }
         }
         public Object this[String key]
         {
-            get => _values.TryGetValue(key, out Object value) ? value : null;
-            set { if (value == null) _values.Remove(key); else _values[key] = value; }
+            get => Values.TryGetValue(key, out String value) ? value : null;
+            set { if (value == null) Values.Remove(key); else Values[key] = (String)value; }
         }
     }
     public class BasicPropertyBagConverter : ExpandableObjectConverter

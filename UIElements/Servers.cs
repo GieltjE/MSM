@@ -169,7 +169,6 @@ namespace MSM.UIElements
                 node.Checked = e.Node.Checked;
             }
         }
-
         private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
         {
             if (Treeview_NodesAndServers.SelectedNode == null || Treeview_NodesAndServers.SelectedNode.ImageIndex != 1) return;
