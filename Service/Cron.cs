@@ -32,14 +32,14 @@ using Quartz.Util;
 
 namespace MSM.Service
 {
-    public class Cron
+    public static class Cron
     {
-        internal Cron()
+        static Cron()
         {
             Events.ShutDownFired += ShutDown;
             Run();
         }
-        private async void Run()
+        private static async void Run()
         {
             NameValueCollection properties = new NameValueCollection
             {
@@ -53,29 +53,29 @@ namespace MSM.Service
             Scheduler.ListenerManager.AddJobListener(new ExceptionOccuredJobListener(), GroupMatcher<JobKey>.AnyGroup());
             await Scheduler.Start();
         }
-        internal async void ShutDown()
+        internal static async void ShutDown()
         {
             await Scheduler.Shutdown(false);
         }
-        internal IScheduler Scheduler;
+        internal static IScheduler Scheduler;
 
         // Prevent concurrent _scheduler operations so we don't crash
-        private readonly SemaphoreSlim _schedulerSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim SchedulerSemaphore = new SemaphoreSlim(1, 1);
 
         // 0/5 means 0, 5, 10, .. 1/5 means 1, 6, 11 .. 2/5 means 2, 7, 12
         // http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger
-        public async void CreateJob<T>(String second, String minute, String hour, String dayOfMonth = "*", Enumerations.CronMonth month = Enumerations.CronMonth.All, Enumerations.CronDayOfTheWeek dayOfweek = Enumerations.CronDayOfTheWeek.All, String year = "*", Boolean immediatlyFireAfterMisfire = true) where T : IJob
+        public static async void CreateJob<T>(String second, String minute, String hour, String dayOfMonth = "*", Enumerations.CronMonth month = Enumerations.CronMonth.All, Enumerations.CronDayOfTheWeek dayOfweek = Enumerations.CronDayOfTheWeek.All, String year = "*", Boolean immediatlyFireAfterMisfire = true) where T : IJob
         {
             if (Scheduler.IsShutdown) return;
 
-            await _schedulerSemaphore.WaitAsync();
+            await SchedulerSemaphore.WaitAsync();
 
             String name = typeof(T).Namespace + typeof(T).Name;
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (hasJob.Result)
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
                 return;
             }
 
@@ -113,21 +113,21 @@ namespace MSM.Service
             }
             finally
             {
-                _schedulerSemaphore.Release(1);
+                SchedulerSemaphore.Release(1);
             }
         }
-        public async void CreateJob<T>(Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately, Boolean refireImmediately = true) where T : IJob
+        public static async void CreateJob<T>(Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately, Boolean refireImmediately = true) where T : IJob
         {
             if (Scheduler.IsShutdown) return;
 
-            await _schedulerSemaphore.WaitAsync();
+            await SchedulerSemaphore.WaitAsync();
 
             String name = typeof(T).Namespace + typeof(T).Name;
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (hasJob.Result)
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
                 return;
             }
 
@@ -156,21 +156,21 @@ namespace MSM.Service
             }
             finally
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
             }
         }
-        public async void TriggerJob<T>()
+        public static async void TriggerJob<T>()
         {
             if (Scheduler.IsShutdown) return;
 
-            await _schedulerSemaphore.WaitAsync();
+            await SchedulerSemaphore.WaitAsync();
 
             String name = typeof(T).Namespace + typeof(T).Name;
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (!hasJob.Result)
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
                 return;
             }
 
@@ -184,14 +184,14 @@ namespace MSM.Service
             }
             finally
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
             }
         }
-        public async void RemoveJob<T>()
+        public static async void RemoveJob<T>()
         {
             if (Scheduler.IsShutdown) return;
 
-            await _schedulerSemaphore.WaitAsync();
+            await SchedulerSemaphore.WaitAsync();
 
             try
             {
@@ -205,14 +205,14 @@ namespace MSM.Service
             catch {}
             finally
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
             }
         }
-        public Boolean IsRunning<T>()
+        public static Boolean IsRunning<T>()
         {
             if (Scheduler.IsShutdown) return false;
 
-            _schedulerSemaphore.WaitAsync();
+            SchedulerSemaphore.WaitAsync();
 
             try
             {
@@ -229,22 +229,22 @@ namespace MSM.Service
             catch {}
             finally
             {
-                _schedulerSemaphore.Release();
+                SchedulerSemaphore.Release();
             }
 
             return false;
         }
-        public Task<Boolean> HasJob<T>()
+        public static Task<Boolean> HasJob<T>()
         {
             return HasJob(typeof(T).Namespace + typeof(T).Name);
         }
-        private async Task<Boolean> HasJob(String triggerIdentity, Boolean performLock = true)
+        private static async Task<Boolean> HasJob(String triggerIdentity, Boolean performLock = true)
         {
             if (Scheduler.IsShutdown) return false;
 
             if (performLock)
             {
-                await _schedulerSemaphore.WaitAsync();
+                await SchedulerSemaphore.WaitAsync();
             }
 
             try
@@ -261,7 +261,7 @@ namespace MSM.Service
             {
                 if (performLock)
                 {
-                    _schedulerSemaphore.Release();
+                    SchedulerSemaphore.Release();
                 }
             }
 
