@@ -16,10 +16,8 @@ namespace MSM.Extends
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            using (SolidBrush b = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background))
-            {
-                e.Graphics.FillRectangle(b, DisplayRectangle);
-            }
+            using SolidBrush b = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+            e.Graphics.FillRectangle(b, DisplayRectangle);
         }
     }
 }

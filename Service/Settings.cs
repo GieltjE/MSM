@@ -132,11 +132,9 @@ namespace MSM.Service
             {
                 UpdateNodesAndServers();
 
-                using (StreamWriter writer = new StreamWriter(SettingsFile))
-                {
-                    XMLSerializer.Serialize(writer, Values);
-                    writer.Flush();
-                }
+                using StreamWriter writer = new StreamWriter(SettingsFile);
+                XMLSerializer.Serialize(writer, Values);
+                writer.Flush();
             }
 
             OnSettingsUpdatedEvent?.Invoke();

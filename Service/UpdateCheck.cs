@@ -42,45 +42,43 @@ namespace MSM.Service
         {
             try
             {
-                using (WebClientOptimized webClient = new WebClientOptimized(10, false, false))
+                using WebClientOptimized webClient = new WebClientOptimized(10, false, false);
+                String result;
+                try
                 {
-                    String result;
-                    try
+                    result = webClient.DownloadString("https://api.github.com/repos/GieltjE/MSM/releases/latest");
+                }
+                catch (WebException exception)
+                {
+                    if (exception.Status == WebExceptionStatus.ProtocolError)
                     {
-                        result = webClient.DownloadString("https://api.github.com/repos/GieltjE/MSM/releases/latest");
-                    }
-                    catch (WebException exception)
-                    {
-                        if (exception.Status == WebExceptionStatus.ProtocolError)
+                        if (exception.Response is HttpWebResponse response)
                         {
-                            if (exception.Response is HttpWebResponse response)
+                            if ((Int32)response.StatusCode == 404)
                             {
-                                if ((Int32)response.StatusCode == 404)
-                                {
-                                    return;
-                                }
+                                return;
                             }
                         }
-
-                        UI.ShowMessage(Variables.MainForm, "Could not perform update check!", "Update check", MessageBoxIcon.Asterisk);
-                        return;
                     }
+
+                    UI.ShowMessage(Variables.MainForm, "Could not perform update check!", "Update check", MessageBoxIcon.Asterisk);
+                    return;
+                }
                     
-                    ReleaseInformation resultDeserialized = Statics.NewtonsoftJsonSerializer.Deserialize<ReleaseInformation>(result);
-                    FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(FileOperations.GetCurrentExecutable());
-                    Version currentVersion = Version.Parse(fileVersionInfo.FileVersion);
+                ReleaseInformation resultDeserialized = Statics.NewtonsoftJsonSerializer.Deserialize<ReleaseInformation>(result);
+                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(FileOperations.GetCurrentExecutable());
+                Version currentVersion = Version.Parse(fileVersionInfo.FileVersion);
 
-                    if (resultDeserialized.tag_name > currentVersion)
-                    {
-                        UI.ShowMessage(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available!", "Update check", MessageBoxIcon.Asterisk);
-                    }
+                if (resultDeserialized.tag_name > currentVersion)
+                {
+                    UI.ShowMessage(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available!", "Update check", MessageBoxIcon.Asterisk);
+                }
 #if !DEBUG
                     else if(resultDeserialized.tag_name < currentVersion)
                     {
                         UI.ShowMessage(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
                     }
 #endif
-                }
             }
             catch (Exception exception)
             {

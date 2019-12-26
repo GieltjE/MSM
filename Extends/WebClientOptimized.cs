@@ -54,34 +54,28 @@ namespace MSM.Extends
             req.SendChunked = false;
             req.ContentLength = 0;
 
-            using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+            using HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            // Both UTF-8 and utf-8 are received from time to time
+            if (String.Equals(resp.CharacterSet, "UTF-8", StringComparison.OrdinalIgnoreCase))
             {
-                // Both UTF-8 and utf-8 are received from time to time
-                if (String.Equals(resp.CharacterSet, "UTF-8", StringComparison.OrdinalIgnoreCase))
-                {
-                    // ReSharper disable once AssignNullToNotNullAttribute
-                    using (StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8, true))
-                    {
-                        // Trim ending newlines, some scripts rely on this! (cd.php etc)
-                        return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
-                    }
-                }
-
-                // Works for at least resp.CharacterSet == ISO-8859-1
-                if (String.Equals(resp.CharacterSet, "ISO-8859-1", StringComparison.OrdinalIgnoreCase))
-                {
-                    // ReSharper disable once AssignNullToNotNullAttribute
-                    using (StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.Default, true))
-                    {
-                        return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
-                    }
-                }
-
                 // ReSharper disable once AssignNullToNotNullAttribute
-                using (StreamReader streamReader = new StreamReader(resp.GetResponseStream(), EncodingIfNoTDetected, true))
-                {
-                    return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
-                }
+                using StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8, true);
+                // Trim ending newlines, some scripts rely on this! (cd.php etc)
+                return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
+            }
+
+            // Works for at least resp.CharacterSet == ISO-8859-1
+            if (String.Equals(resp.CharacterSet, "ISO-8859-1", StringComparison.OrdinalIgnoreCase))
+            {
+                // ReSharper disable once AssignNullToNotNullAttribute
+                using StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.Default, true);
+                return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
+            }
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            using (StreamReader streamReader = new StreamReader(resp.GetResponseStream(), EncodingIfNoTDetected, true))
+            {
+                return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
             }
         }
         public new String DownloadString(String uri)
