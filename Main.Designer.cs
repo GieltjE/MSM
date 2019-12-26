@@ -1,5 +1,5 @@
 using MSM.Extends;
-using WeifenLuo.WinFormsUI.Docking;
+using MSM.Extends.Themes;
 
 namespace MSM
 {
@@ -42,7 +42,8 @@ namespace MSM
             this.SuspendLayout();
             // 
             // DockPanel_Main
-            // 
+            //
+            this.DockPanel_Main.Theme = new MaterialDarkTheme();
             this.DockPanel_Main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DockPanel_Main.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
             this.DockPanel_Main.Location = new System.Drawing.Point(0, 25);

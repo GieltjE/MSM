@@ -22,7 +22,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
-using MSM.Extends.Themes;
 using MSM.Functions;
 using MSM.Service;
 using MSM.UIElements;
@@ -44,8 +43,6 @@ namespace MSM
         public Main()
         {
             InitializeComponent();
-
-            DockPanel_Main.Theme = new MaterialDarkTheme();
 
             Variables.MainForm = this;
             Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
@@ -72,11 +69,11 @@ namespace MSM
             NotifyIcon.DoubleClick += TrayIconDoubleClick;
             NotifyIcon.BalloonTipClicked += TrayIconStripOpenClick;
 
-            _trayIconStripOpen.Text = "Open";
+            _trayIconStripOpen.Text = @"Open";
             _trayIconStripOpen.DisplayStyle = ToolStripItemDisplayStyle.Text;
             _trayIconStripOpen.Click += TrayIconStripOpenClick;
 
-            _trayIconStripExit.Text = "Close";
+            _trayIconStripExit.Text = @"Close";
             _trayIconStripExit.DisplayStyle = ToolStripItemDisplayStyle.Text;
             _trayIconStripExit.Click += TrayIconStripExitClick;
 
