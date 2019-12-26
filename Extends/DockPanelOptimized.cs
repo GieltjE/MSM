@@ -10,6 +10,9 @@ namespace MSM.Extends
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
+            BorderStyle = BorderStyle.None;
+            Padding = new Padding(0);
+
             if (!DesignMode && Variables.ColorPalette != null)
             {
                 // ReSharper disable once RedundantBaseQualifier

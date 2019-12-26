@@ -12,12 +12,10 @@ namespace MSM.Extends
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
             FormBorderStyle = FormBorderStyle.None;
+            Padding = new Padding(0);
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            using SolidBrush b = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
-            e.Graphics.FillRectangle(b, DisplayRectangle);
-        }
+        private readonly SolidBrush brush = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+        protected override void OnPaintBackground(PaintEventArgs e) => e.Graphics.FillRectangle(brush, DisplayRectangle);
     }
 }

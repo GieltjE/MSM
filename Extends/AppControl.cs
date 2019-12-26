@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 using MSM.Data;
 using MSM.Functions;
 
@@ -47,6 +48,8 @@ namespace MSM.Extends
                     _parameters = arguments.Aggregate("", (current, argument) => current + " " + argument).Trim();
                 }
             }
+
+            Padding = new Padding(0);
 
             SizeChanged += OnSizeChanged;
         }

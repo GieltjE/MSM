@@ -32,6 +32,9 @@ namespace MSM.UIElements
         public Terminal(Server server)
         {
             _server = server;
+
+            BorderStyle = BorderStyle.None;
+            Padding = new Padding(0);
         }
         ~Terminal()
         {
