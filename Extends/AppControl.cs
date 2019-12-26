@@ -149,6 +149,8 @@ namespace MSM.Extends
                     style &= ~((Int32)NativeMethods.WindowStyles.WS_BORDER | (Int32)NativeMethods.WindowStyles.WS_THICKFRAME);
                     windowStyle = new IntPtr(style);
                 }
+
+                // Attach handle to our form and apply the window style
                 NativeMethods.SetWindowLongPtr(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
 
                 OnSizeChanged(null, null);

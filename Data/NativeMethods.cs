@@ -46,21 +46,13 @@ namespace MSM.Data
         private static extern Int32 GetWindowLong(IntPtr hWnd, Int32 nIndex);
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
         private static extern IntPtr GetWindowLong64(IntPtr hWnd, Int32 nIndex);
-
-        public static IntPtr GetWindowLongPtr(IntPtr hWnd, Int32 nIndex)
-        {
-            return IntPtr.Size == 8 ? GetWindowLong64(hWnd, nIndex) : new IntPtr(GetWindowLong(hWnd, nIndex));
-        }
+        public static IntPtr GetWindowLongPtr(IntPtr hWnd, Int32 nIndex) => IntPtr.Size == 8 ? GetWindowLong64(hWnd, nIndex) : new IntPtr(GetWindowLong(hWnd, nIndex));
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
-        private static extern int SetWindowLong32(HandleRef hWnd, int nIndex, int dwNewLong);
+        private static extern Int32 SetWindowLong32(HandleRef hWnd, Int32 nIndex, Int32 dwNewLong);
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
-        private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, int nIndex, IntPtr dwNewLong);
-
-        public static IntPtr SetWindowLongPtr(HandleRef hWnd, int nIndex, IntPtr dwNewLong)
-        {
-            return IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
-        }
+        private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong);
+        public static IntPtr SetWindowLongPtr(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong) => IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
 
         public enum GWL : SByte
         {
@@ -115,8 +107,6 @@ namespace MSM.Data
             WS_EX_ACCEPTFILES = 0x00000010,
             WS_EX_TRANSPARENT = 0x00000020,
 
-            //#if(WINVER >= 0x0400)
-
             WS_EX_MDICHILD = 0x00000040,
             WS_EX_TOOLWINDOW = 0x00000080,
             WS_EX_WINDOWEDGE = 0x00000100,
@@ -137,27 +127,12 @@ namespace MSM.Data
             WS_EX_OVERLAPPEDWINDOW = WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE,
             WS_EX_PALETTEWINDOW = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
 
-            //#endif /* WINVER >= 0x0400 */
-
-            //#if(WIN32WINNT >= 0x0500)
-
             WS_EX_LAYERED = 0x00080000,
-
-            //#endif /* WIN32WINNT >= 0x0500 */
-
-            //#if(WINVER >= 0x0500)
 
             WS_EX_NOINHERITLAYOUT = 0x00100000, // Disable inheritence of mirroring by children
             WS_EX_LAYOUTRTL = 0x00400000, // Right to left mirroring
-
-            //#endif /* WINVER >= 0x0500 */
-
-            //#if(WIN32WINNT >= 0x0500)
-
             WS_EX_COMPOSITED = 0x02000000,
             WS_EX_NOACTIVATE = 0x08000000
-
-            //#endif /* WIN32WINNT >= 0x0500 */
         }
 
         public enum ShowWindowCommands : Byte
