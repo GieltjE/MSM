@@ -111,6 +111,37 @@ namespace MSM.Functions
 
             return inputArray.All(input => compareToArray.Contains(input, StringComparer.Ordinal));
         }
+        public static String Replace(this String source, String oldString, String newString, StringComparison stringComparison)
+        {
+            List<Int32> indexes = source.GetAllIndexes(oldString, stringComparison, false);
+            indexes.Reverse();
+            foreach (Int32 index in indexes)
+            {
+                source = source.Remove(index, oldString.Length).Insert(index, newString);
+            }
+            return source;
+        }
+        public static List<Int32> GetAllIndexes(this String input, String search, StringComparison comparison = StringComparison.Ordinal, Boolean allowOverlap = true)
+        {
+            List<Int32> indexes = new();
+
+            Int32 lastIndex = 0;
+            while (true)
+            {
+                lastIndex = input.IndexOf(search, lastIndex, comparison);
+                if (lastIndex == -1) return indexes;
+
+                indexes.Add(lastIndex);
+                if (!allowOverlap)
+                {
+                    lastIndex += search.Length;
+                }
+                else
+                {
+                    lastIndex++;
+                }
+            }
+        }
 
         public delegate void CustomDelegate();
         public delegate void CustomDelegate<in TEventArgs>(TEventArgs t);

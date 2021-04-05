@@ -46,8 +46,43 @@ namespace MSM
 
         public Main()
         {
-            InitializeComponent();
+            String[] commandLineArguements = Environment.GetCommandLineArgs();
+            if (commandLineArguements.Contains("--update", StringComparer.Ordinal))
+            {
+                String parentDirectory = Path.Combine(FileOperations.GetRunningDirectory(), "..");
+                List<String> files = FileOperations.ReturnFiles(parentDirectory, false, includedExtensions: new[] { ".dll", ".exe", ".pdb", ".xml", ".config", ".md" });
+                foreach (String file in files)
+                {
+                    FileOperations.DeleteFile(file);
+                }
 
+                files = FileOperations.ReturnFiles(FileOperations.GetRunningDirectory(), false);
+                foreach (String file in files)
+                {
+                    FileOperations.CopyFile(file, Path.Combine(parentDirectory, Path.GetFileName(file)), true);
+                }
+
+                ProcessStartInfo procInfo = new(Path.Combine(parentDirectory, Path.GetFileName(FileOperations.GetCurrentExecutable())))
+                {
+                    WorkingDirectory = parentDirectory,
+                    Arguments = "--updated",
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Maximized,
+                    UseShellExecute = false
+                };
+                Process.Start(procInfo);
+                Environment.Exit(1002);
+            }
+            else if (commandLineArguements.Contains("--updated"))
+            {
+                String updateDirectory = Path.Combine(FileOperations.GetRunningDirectory(), "update");
+                while (FileOperations.DeleteDirectory(updateDirectory, true).Any())
+                {
+                    Thread.Sleep(5000);
+                }
+            }
+
+            InitializeComponent();
             Variables.MainForm = this;
 
             if (Settings.Values.CheckForUpdates)

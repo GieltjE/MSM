@@ -157,11 +157,16 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="app.manifest" />
-    <None Include="LICENSE">
+    <None Include="LICENSE.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="MSM.pfx" />
-    <None Include="README.md" />
+    <None Include="README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DockPanelSuite">
@@ -175,6 +180,9 @@
     </PackageReference>
     <PackageReference Include="Quartz">
       <Version>3.2.4</Version>
+    </PackageReference>
+    <PackageReference Include="SharpZipLib">
+      <Version>1.3.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

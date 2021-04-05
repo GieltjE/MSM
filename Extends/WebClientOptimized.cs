@@ -19,9 +19,11 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Cache;
 using System.Text;
+using MSM.Functions;
 
 namespace MSM.Extends
 {
@@ -29,18 +31,16 @@ namespace MSM.Extends
     {
         private readonly CookieContainer _cookieContainer = new();
         private readonly Int32 _timeout;
-        private Boolean _preauth;
         private readonly Boolean _useCookieContainer;
-        public Encoding EncodingIfNoTDetected = Encoding.UTF8;
+        public static Encoding EncodingIfNoTDetected = Encoding.UTF8;
         public Boolean AllowAutoRedirects = true;
-        private readonly Boolean _keepAlive;
+        public Boolean AllowDownloadAutoRedirects = true;
 
-        public WebClientOptimized(Int32 timeout = 30, Boolean useCookieContainer = true, Boolean keepAlive = true)
+        public WebClientOptimized(Int32 timeout = 30, Boolean useCookieContainer = true)
         {
             CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
             _timeout = timeout;
             _useCookieContainer = useCookieContainer;
-            _keepAlive = keepAlive;
         }
 
         public new String DownloadString(Uri uri)
@@ -51,7 +51,6 @@ namespace MSM.Extends
             {
                 return "";
             }
-
             req.SendChunked = false;
             req.ContentLength = 0;
 
@@ -83,6 +82,73 @@ namespace MSM.Extends
         {
             return DownloadString(new Uri(uri));
         }
+        public new void DownloadFile(Uri uri, String file)
+        {
+            // Ensure that the downloaded data is flushed, else if the next bit of code is to fast it doesn't always receive all data.....
+            using MemoryStream memoryStream = new();
+            WebRequest webRequest = GetWebRequest(uri);
+
+            using (WebResponse webResponse = webRequest.GetResponse())
+            {
+                if (!AllowDownloadAutoRedirects &&
+                    (((HttpWebResponse)webResponse).StatusCode == HttpStatusCode.Redirect ||
+                     ((HttpWebResponse)webResponse).StatusCode == HttpStatusCode.RedirectKeepVerb ||
+                     ((HttpWebResponse)webResponse).StatusCode == HttpStatusCode.RedirectMethod ||
+                     ((HttpWebResponse)webResponse).StatusCode == HttpStatusCode.TemporaryRedirect))
+                {
+                    return;
+                }
+
+                using Stream webStream = webResponse.GetResponseStream();
+                webStream.CopyTo(memoryStream);
+            }
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            FileOperations.CreateFile(file);
+            try
+            {
+                using FileStreamOptimized fileStream = new(file, FileMode.Truncate);
+                memoryStream.CopyTo(fileStream);
+            }
+            catch
+            {
+                FileOperations.DeleteFile(file);
+                throw;
+            }
+            FileOperations.Unblock(file);
+        }
+        public new void DownloadFile(String uri, String file)
+        {
+            DownloadFile(new Uri(uri), file);
+        }
+        private String _file;
+        public new void DownloadFileAsync(Uri address, String fileName)
+        {
+            _file = fileName;
+            base.DownloadFileAsync(address, fileName);
+        }
+        public new void DownloadFileAsync(Uri address, String fileName, Object userToken)
+        {
+            _file = fileName;
+            base.DownloadFileAsync(address, fileName, userToken);
+        }
+        public new Byte[] DownloadData(String url)
+        {
+            try
+            {
+                return base.DownloadData(url);
+            }
+            catch (WebException webException)
+            {
+                if (webException.Response is not HttpWebResponse response || (Int32)response.StatusCode != 308) throw;
+
+                if (webException.Response.Headers.AllKeys.Any(headerKey => String.Equals("Location", headerKey, StringComparison.Ordinal)))
+                {
+                    return DownloadData(webException.Response.Headers["Location"]);
+                }
+                throw;
+            }
+        }
 
         protected override void OnDownloadDataCompleted(DownloadDataCompletedEventArgs e)
         {
@@ -96,6 +162,12 @@ namespace MSM.Extends
         }
         protected override void OnDownloadFileCompleted(AsyncCompletedEventArgs e)
         {
+            if (_file != null)
+            {
+                FileOperations.Unblock(_file);
+            }
+
+            _file = null;
             base.OnDownloadFileCompleted(e);
             SetHeaders();
         }
@@ -132,56 +204,46 @@ namespace MSM.Extends
 
         private void SetHeaders()
         {
-            SetHeader(HttpRequestHeader.UserAgent, "MSM");
             SetHeader(HttpRequestHeader.CacheControl, "no-cache");
             SetHeader(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            SetHeader(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
         }
+
         private void SetHeader(HttpRequestHeader header, String value)
         {
             try
             {
                 Headers[header] = value;
             }
-            catch (Exception)
+            catch
             {
                 try
                 {
                     Headers.Set(header, value);
                 }
-                catch {}
+                // ReSharper disable once EmptyGeneralCatchClause
+                catch { }
             }
-        }
-        public void AddCredentials(String username, String password)
-        {
-            // Just perform a basic authentication for other sites
-            Headers.Set(HttpRequestHeader.Authorization, "Basic " + Convert.ToBase64String(new UTF8Encoding().GetBytes((username + ":" + password).ToCharArray())));
-            Credentials = new NetworkCredential(username, password);
-            _preauth = true;
-        }
-        public void RemoveCredentials()
-        {
-            Headers.Remove(HttpRequestHeader.Authorization);
-            Credentials = null;
-            _preauth = false;
         }
 
         protected override WebRequest GetWebRequest(Uri address)
         {
             SetHeaders();
             HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
-
             if (request == null) return null;
+
+            request.Credentials = Credentials;
+            request.KeepAlive = false;
 
             if (_useCookieContainer)
             {
                 request.CookieContainer = _cookieContainer;
             }
 
-            request.KeepAlive = _keepAlive;
-            request.PreAuthenticate = _preauth;
             request.Timeout = _timeout * 1000;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.AllowAutoRedirect = AllowAutoRedirects;
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0";
             return request;
         }
     }

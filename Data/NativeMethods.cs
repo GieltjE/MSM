@@ -54,6 +54,10 @@ namespace MSM.Data
         private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong);
         public static IntPtr SetWindowLongPtr(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong) => IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
 
+        [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern Boolean DeleteFile(String name);
+
         public enum GWL : SByte
         {
             GWL_WNDPROC = -4,

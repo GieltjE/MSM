@@ -17,10 +17,15 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ICSharpCode.SharpZipLib.Zip;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Functions;
@@ -43,7 +48,7 @@ namespace MSM.Service
         {
             try
             {
-                using WebClientOptimized webClient = new(10, false, false);
+                using WebClientOptimized webClient = new(10, false);
                 String result;
                 try
                 {
@@ -69,10 +74,40 @@ namespace MSM.Service
                 ReleaseInformation resultDeserialized = Statics.NewtonsoftJsonSerializer.Deserialize<ReleaseInformation>(result);
                 FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(FileOperations.GetCurrentExecutable());
                 Version currentVersion = Version.Parse(fileVersionInfo.FileVersion);
+                Asset asset = resultDeserialized.assets.FirstOrDefault(x => x.browser_download_url.EndsWith(".zip", StringComparison.Ordinal));
 
-                if (resultDeserialized.tag_name > currentVersion)
+                if (resultDeserialized.tag_name > currentVersion && asset != null)
                 {
-                    UI.ShowMessage(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available!", "Update check", MessageBoxIcon.Asterisk);
+                    String updateDirectory = Path.Combine(FileOperations.GetRunningDirectory(), "update");
+
+                    if (Directory.Exists(updateDirectory))
+                    {
+                        while (FileOperations.DeleteDirectory(updateDirectory, true).Any())
+                        {
+                            Thread.Sleep(500);
+                        }
+                    }
+
+                    if (UI.AskQuestion(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available, would you like to upgrade?", "Upgrade available", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        if (FileOperations.CreateDirectory(updateDirectory))
+                        {
+                            MemoryStream stream = new(webClient.DownloadData(resultDeserialized.assets[0].browser_download_url));
+                            FastZip fastZip = new();
+                            fastZip.ExtractZip(stream, updateDirectory, FastZip.Overwrite.Always, null, null, null, true, true);
+
+                            ProcessStartInfo procInfo = new(Path.Combine(updateDirectory, Path.GetFileName(FileOperations.GetCurrentExecutable())))
+                            {
+                                WorkingDirectory = updateDirectory,
+                                Arguments = "--update",
+                                CreateNoWindow = true,
+                                WindowStyle = ProcessWindowStyle.Maximized,
+                                UseShellExecute = false
+                            };
+                            Process.Start(procInfo);
+                            Environment.Exit(1001);
+                        }
+                    }
                 }
 #if !DEBUG
                 else if(resultDeserialized.tag_name < currentVersion)
@@ -86,54 +121,24 @@ namespace MSM.Service
                 Logging.LogErrorItem(exception);
             }
         }
+
     }
 
 #pragma warning disable IDE1006 // Naming Styles
     // ReSharper disable InconsistentNaming
-    public class Author
-    {
-        public String login { get; set; }
-        public Int32 id { get; set; }
-        public String avatar_url { get; set; }
-        public String gravatar_id { get; set; }
-        public String url { get; set; }
-        public String html_url { get; set; }
-        public String followers_url { get; set; }
-        public String following_url { get; set; }
-        public String gists_url { get; set; }
-        public String starred_url { get; set; }
-        public String subscriptions_url { get; set; }
-        public String organizations_url { get; set; }
-        public String repos_url { get; set; }
-        public String events_url { get; set; }
-        public String received_events_url { get; set; }
-        public String type { get; set; }
-        public Boolean site_admin { get; set; }
-    }
     public class ReleaseInformation
     {
-        public String url { get; set; }
-        public String assets_url { get; set; }
-        public String upload_url { get; set; }
-        public String html_url { get; set; }
-        public Int32 id { get; set; }
         public Version tag_name { get; set; }
-        public String target_commitish { get; set; }
-        public String name { get; set; }
-        public Boolean draft { get; set; }
-        public Author author { get; set; }
-        public Boolean prerelease { get; set; }
-        public DateTime created_at { get; set; }
-        public DateTime published_at { get; set; }
-        public Object[] assets { get; set; }
-        public String tarball_url { get; set; }
-        public String zipball_url { get; set; }
-        public String body { get; set; }
+        public Asset[] assets { get; set; }
+    }
+    public class Asset
+    {
+        public String browser_download_url { get; set; }
     }
     // ReSharper restore InconsistentNaming
 #pragma warning restore IDE1006 // Naming Styles
 
-    [DisallowConcurrentExecution]
+    [DisallowConcurrentExecution, ResetTimerAfterRunCompletes]
     internal class UpdateCheckJob : IJob
     {
         public virtual Task Execute(IJobExecutionContext context)

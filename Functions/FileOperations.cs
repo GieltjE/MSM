@@ -19,11 +19,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using MSM.Data;
 using MSM.Extends;
 
 namespace MSM.Functions
@@ -184,6 +188,7 @@ namespace MSM.Functions
                     }
                 }
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch {}
 
             try
@@ -233,10 +238,8 @@ namespace MSM.Functions
                     }
                 }
 
-                using (FileStreamOptimized testFile = new(fullDirectoryPathAndFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
-                {
-                    testFile.Flush(true);
-                }
+                using FileStreamOptimized testFile = new(fullDirectoryPathAndFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
+                testFile.Flush(true);
 
                 return true;
             }
@@ -268,74 +271,11 @@ namespace MSM.Functions
                 return false;
             }
         }
-
-        public static void RotateFile(String fileName, Int32 maxFiles)
+        
+        public static Boolean Unblock(String fileName)
         {
-            if (!File.Exists(fileName)) return;
-
-            if (File.Exists(fileName + "." + maxFiles))
-            {
-                DeleteFile(fileName + "." + maxFiles);
-            }
-
-            for (Int32 i = maxFiles; i-- > 0;)
-            {
-                if (i > 0)
-                {
-                    if (File.Exists(fileName + "." + i))
-                    {
-                        MoveFile(fileName + "." + i, fileName + "." + (i + 1));
-                    }
-                }
-                else
-                {
-                    if (!File.Exists(fileName)) continue;
-
-                    Boolean success = true;
-                    if (File.Exists(GetRunningDirectory() + @"\7z.exe"))
-                    {
-                        ProcessStartInfo processStartInfo = new() {
-                            FileName = GetRunningDirectory() + @"\7z.exe",
-                            // PPMd is a good raw text compressor, mx9 is maximum compression
-                            Arguments = " a -t7z \"" + fileName + ".1\" \"" + fileName + "\" -m0=PPMd -mx9 -mmt=" + Environment.ProcessorCount,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        };
-                        Process process1 = Process.Start(processStartInfo);
-
-                        if (process1 == null)
-                        {
-                            success = false;
-                        }
-                        else
-                        {
-                            process1.WaitForExit();
-                            process1.Close();
-                            process1.Dispose();
-                            DeleteFile(fileName);
-                        }
-                    }
-                    else
-                    {
-                        success = false;
-                    }
-
-                    if (!success || !File.Exists(fileName + ".1"))
-                    {
-                        if (!IsFileLocked(fileName))
-                        {
-                            MoveFile(fileName, fileName + ".1");
-                        }
-                    }
-                }
-            }
-
-            if (!File.Exists(fileName))
-            {
-                CreateFile(fileName);
-            }
+            return NativeMethods.DeleteFile(fileName + ":Zone.Identifier");
         }
-
         public static Boolean IsFileLocked(String file)
         {
             if (!File.Exists(file))
@@ -365,6 +305,77 @@ namespace MSM.Functions
                 }
             }
             return false;
+        }
+
+        [DebuggerStepThrough, Pure]
+        public static Boolean Contains(this String[] input, String toFind, StringComparison comparison = StringComparison.Ordinal)
+        {
+            // ReSharper disable once ForCanBeConvertedToForeach
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (Int32 i = 0; i < input.Length; i++)
+            {
+                if (String.Equals(input[i], toFind, comparison))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static List<String> ReturnFiles(String localPath, Boolean recurseDirectories, String[] excludedExtensions = null, String[] excludedFiles = null, String[] includedExtensions = null, String[] includedFiles = null, Boolean includeBasePath = true, String[] excludedDirectories = null, Boolean regex = false, Boolean includePath = true)
+        {
+            if (!Directory.Exists(localPath)) return new List<String>();
+
+            if (!localPath.EndsWith(@"\"))
+            {
+                localPath += @"\";
+            }
+
+            List<String> list = new();
+            DirectoryInfo directoryInfo = new(localPath);
+
+            IEnumerable<FileInfo> result = directoryInfo.EnumerateFiles("*", recurseDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            if (excludedDirectories != null)
+            {
+                for (Int32 i = 0; i < excludedDirectories.Length; i++)
+                {
+                    excludedDirectories[i] = excludedDirectories[i].TrimEnd('\\');
+                }
+
+                result = result.Where(x => !excludedDirectories.Any(excludedDirectory => String.Equals(x.DirectoryName, excludedDirectory, StringComparison.OrdinalIgnoreCase)));
+
+                String[] full = new String[excludedDirectories.Length];
+                for (Int32 i = 0; i < excludedDirectories.Length; i++)
+                {
+                    full[i] = excludedDirectories[i] + @"\";
+                }
+
+                result = result.Where(x => !full.Any(excludedDirectory => x.DirectoryName != null && x.DirectoryName.StartsWith(excludedDirectory, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            foreach (FileInfo file in result)
+            {
+                if (excludedExtensions != null && excludedExtensions.Contains(file.Extension, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                if (excludedFiles != null && (excludedFiles.Contains(file.Name, StringComparer.OrdinalIgnoreCase) || (regex && excludedFiles.Any(excludedFile => Regex.IsMatch(file.Name, excludedFile, RegexOptions.IgnoreCase)))))
+                {
+                    continue;
+                }
+
+                if ((includedFiles == null && includedExtensions == null) || (includedFiles != null && includedFiles.Contains(file.Name, StringComparison.OrdinalIgnoreCase)) || (includedExtensions != null && includedExtensions.Contains(file.Extension, StringComparer.OrdinalIgnoreCase)) || (regex && includedFiles != null && includedFiles.Any(includedFile => Regex.IsMatch(file.Name, includedFile, RegexOptions.IgnoreCase))))
+                {
+                    if (!includePath)
+                    {
+                        list.Add(file.Name);
+                    }
+                    else
+                    {
+                        list.Add(includeBasePath ? file.FullName : file.FullName.Replace(localPath, "", StringComparison.OrdinalIgnoreCase));
+                    }
+                }
+            }
+            return list;
         }
     }
 }
