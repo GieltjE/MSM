@@ -42,7 +42,7 @@ namespace MSM.Service
         {
             try
             {
-                using WebClientOptimized webClient = new WebClientOptimized(10, false, false);
+                using WebClientOptimized webClient = new(10, false, false);
                 String result;
                 try
                 {

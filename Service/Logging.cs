@@ -52,7 +52,7 @@ namespace MSM.Service
             LogItemWorker();
         }
 
-        private static readonly ConcurrentQueue<String> LogQueue = new ConcurrentQueue<String>();
+        private static readonly ConcurrentQueue<String> LogQueue = new();
         private static readonly TextWriter TextWriter;
         private static readonly FileStream TextWriterFileStream;
 

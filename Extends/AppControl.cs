@@ -40,7 +40,7 @@ namespace MSM.Extends
 
             if (File.Exists(executable))
             {
-                FileInfo fileInfo = new FileInfo(executable);
+                FileInfo fileInfo = new(executable);
                 if (fileInfo.Directory != null)
                 {
                     _path = fileInfo.Directory.ToString();
@@ -106,7 +106,7 @@ namespace MSM.Extends
         {
             try
             {
-                ProcessStartInfo procInfo = new ProcessStartInfo(_executable)
+                ProcessStartInfo procInfo = new(_executable)
                 {
                     WorkingDirectory = _path,
                     Arguments = _parameters,

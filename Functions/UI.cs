@@ -27,7 +27,7 @@ namespace MSM.Functions
         {
             if (owner != null && owner.Created && !owner.IsDisposed && owner.IsHandleCreated)
             {
-                ShowMessageHelper helper = new ShowMessageHelper();
+                ShowMessageHelper helper = new();
                 owner.Invoke(new Action<IWin32Window, String, String, MessageBoxButtons, MessageBoxIcon, MessageBoxDefaultButton>(helper.ShowMessage), owner, message, header, MessageBoxButtons.OK, messageBoxIcon, MessageBoxDefaultButton.Button1);
             }
             else
@@ -42,7 +42,7 @@ namespace MSM.Functions
 
             if (owner != null && owner != new Form() && !owner.IsDisposed && owner.IsHandleCreated)
             {
-                ShowMessageHelper helper = new ShowMessageHelper();
+                ShowMessageHelper helper = new();
                 owner.Invoke(new Action<IWin32Window, String, String, MessageBoxButtons, MessageBoxIcon, MessageBoxDefaultButton>(helper.ShowMessage), owner, message, header, buttons, icon, defaultButton);
                 result = helper.Result;
             }

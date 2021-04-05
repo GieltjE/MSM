@@ -29,7 +29,7 @@ namespace MSM.Extends
             Renderer = new ToolStripProfessionalRendererNoLine(CustomColorTableStatusStrip);
         }
 
-        public CustomColorTableStatusStrip CustomColorTableStatusStrip = new CustomColorTableStatusStrip();
+        public CustomColorTableStatusStrip CustomColorTableStatusStrip = new();
     }
 
     internal class ToolStripProfessionalRendererNoLine : ToolStripProfessionalRenderer

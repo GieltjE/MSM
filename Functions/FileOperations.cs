@@ -82,7 +82,7 @@ namespace MSM.Functions
         }
         public static List<String> DeleteDirectory(String fullDirectoryPath, Boolean recursive)
         {
-            List<String> failed = new List<String>();
+            List<String> failed = new();
             if (!Directory.Exists(fullDirectoryPath)) return failed;
             try
             {
@@ -129,13 +129,13 @@ namespace MSM.Functions
                 }
                 if (File.Exists(fullDirectoryPathAndFileName))
                 {
-                    FileInfo origin = new FileInfo(fullDirectoryPathAndFileName);
+                    FileInfo origin = new(fullDirectoryPathAndFileName);
                     DateTime creationTime = origin.CreationTime, lastWriteTime = origin.LastWriteTime, lastAccessTime = origin.LastAccessTime;
                     FileAttributes attributes = File.GetAttributes(fullDirectoryPathAndFileName);
 
                     File.Move(fullDirectoryPathAndFileName, fullDirectoryPathAndFileNameNew);
 
-                    FileInfo destination = new FileInfo(fullDirectoryPathAndFileNameNew);
+                    FileInfo destination = new(fullDirectoryPathAndFileNameNew);
                     if (destination.IsReadOnly)
                     {
                         destination.IsReadOnly = false;
@@ -171,7 +171,7 @@ namespace MSM.Functions
                     FileAttributes attributes = File.GetAttributes(fullDirectoryPathAndFileNameNew);
                     if (attributes.HasFlag(FileAttributes.Directory))
                     {
-                        FileInfo fileInfo = new FileInfo(fullDirectoryPathAndFileName);
+                        FileInfo fileInfo = new(fullDirectoryPathAndFileName);
                         fullDirectoryPathAndFileNameNew += @"\" + fileInfo.Name;
                     }
                     else
@@ -232,7 +232,7 @@ namespace MSM.Functions
                     }
                 }
 
-                using (FileStreamOptimized testFile = new FileStreamOptimized(fullDirectoryPathAndFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+                using (FileStreamOptimized testFile = new(fullDirectoryPathAndFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
                 {
                     testFile.Flush(true);
                 }
@@ -246,7 +246,7 @@ namespace MSM.Functions
         }
         public static Boolean CreateDirectory(String directory)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(directory);
+            DirectoryInfo dirInfo = new(directory);
             try
             {
                 if (dirInfo.Parent != null && !dirInfo.Exists)
@@ -293,8 +293,7 @@ namespace MSM.Functions
                     Boolean success = true;
                     if (File.Exists(GetRunningDirectory() + @"\7z.exe"))
                     {
-                        ProcessStartInfo processStartInfo = new ProcessStartInfo
-                        {
+                        ProcessStartInfo processStartInfo = new() {
                             FileName = GetRunningDirectory() + @"\7z.exe",
                             // PPMd is a good raw text compressor, mx9 is maximum compression
                             Arguments = " a -t7z \"" + fileName + ".1\" \"" + fileName + "\" -m0=PPMd -mx9 -mmt=" + Environment.ProcessorCount,
@@ -347,7 +346,7 @@ namespace MSM.Functions
 
             try
             {
-                FileInfo testFileInfo = new FileInfo(file);
+                FileInfo testFileInfo = new(file);
                 stream = testFileInfo.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
                 stream.Close();
                 stream.Dispose();

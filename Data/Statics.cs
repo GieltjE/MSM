@@ -22,6 +22,6 @@ namespace MSM.Data
 {
     public static class Statics
     {
-        public static NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new NewtonsoftJsonSerializer();
+        public static NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
     }
 }

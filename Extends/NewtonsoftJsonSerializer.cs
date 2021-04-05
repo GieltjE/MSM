@@ -32,15 +32,15 @@ namespace MSM.Extends
 
         public String Serialize(Object obj)
         {
-            using StringWriter stringWriter = new StringWriter();
-            using JsonTextWriter jsonTextWriter = new JsonTextWriter(stringWriter);
+            using StringWriter stringWriter = new();
+            using JsonTextWriter jsonTextWriter = new(stringWriter);
             _jsonSerializer.Serialize(jsonTextWriter, obj);
             return stringWriter.ToString();
         }
         public T Deserialize<T>(String input)
         {
-            using StringReader stringReader = new StringReader(input);
-            using JsonTextReader jsonTextReader = new JsonTextReader(stringReader);
+            using StringReader stringReader = new(input);
+            using JsonTextReader jsonTextReader = new(stringReader);
             return _jsonSerializer.Deserialize<T>(jsonTextReader);
         }
     }

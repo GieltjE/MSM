@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -64,12 +65,9 @@ namespace MSM.UIElements
             AddNode(Service.Settings.Values.Node.NodeList);
             AddServers(Service.Settings.Values.Node.ServerList, null);
             
-            foreach (KeyValuePair<String, TreeNode> treeNode in Treeview_NodesAndServers.TreeNodes)
+            foreach (KeyValuePair<String, TreeNode> treeNode in Treeview_NodesAndServers.TreeNodes.Where(treeNode => !Service.Settings.AllNodes.ContainsKey(treeNode.Key) && !Service.Settings.AllServers.ContainsKey(treeNode.Key)))
             {
-                if (!Service.Settings.AllNodes.ContainsKey(treeNode.Key) && !Service.Settings.AllServers.ContainsKey(treeNode.Key))
-                {
-                    treeNode.Value.Remove();
-                }
+                treeNode.Value.Remove();
             }
 
             Treeview_NodesAndServers.UpdateList();
@@ -150,7 +148,7 @@ namespace MSM.UIElements
         }
         private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
         {
-            if (Treeview_NodesAndServers.SelectedNode == null || Treeview_NodesAndServers.SelectedNode.ImageIndex != 1) return;
+            if (Treeview_NodesAndServers.SelectedNode is not {ImageIndex: 1}) return;
 
             Variables.MainForm.AddServer(Service.Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name));
         }

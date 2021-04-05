@@ -41,7 +41,7 @@ namespace MSM.Service
         }
         private static async void Run()
         {
-            NameValueCollection properties = new NameValueCollection
+            NameValueCollection properties = new()
             {
                 ["quartz.threadPool.type"] = typeof(DefaultThreadPool).AssemblyQualifiedName,
                 ["quartz.jobStore.type"] = typeof(RAMJobStore).AssemblyQualifiedName,
@@ -60,7 +60,7 @@ namespace MSM.Service
         internal static IScheduler Scheduler;
 
         // Prevent concurrent _scheduler operations so we don't crash
-        private static readonly SemaphoreSlim SchedulerSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim SchedulerSemaphore = new(1, 1);
 
         // 0/5 means 0, 5, 10, .. 1/5 means 1, 6, 11 .. 2/5 means 2, 7, 12
         // http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger
@@ -276,13 +276,13 @@ namespace MSM.Service
     {
         public String Name => "ExceptionOccuredJobListener";
 
-        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
-        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
-        public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new CancellationToken())
+        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new()) => Task.CompletedTask;
+        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) => Task.CompletedTask;
+        public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new())
         {
             if (ObjectUtils.IsAttributePresent(context.JobDetail.JobType, typeof(ResetTimerAfterRunCompletes)))
             {
-                TriggerKey triggerName = new TriggerKey(context.Trigger.Key.Name, ((AbstractTrigger)context.Trigger).Group);
+                TriggerKey triggerName = new(context.Trigger.Key.Name, ((AbstractTrigger)context.Trigger).Group);
 
                 Task<ITrigger> trigger = context.Scheduler.GetTrigger(triggerName, cancellationToken);
                 trigger.Wait(cancellationToken);

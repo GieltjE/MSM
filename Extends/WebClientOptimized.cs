@@ -26,7 +26,7 @@ namespace MSM.Extends
 {
     public class WebClientOptimized : WebClient
     {
-        private readonly CookieContainer _cookieContainer = new CookieContainer();
+        private readonly CookieContainer _cookieContainer = new();
         private readonly Int32 _timeout;
         private Boolean _preauth;
         private readonly Boolean _useCookieContainer;
@@ -59,7 +59,7 @@ namespace MSM.Extends
             if (String.Equals(resp.CharacterSet, "UTF-8", StringComparison.OrdinalIgnoreCase))
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                using StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8, true);
+                using StreamReader streamReader = new(resp.GetResponseStream(), Encoding.UTF8, true);
                 // Trim ending newlines, some scripts rely on this! (cd.php etc)
                 return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
             }
@@ -68,12 +68,12 @@ namespace MSM.Extends
             if (String.Equals(resp.CharacterSet, "ISO-8859-1", StringComparison.OrdinalIgnoreCase))
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                using StreamReader streamReader = new StreamReader(resp.GetResponseStream(), Encoding.Default, true);
+                using StreamReader streamReader = new(resp.GetResponseStream(), Encoding.Default, true);
                 return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
             }
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            using (StreamReader streamReader = new StreamReader(resp.GetResponseStream(), EncodingIfNoTDetected, true))
+            using (StreamReader streamReader = new(resp.GetResponseStream(), EncodingIfNoTDetected, true))
             {
                 return streamReader.ReadToEnd().TrimEnd('\n').TrimEnd('\r');
             }

@@ -98,7 +98,7 @@ namespace MSM.Extends
         // Overrides the ConvertTo method of TypeConverter.
         public override Object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, Object value, Type destinationType)
         {
-            if (!(value is String[] values)) return "";
+            if (value is not String[] values) return "";
 
             if (destinationType == typeof(String))
             {
@@ -157,7 +157,7 @@ namespace MSM.Extends
     }
     public class CheckedListBoxUITypeEditor : UITypeEditor
     {
-        private readonly CheckedListBox _checkedListBox = new CheckedListBox();
+        private readonly CheckedListBox _checkedListBox = new();
         private IWindowsFormsEditorService _iWindowsFormsEditorService;
         public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
         {
@@ -224,12 +224,12 @@ namespace MSM.Extends
             return "(variables)";
         }
 
-        public readonly Dictionary<String, String> Values = new Dictionary<String, String>(StringComparer.Ordinal);
+        public readonly Dictionary<String, String> Values = new(StringComparer.Ordinal);
         public Variable[] Properties
         {
             get
             {
-                List<Variable> toReturn = new List<Variable>();
+                List<Variable> toReturn = new();
                 foreach (KeyValuePair<String, String> keyValuePair in Values)
                 {
                     if (keyValuePair.Value != null && !String.IsNullOrWhiteSpace((String)keyValuePair.Value))
@@ -262,7 +262,7 @@ namespace MSM.Extends
             Enumerations.CheckedListBoxSetting setting = context.PropertyDescriptor.Attributes.OfType<ArgumentsAttribute>().First().CheckedListBoxSetting;
             // ReSharper restore PossibleNullReferenceException
 
-            List<PropertyDescriptor> properties = new List<PropertyDescriptor>();
+            List<PropertyDescriptor> properties = new();
             switch (setting)
             {
                 case Enumerations.CheckedListBoxSetting.ServerVariables:

@@ -203,8 +203,8 @@ namespace MSM.Extends
             }
         }
 
-        public HashSet<String> CheckedItems = new HashSet<String>(StringComparer.Ordinal);
-        public Dictionary<String, TreeNode> TreeNodes = new Dictionary<String, TreeNode>();
+        public HashSet<String> CheckedItems = new(StringComparer.Ordinal);
+        public Dictionary<String, TreeNode> TreeNodes = new();
         public void UpdateList()
         {
             TreeNodes.Clear();

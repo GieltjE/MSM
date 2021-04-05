@@ -32,17 +32,19 @@ namespace MSM
 {
     public partial class Main : FormOptimized
     {
-        public readonly NotifyIcon NotifyIcon = new NotifyIcon();
-        private readonly ContextMenuStrip _contextMenuStripTrayIcon = new ContextMenuStrip();
-        private readonly ToolStripMenuItem _trayIconStripOpen = new ToolStripMenuItem();
-        private readonly ToolStripMenuItem _trayIconStripExit = new ToolStripMenuItem();
+        public readonly NotifyIcon NotifyIcon = new();
+        private readonly ContextMenuStrip _contextMenuStripTrayIcon = new();
+        private readonly ToolStripMenuItem _trayIconStripOpen = new();
+        private readonly ToolStripMenuItem _trayIconStripExit = new();
         private FormWindowState _previousWindowState = FormWindowState.Normal;
 
-        private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new VisualStudioToolStripExtender();
+        private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new();
 
         public Main()
         {
             InitializeComponent();
+
+            DockPanel_Main.Theme = new VS2015BlueTheme();
 
             Variables.MainForm = this;
             Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
@@ -123,13 +125,13 @@ namespace MSM
 
         public void TrayIconDoubleClick(Object sender, EventArgs e)
         {
-            if (!(e is MouseEventArgs) || ((MouseEventArgs)e).Button != MouseButtons.Left) return;
+            if (e is not MouseEventArgs { Button: MouseButtons.Left }) return;
 
             TrayIconStripOpenClick(null, null);
         }
         private void TrayIconMouseClick(Object sender, MouseEventArgs e)
         {
-            if (e == null || e.Button != MouseButtons.Right) return;
+            if (e is not {Button: MouseButtons.Right}) return;
 
             NotifyIcon.ContextMenuStrip.Show();
         }
@@ -168,10 +170,10 @@ namespace MSM
             Settings.Values.ShowServerList = ToolStrip_ShowServerList.Checked;
             if (Settings.Values.ShowServerList)
             {
-                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers() { Width = 100}, false, DockState.DockRight);
+                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers { Width = 100}, false, DockState.DockRight);
                 dockContent.Width = Settings.Values.ServerListWidth;
                 dockContent.Closing += ServerListClosing;
-                dockContent.SizeChanged += (o, args) => { Settings.Values.ServerListWidth = dockContent.Width; };
+                dockContent.SizeChanged += (_, _) => { Settings.Values.ServerListWidth = dockContent.Width; };
             }
             else
             {
@@ -187,16 +189,16 @@ namespace MSM
         {
             if (server == null) return;
 
-            ThreadHelpers thread = new ThreadHelpers();
+            ThreadHelpers thread = new();
             thread.ExecuteThreadParameter(AddServerHelper, server, false, false);
         }
         private void AddServerHelper(Object server)
         {
-            Terminal terminal = new Terminal((Server)server);
+            Terminal terminal = new((Server)server);
             AddDockContent(((Server)server).DisplayName, ((Server)server).NodeID, terminal, true);
         }
 
-        private readonly Dictionary<String, DockContentOptimized> _availableDocks = new Dictionary<String, DockContentOptimized>(StringComparer.Ordinal);
+        private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);
         private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
@@ -206,7 +208,7 @@ namespace MSM
                 return _availableDocks[internalName];
             }
 
-            DockContentOptimized newDockContent = new DockContentOptimized { Text = text, Name = internalName };
+            DockContentOptimized newDockContent = new() { Text = text, Name = internalName };
 
             content.Dock = DockStyle.Fill;
             content.Padding = new Padding(0);

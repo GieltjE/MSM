@@ -46,7 +46,7 @@ namespace MSM.UIElements
             base.OnHandleCreated(e);
 
             //-ssh -P 222 -load "Default Settings"  -l root prolis.fyn.nl
-            List<String> parameters = new List<String>
+            List<String> parameters = new()
             {
                 "-ssh",
                 "-P " + _server.Port.ToString(CultureInfo.InvariantCulture),

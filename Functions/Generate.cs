@@ -15,10 +15,10 @@ namespace MSM.Functions
             }
         }
 
-        public static readonly Random StaticRandom = new Random(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
+        public static readonly Random StaticRandom = new(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
         public static String RandomPassword(UInt32 length)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             for (UInt32 i = 0; i < length; i++)
             {
                 builder.Append(Convert.ToChar(Convert.ToInt32(Math.Floor(26 * StaticRandom.NextDouble() + 65))));

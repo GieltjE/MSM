@@ -141,7 +141,6 @@ namespace MSM
             this.ToolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
         #endregion
 

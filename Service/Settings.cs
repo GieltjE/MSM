@@ -61,7 +61,7 @@ namespace MSM.Service
             _readingSettings = true;
             try
             {
-                using (StreamReader streamReader = new StreamReader(SettingsFile))
+                using (StreamReader streamReader = new(SettingsFile))
                 {
                     Values = (Values)XMLSerializer.Deserialize(streamReader);
                 }
@@ -74,7 +74,7 @@ namespace MSM.Service
             _readingSettings = false;
         }
 
-        public static Values Values = new Values();
+        public static Values Values = new();
         public static event ExtensionMethods.CustomDelegate OnSettingsUpdatedEvent;
         public static event ExtensionMethods.CustomDelegate OnSettingsServerUpdatedEvent;
         public static void FireOnSettingsServerUpdatedEvent()
@@ -82,7 +82,7 @@ namespace MSM.Service
             OnSettingsServerUpdatedEvent?.Invoke();
         }
 
-        public static readonly Dictionary<String, Node> AllNodes = new Dictionary<String, Node>(StringComparer.Ordinal);
+        public static readonly Dictionary<String, Node> AllNodes = new(StringComparer.Ordinal);
         public static Node FindNode(String nodeID)
         {
             return AllNodes.ContainsKey(nodeID) ? AllNodes[nodeID] : null;
@@ -95,7 +95,7 @@ namespace MSM.Service
                 FindAllNodes(nodeFound);
             }
         }
-        public static readonly Dictionary<String, Server> AllServers = new Dictionary<String, Server>(StringComparer.Ordinal);
+        public static readonly Dictionary<String, Server> AllServers = new(StringComparer.Ordinal);
         public static Server FindServer(String nodeID)
         {
             return AllServers.ContainsKey(nodeID) ? AllServers[nodeID] : null;
@@ -122,7 +122,7 @@ namespace MSM.Service
         }
 
         private static Boolean _readingSettings;
-        private static readonly XmlSerializer XMLSerializer = new XmlSerializer(typeof(Values));
+        private static readonly XmlSerializer XMLSerializer = new(typeof(Values));
         private static readonly String SettingsFile;
         internal static void Flush()
         {
@@ -132,7 +132,7 @@ namespace MSM.Service
             {
                 UpdateNodesAndServers();
 
-                using StreamWriter writer = new StreamWriter(SettingsFile);
+                using StreamWriter writer = new(SettingsFile);
                 XMLSerializer.Serialize(writer, Values);
                 writer.Flush();
             }
@@ -384,7 +384,7 @@ namespace MSM.Service
                 Settings.Flush();
             }
         }
-        [XmlIgnore] private Node _node = new Node();
+        [XmlIgnore] private Node _node = new();
 
         [Browsable(false)]
         public Int32 ServerListWidth
@@ -446,7 +446,7 @@ namespace MSM.Service
             }
             set => _nodeList = value;
         }
-        [XmlIgnore] private CollectionConverter<Node> _nodeList = new CollectionConverter<Node>();
+        [XmlIgnore] private CollectionConverter<Node> _nodeList = new();
 
         [Category("Servers"), DisplayName("Server list")]
         public CollectionConverter<Server> ServerList
@@ -462,7 +462,7 @@ namespace MSM.Service
             }
             set => _serverList = value;
         }
-        [XmlIgnore] private CollectionConverter<Server> _serverList = new CollectionConverter<Server>();
+        [XmlIgnore] private CollectionConverter<Server> _serverList = new();
 
         [Browsable(false)]
         public Boolean Checked
@@ -627,7 +627,7 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private String[] _keywords = new String[0];
-        [XmlIgnore] public HashSet<String> KeywordsHashed = new HashSet<String>(StringComparer.Ordinal);
+        [XmlIgnore] public HashSet<String> KeywordsHashed = new(StringComparer.Ordinal);
 
         [Browsable(false)]
         public Variable[] Variables
@@ -637,7 +637,7 @@ namespace MSM.Service
         }
 
         [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
-        public BasicPropertyBag VariablesInternal { get; set; } = new BasicPropertyBag();
+        public BasicPropertyBag VariablesInternal { get; set; } = new();
 
         [Browsable(false)]
         public Boolean Checked
