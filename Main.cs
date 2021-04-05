@@ -18,10 +18,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -133,12 +135,14 @@ namespace MSM
         {
             Visible = false;
 
+            FileOperations.CreateDirectory(Variables.SettingsDirectory);
+
             Boolean loadSuccess = false;
-            if (File.Exists("PreviousSessions.xml"))
+            if (File.Exists(Variables.SessionFile))
             {
                 try
                 {
-                    DockPanel_Main.LoadFromXml("PreviousSessions.xml", GetContentFromPersistString);
+                    DockPanel_Main.LoadFromXml(Variables.SessionFile, GetContentFromPersistString);
                     
                     foreach (DockPane dockPane in DockPanel_Main.Panes)
                     {
@@ -345,7 +349,7 @@ namespace MSM
         }
         private void SaveSessions()
         {
-            DockPanel_Main.SaveAsXml("PreviousSessions.xml", Encoding.UTF8);
+            DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
         }
 
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);

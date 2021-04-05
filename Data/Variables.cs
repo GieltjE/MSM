@@ -17,6 +17,8 @@
 //
 
 using System;
+using System.IO;
+using MSM.Functions;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MSM.Data
@@ -28,5 +30,11 @@ namespace MSM.Data
         public static DockPanelColorPalette ColorPalette;
         public static Measures Measures;
         public static Boolean ShutDownFired;
+        public static String SettingsDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "settings");
+        public static String SessionFile => Path.Combine(SettingsDirectory, "PreviousSessions.xml");
+        public static String PortableSettingsFile => Path.Combine(SettingsDirectory, "Settings.xml");
+        public static String NormalSettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
+        public static String SettingsFileChosen { get; set; }
+        public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
     }
 }

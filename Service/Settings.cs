@@ -26,9 +26,7 @@ using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
-using MSM.Extends.Themes;
 using MSM.Functions;
-using WeifenLuo.WinFormsUI.Docking;
 using String = System.String;
 
 namespace MSM.Service
@@ -37,24 +35,22 @@ namespace MSM.Service
     {
         static Settings()
         {
-            String portableSettingsFile = Path.Combine(FileOperations.GetRunningDirectory(), "Settings.xml");
-            String localSettingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
-            
-            if (File.Exists(portableSettingsFile))
+            if (File.Exists(Variables.PortableSettingsFile))
             {
-                SettingsFile = portableSettingsFile;
+                Variables.SettingsFileChosen = Variables.PortableSettingsFile;
                 ReadSettings();
             }
-            else if (File.Exists(localSettingsFile))
+            else if (File.Exists(Variables.NormalSettingsFile))
             {
-                SettingsFile = localSettingsFile;
+                Variables.SettingsFileChosen = Variables.NormalSettingsFile;
                 ReadSettings();
             }
 
-            if (SettingsFile == null)
+            if (Variables.SettingsFileChosen == null)
             {
-                SettingsFile = UI.AskQuestion(Variables.MainForm, "Create portable settings file?", "No settings file found", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes ? portableSettingsFile : localSettingsFile;
-                FileOperations.CreateFile(SettingsFile);
+                Variables.SettingsFileChosen = UI.AskQuestion(Variables.MainForm, "Create portable settings file?", "No settings file found", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes ? Variables.PortableSettingsFile : Variables.NormalSettingsFile;
+                FileOperations.CreateDirectory(Path.GetDirectoryName(Variables.SettingsFileChosen));
+                FileOperations.CreateFile(Variables.SettingsFileChosen);
                 Flush();
             }
         }
@@ -63,7 +59,7 @@ namespace MSM.Service
             _readingSettings = true;
             try
             {
-                using (StreamReader streamReader = new(SettingsFile))
+                using (StreamReader streamReader = new(Variables.SettingsFileChosen))
                 {
                     Values = (Values)XMLSerializer.Deserialize(streamReader);
                 }
@@ -125,7 +121,6 @@ namespace MSM.Service
 
         private static Boolean _readingSettings;
         private static readonly XmlSerializer XMLSerializer = new(typeof(Values));
-        private static readonly String SettingsFile;
         internal static void Flush()
         {
             if (_readingSettings) return;
@@ -134,7 +129,7 @@ namespace MSM.Service
             {
                 UpdateNodesAndServers();
 
-                using StreamWriter writer = new(SettingsFile);
+                using StreamWriter writer = new(Variables.SettingsFileChosen);
                 XMLSerializer.Serialize(writer, Values);
                 writer.Flush();
             }
