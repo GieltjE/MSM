@@ -150,7 +150,7 @@ namespace MSM
         private StatusStripOptimized StatusStrip;
         private ToolStripDropDownButtonOptimized ToolStripButton_Help;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_About;
-        private DockPanelOptimized DockPanel_Main;
+        internal DockPanelOptimized DockPanel_Main;
         private ToolStripDropDownButtonOptimized ToolStrip_General;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;

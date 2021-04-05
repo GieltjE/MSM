@@ -58,7 +58,7 @@ namespace MSM.Data
         };
 
         [Flags]
-        public enum CronDayOfTheWeek : byte
+        public enum CronDayOfTheWeek : Byte
         {
             All = 1,
             Monday = 2,
@@ -81,7 +81,7 @@ namespace MSM.Data
             "sun"
         };
 
-        public enum CloseAction : byte
+        public enum CloseAction : Byte
         {
             [Description("Close normally")]
             Close,
@@ -91,7 +91,7 @@ namespace MSM.Data
             MinimizeToTray,
         }
 
-        public enum InitialSessions : byte
+        public enum InitialSessions : Byte
         {
             [Description("None")]
             None,
@@ -101,10 +101,18 @@ namespace MSM.Data
             Predefined,
         }
 
-        public enum CheckedListBoxSetting : byte
+        public enum CheckedListBoxSetting : Byte
         {
             ServerKeywords,
             ServerVariables,
+        }
+
+        public enum Theme : Byte
+        {
+            Black,
+            Dark,
+            Blue,
+            Light,
         }
     }
 }

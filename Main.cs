@@ -48,20 +48,26 @@ namespace MSM
         {
             InitializeComponent();
 
-            DockPanel_Main.Theme = new VS2015BlueTheme();
-            DockPanel_Main.Theme = new MaterialDarkTheme();
-
             Variables.MainForm = this;
-            Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
-            Variables.Measures = DockPanel_Main.Theme.Measures;
-
-            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
-            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
             if (Settings.Values.CheckForUpdates)
             {
                 UpdateCheck.StartUpdateCheck();
             }
+            
+            Variables.MainForm.DockPanel_Main.Theme = Settings.Values.Theme switch
+            {
+                Enumerations.Theme.Blue => new VS2015BlueTheme(),
+                Enumerations.Theme.Black => new MaterialDarkTheme(),
+                Enumerations.Theme.Dark => new VS2015DarkTheme(),
+                Enumerations.Theme.Light => new VS2015LightTheme(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
+            Variables.Measures = DockPanel_Main.Theme.Measures;
+
+            _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
+            _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
             Service.Events.ShutDownFired += ShutDownFired;
 

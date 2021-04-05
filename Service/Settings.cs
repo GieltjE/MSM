@@ -26,7 +26,9 @@ using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
+using MSM.Extends.Themes;
 using MSM.Functions;
+using WeifenLuo.WinFormsUI.Docking;
 using String = System.String;
 
 namespace MSM.Service
@@ -161,6 +163,23 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _checkForUpdates = true;
 
+        [Category("Basic"), DisplayName("Theme to apply"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.Theme>))]
+        public Enumerations.Theme Theme
+        {
+            get => _theme;
+            set
+            {
+                Boolean update = _theme != value;
+                _theme = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Enumerations.Theme _theme = Enumerations.Theme.Black;
+
         [Category("UI"), DisplayName("Minimize to the tray instead of the taskbar"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean MinimizeToTray
         {
@@ -190,7 +209,7 @@ namespace MSM.Service
                 {
                     Data.Variables.MainForm.NotifyIcon.Visible = true;
                 }
-                else if(Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
+                else if (Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
                 {
                     Data.Variables.MainForm.NotifyIcon.Visible = false;
                 }
