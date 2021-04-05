@@ -27,44 +27,44 @@ namespace MSM
         /// </summary>
         private void InitializeComponent()
         {
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.RichTextBox_License = new System.Windows.Forms.RichTextBox();
+            this.GroupBox_General = new System.Windows.Forms.GroupBox();
             this.Label_Log4Net = new System.Windows.Forms.Label();
             this.Label_SmashIcons = new System.Windows.Forms.Label();
             this.Label_DockPanelSuite = new System.Windows.Forms.Label();
             this.Label_NewtonsoftJson = new System.Windows.Forms.Label();
             this.Label_QuartzNet = new System.Windows.Forms.Label();
             this.Label_GeneralCopyright = new System.Windows.Forms.Label();
-            this.groupBox1.SuspendLayout();
+            this.GroupBox_General.SuspendLayout();
             this.SuspendLayout();
             // 
-            // richTextBox1
+            // RichTextBox_License
             // 
-            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 142);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(675, 153);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.RichTextBox_License.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.RichTextBox_License.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.RichTextBox_License.Location = new System.Drawing.Point(0, 142);
+            this.RichTextBox_License.Name = "RichTextBox_License";
+            this.RichTextBox_License.ReadOnly = true;
+            this.RichTextBox_License.Size = new System.Drawing.Size(675, 153);
+            this.RichTextBox_License.TabIndex = 0;
+            this.RichTextBox_License.Text = "";
             // 
-            // groupBox1
+            // GroupBox_General
             // 
-            this.groupBox1.AutoSize = true;
-            this.groupBox1.Controls.Add(this.Label_Log4Net);
-            this.groupBox1.Controls.Add(this.Label_SmashIcons);
-            this.groupBox1.Controls.Add(this.Label_DockPanelSuite);
-            this.groupBox1.Controls.Add(this.Label_NewtonsoftJson);
-            this.groupBox1.Controls.Add(this.Label_QuartzNet);
-            this.groupBox1.Controls.Add(this.Label_GeneralCopyright);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(675, 142);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "General";
+            this.GroupBox_General.AutoSize = true;
+            this.GroupBox_General.Controls.Add(this.Label_Log4Net);
+            this.GroupBox_General.Controls.Add(this.Label_SmashIcons);
+            this.GroupBox_General.Controls.Add(this.Label_DockPanelSuite);
+            this.GroupBox_General.Controls.Add(this.Label_NewtonsoftJson);
+            this.GroupBox_General.Controls.Add(this.Label_QuartzNet);
+            this.GroupBox_General.Controls.Add(this.Label_GeneralCopyright);
+            this.GroupBox_General.Dock = System.Windows.Forms.DockStyle.Top;
+            this.GroupBox_General.Location = new System.Drawing.Point(0, 0);
+            this.GroupBox_General.Name = "GroupBox_General";
+            this.GroupBox_General.Size = new System.Drawing.Size(675, 142);
+            this.GroupBox_General.TabIndex = 4;
+            this.GroupBox_General.TabStop = false;
+            this.GroupBox_General.Text = "General";
             // 
             // Label_Log4Net
             // 
@@ -84,7 +84,8 @@ namespace MSM
             this.Label_SmashIcons.Name = "Label_SmashIcons";
             this.Label_SmashIcons.Size = new System.Drawing.Size(663, 18);
             this.Label_SmashIcons.TabIndex = 8;
-            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)";
+            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIc" +
+    "ons) (Flaticon Basic License)";
             // 
             // Label_DockPanelSuite
             // 
@@ -94,7 +95,8 @@ namespace MSM
             this.Label_DockPanelSuite.Name = "Label_DockPanelSuite";
             this.Label_DockPanelSuite.Size = new System.Drawing.Size(663, 18);
             this.Label_DockPanelSuite.TabIndex = 7;
-            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)";
+            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)" +
+    "";
             // 
             // Label_NewtonsoftJson
             // 
@@ -114,7 +116,8 @@ namespace MSM
             this.Label_QuartzNet.Name = "Label_QuartzNet";
             this.Label_QuartzNet.Size = new System.Drawing.Size(663, 18);
             this.Label_QuartzNet.TabIndex = 5;
-            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2.0)";
+            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2." +
+    "0)";
             // 
             // Label_GeneralCopyright
             // 
@@ -131,23 +134,23 @@ namespace MSM
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(675, 295);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.RichTextBox_License);
+            this.Controls.Add(this.GroupBox_General);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "About";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "About";
+            this.Text = "About MSM (Multi Server Manager)";
             this.TopMost = true;
-            this.groupBox1.ResumeLayout(false);
+            this.GroupBox_General.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
         }
         #endregion
 
-        private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RichTextBox RichTextBox_License;
+        private System.Windows.Forms.GroupBox GroupBox_General;
         private System.Windows.Forms.Label Label_NewtonsoftJson;
         private System.Windows.Forms.Label Label_QuartzNet;
         private System.Windows.Forms.Label Label_GeneralCopyright;

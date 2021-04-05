@@ -15,8 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
 // 
+
+using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using MSM.Extends;
+using MSM.Functions;
 
 namespace MSM
 {
@@ -25,6 +29,12 @@ namespace MSM
         public About(Form owner) : base(owner)
         {
             InitializeComponent();
+
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(FileOperations.GetCurrentExecutable());
+            Version currentVersion = Version.Parse(fileVersionInfo.FileVersion);
+
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Text += @" v" + currentVersion;
         }
     }
 }
