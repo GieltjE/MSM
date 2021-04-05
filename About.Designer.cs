@@ -27,14 +27,14 @@ namespace MSM
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Label_Log4Net = new System.Windows.Forms.Label();
+            this.Label_SmashIcons = new System.Windows.Forms.Label();
             this.Label_DockPanelSuite = new System.Windows.Forms.Label();
             this.Label_NewtonsoftJson = new System.Windows.Forms.Label();
             this.Label_QuartzNet = new System.Windows.Forms.Label();
             this.Label_GeneralCopyright = new System.Windows.Forms.Label();
-            this.Label_SmashIcons = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,16 +42,17 @@ namespace MSM
             // 
             this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 124);
+            this.richTextBox1.Location = new System.Drawing.Point(0, 142);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(675, 171);
+            this.richTextBox1.Size = new System.Drawing.Size(675, 153);
             this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "    This program is free software: you can redistribute it and/or modify\n    it under the terms of the GNU General Public License as published by\n    the Free Software Foundation, either version 3 of the License, or\n    (at your option) any later version.\n\n    This program is distributed in the hope that it will be useful,\n    but WITHOUT ANY WARRANTY; without even the implied warranty of\n    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n    GNU General Public License for more details.\n\n    You should have received a copy of the GNU General Public License\n    along with this program.  If not, see <http://www.gnu.org/licenses/>.";
+            this.richTextBox1.Text = "";
             // 
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
+            this.groupBox1.Controls.Add(this.Label_Log4Net);
             this.groupBox1.Controls.Add(this.Label_SmashIcons);
             this.groupBox1.Controls.Add(this.Label_DockPanelSuite);
             this.groupBox1.Controls.Add(this.Label_NewtonsoftJson);
@@ -60,10 +61,30 @@ namespace MSM
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(675, 124);
+            this.groupBox1.Size = new System.Drawing.Size(675, 142);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General";
+            // 
+            // Label_Log4Net
+            // 
+            this.Label_Log4Net.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Label_Log4Net.Location = new System.Drawing.Point(6, 108);
+            this.Label_Log4Net.Name = "Label_Log4Net";
+            this.Label_Log4Net.Size = new System.Drawing.Size(663, 18);
+            this.Label_Log4Net.TabIndex = 9;
+            this.Label_Log4Net.Text = "[log4net] (https://logging.apache.org/log4net/) (Apache License, Version 2.0)";
+            // 
+            // Label_SmashIcons
+            // 
+            this.Label_SmashIcons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Label_SmashIcons.Location = new System.Drawing.Point(6, 90);
+            this.Label_SmashIcons.Name = "Label_SmashIcons";
+            this.Label_SmashIcons.Size = new System.Drawing.Size(663, 18);
+            this.Label_SmashIcons.TabIndex = 8;
+            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)";
             // 
             // Label_DockPanelSuite
             // 
@@ -103,17 +124,7 @@ namespace MSM
             this.Label_GeneralCopyright.Name = "Label_GeneralCopyright";
             this.Label_GeneralCopyright.Size = new System.Drawing.Size(663, 18);
             this.Label_GeneralCopyright.TabIndex = 4;
-            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2018 - Michiel Hazelhof (michiel@hazelhof.nl), Chris Kruining (chris@kruining.eu)";
-            // 
-            // Label_SmashIcons
-            // 
-            this.Label_SmashIcons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.Label_SmashIcons.Location = new System.Drawing.Point(6, 90);
-            this.Label_SmashIcons.Name = "Label_SmashIcons";
-            this.Label_SmashIcons.Size = new System.Drawing.Size(663, 18);
-            this.Label_SmashIcons.TabIndex = 8;
-            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)";
+            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2021 - Michiel Hazelhof (michiel@hazelhof.nl)";
             // 
             // About
             // 
@@ -142,5 +153,6 @@ namespace MSM
         private System.Windows.Forms.Label Label_GeneralCopyright;
         private System.Windows.Forms.Label Label_DockPanelSuite;
         private System.Windows.Forms.Label Label_SmashIcons;
+        private System.Windows.Forms.Label Label_Log4Net;
     }
 }

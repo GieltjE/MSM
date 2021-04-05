@@ -26,6 +26,8 @@ Following components are being used by MSM:
 * [Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2.0) as a scheduling agent for performing interval/scheduled events
 * [Newtonsoft.Json] (https://github.com/JamesNK/Newtonsoft.Json) (MIT License) for (de)serializing objects
 * [DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License) for UI elements and theming
+* [Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)
+* [log4net] (https://logging.apache.org/log4net/) (Apache License, Version 2.0)
 
 ## License
 
