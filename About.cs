@@ -18,6 +18,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 using MSM.Extends;
 using MSM.Functions;
@@ -35,6 +36,12 @@ namespace MSM
 
             // ReSharper disable once VirtualMemberCallInConstructor
             Text += @" v" + currentVersion;
+
+            String licenseFile = Path.Combine(FileOperations.GetRunningDirectory(), "LICENSE.md");
+            if (File.Exists(licenseFile))
+            {
+                RichTextBox_License.Text = File.ReadAllText(licenseFile);
+            }
         }
     }
 }
