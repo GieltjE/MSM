@@ -202,6 +202,7 @@ namespace MSM.Service
 
                 await Scheduler.DeleteJob(new JobKey(name));
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch {}
             finally
             {
@@ -226,7 +227,8 @@ namespace MSM.Service
                     return true;
                 }
             }
-            catch {}
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch { }
             finally
             {
                 SchedulerSemaphore.Release();
@@ -256,6 +258,7 @@ namespace MSM.Service
                     return true;
                 }
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch {}
             finally
             {

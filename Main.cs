@@ -22,7 +22,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -105,6 +104,7 @@ namespace MSM
                     }
                     loadSuccess = true;
                 }
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch {}
             }
             if (!loadSuccess)
@@ -128,6 +128,7 @@ namespace MSM
             Boolean allowDuplicate = true;
             if (String.Equals(persistString, "Serverlist", StringComparison.Ordinal))
             {
+                ToolStrip_ShowServerList.Checked = true;
                 content = new Servers();
                 internalName = "Serverlist";
                 displayName = "Serverlist";
@@ -135,6 +136,7 @@ namespace MSM
             }
             else if (String.Equals(persistString, "Settings", StringComparison.Ordinal))
             {
+                ToolStrip_Settings.Checked = true;
                 content = new UIElements.Settings();
                 internalName = "Settings";
                 displayName = "Settings";
@@ -228,23 +230,54 @@ namespace MSM
         }
         private void ToolStripSettingsClick(Object sender, EventArgs e)
         {
-            AddDockContent("Settings", "Settings", new UIElements.Settings(), false);
-        }
-        private void ToolStripShowServerListClick(Object sender, EventArgs e)
-        {
-            if (ToolStrip_ShowServerList.Checked)
+            if (!ToolStrip_Settings.Checked)
             {
-                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers { Width = 100 }, false, DockState.DockRight);
-                dockContent.Closing += ServerListClosing;
+                ToolStrip_Settings.Checked = true;
+                AddDockContent("Settings", "Settings", new UIElements.Settings(), false);
             }
             else
             {
-                HideDockContent("Serverlist", false);
+                HideDockContent("Settings");
             }
         }
-        private void ServerListClosing(Object sender, System.ComponentModel.CancelEventArgs e)
+        private void ToolStripShowServerListClick(Object sender, EventArgs e)
         {
-            ToolStrip_ShowServerList.Checked = false;
+            if (!ToolStrip_ShowServerList.Checked)
+            {
+                ToolStrip_ShowServerList.Checked = true;
+                AddDockContent("Serverlist", "Serverlist", new Servers(), false, DockState.DockRight);
+            }
+            else
+            {
+                HideDockContent("Serverlist");
+            }
+        }
+
+        private void DockPanelMainContentRemoved(Object sender, DockContentEventArgs e)
+        {
+            DockContentOptimized activeContent = sender switch
+            {
+                DockPanelOptimized optimized => (DockContentOptimized)optimized.ActiveContent,
+                DockContentOptimized optimized => optimized,
+                _ => null
+            };
+            if (activeContent == null) return;
+            if (!_availableDocks.ContainsKey(activeContent.Name)) return;
+
+            if (String.Equals(activeContent.Name, "Serverlist", StringComparison.Ordinal))
+            {
+                ToolStrip_ShowServerList.Checked = false;
+            }
+            else
+            if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
+            {
+                ToolStrip_Settings.Checked = false;
+            }
+
+            if (sender is not DockContentOptimized)
+            {
+                HideDockContent(activeContent.Name);
+            }
         }
 
         public void AddServer(Server server, Boolean save)
@@ -258,8 +291,12 @@ namespace MSM
         {
             (Server server, Boolean save) = ((Server server, Boolean save))startInfo;
 
-            Terminal terminal = new((Server)server);
-            AddDockContent(((Server)server).DisplayName, ((Server)server).NodeID, terminal, true, save: save);
+            Terminal terminal = new(server);
+            AddDockContent(server.DisplayName, server.NodeID, terminal, true, save: save);
+        }
+        private void SaveSessions()
+        {
+            DockPanel_Main.SaveAsXml("PreviousSessions.xml", Encoding.UTF8);
         }
 
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);
@@ -267,8 +304,7 @@ namespace MSM
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
             {
-                _availableDocks[internalName].Show();
-                _availableDocks[internalName].BringToFront();
+                _availableDocks[internalName].Show(DockPanel_Main, dockState);
                 return _availableDocks[internalName];
             }
 
@@ -303,7 +339,7 @@ namespace MSM
 
             return newDockContent;
         }
-        private void HideDockContent(String internalName, Boolean remove)
+        private void HideDockContent(String internalName)
         {
             if (!_availableDocks.ContainsKey(internalName)) return;
 
@@ -313,20 +349,10 @@ namespace MSM
                 return;
             }
 
-            if (!remove)
-            {
-                _availableDocks[internalName].Hide();
-            }
-            else
-            {
-                _availableDocks[internalName].Close();
-                _availableDocks[internalName].Dispose();
-                _availableDocks.Remove(internalName);
-            }
-        }
-        private void SaveSessions()
-        {
-            DockPanel_Main.SaveAsXml("PreviousSessions.xml", Encoding.UTF8);
+            DockPanelMainContentRemoved(_availableDocks[internalName], null);
+            _availableDocks[internalName].Close();
+            _availableDocks[internalName].Dispose();
+            _availableDocks.Remove(internalName);
         }
     }
 }

@@ -48,10 +48,10 @@ namespace MSM
             this.DockPanel_Main.Location = new System.Drawing.Point(0, 25);
             this.DockPanel_Main.Margin = new System.Windows.Forms.Padding(0);
             this.DockPanel_Main.Name = "DockPanel_Main";
-            this.DockPanel_Main.Padding = new System.Windows.Forms.Padding(6);
             this.DockPanel_Main.ShowAutoHideContentOnHover = false;
             this.DockPanel_Main.Size = new System.Drawing.Size(882, 551);
             this.DockPanel_Main.TabIndex = 4;
+            this.DockPanel_Main.ContentRemoved += new System.EventHandler<WeifenLuo.WinFormsUI.Docking.DockContentEventArgs>(this.DockPanelMainContentRemoved);
             // 
             // ToolStrip
             // 
