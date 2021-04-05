@@ -38,9 +38,7 @@ namespace MSM.UIElements
 
             PropertyGrid_Settings.CategorySplitterColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
 
-            Color c = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-
-            PropertyGrid_Settings.LineColor = Color.FromArgb(c.A, c.R + 10, c.G + 10, c.B + 10);
+            PropertyGrid_Settings.LineColor = Variables.ColorPalette.ToolWindowCaptionActive.Button;
 
             PropertyGrid_Settings.CommandsBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
             PropertyGrid_Settings.HelpBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
