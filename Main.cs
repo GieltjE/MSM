@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ using System.Text;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
+using MSM.Extends.Themes;
 using MSM.Functions;
 using MSM.Service;
 using MSM.UIElements;
@@ -48,6 +49,7 @@ namespace MSM
             InitializeComponent();
 
             DockPanel_Main.Theme = new VS2015BlueTheme();
+            DockPanel_Main.Theme = new MaterialDarkTheme();
 
             Variables.MainForm = this;
             Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;

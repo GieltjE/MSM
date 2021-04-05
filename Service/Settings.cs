@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Functions;
-using WeifenLuo.WinFormsUI.Docking;
 using String = System.String;
 
 namespace MSM.Service

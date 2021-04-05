@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2018 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
 // 
 // You should have received a copy of the GNU General Public License
 // If not, see <http://www.gnu.org/licenses/>.
-// 
+//
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
