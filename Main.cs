@@ -55,13 +55,19 @@ namespace MSM
                 List<String> files = FileOperations.ReturnFiles(parentDirectory, false, includedExtensions: new[] { ".dll", ".exe", ".pdb", ".xml", ".config", ".md" });
                 foreach (String file in files)
                 {
-                    FileOperations.DeleteFile(file);
+                    while (!FileOperations.DeleteFile(file))
+                    {
+                        Thread.Sleep(200);
+                    }
                 }
 
                 files = FileOperations.ReturnFiles(FileOperations.GetRunningDirectory(), false);
                 foreach (String file in files)
                 {
-                    FileOperations.CopyFile(file, Path.Combine(parentDirectory, Path.GetFileName(file)), true);
+                    while (!FileOperations.CopyFile(file, Path.Combine(parentDirectory, Path.GetFileName(file)), true))
+                    {
+                        Thread.Sleep(200);
+                    }
                 }
 
                 ProcessStartInfo procInfo = new(Path.Combine(parentDirectory, Path.GetFileName(FileOperations.GetCurrentExecutable())))
