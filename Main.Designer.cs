@@ -42,13 +42,14 @@ namespace MSM
             this.SuspendLayout();
             // 
             // DockPanel_Main
-            //
-            this.DockPanel_Main.Theme = new MaterialDarkTheme();
+            // 
             this.DockPanel_Main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DockPanel_Main.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
+            this.DockPanel_Main.DockBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
             this.DockPanel_Main.Location = new System.Drawing.Point(0, 25);
             this.DockPanel_Main.Margin = new System.Windows.Forms.Padding(0);
             this.DockPanel_Main.Name = "DockPanel_Main";
+            this.DockPanel_Main.Padding = new System.Windows.Forms.Padding(6);
+            this.DockPanel_Main.ShowAutoHideContentOnHover = false;
             this.DockPanel_Main.Size = new System.Drawing.Size(882, 551);
             this.DockPanel_Main.TabIndex = 4;
             // 
@@ -136,6 +137,7 @@ namespace MSM
             this.Name = "Main";
             this.Text = "Multi Server Manager";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainClosing);
+            this.Shown += new System.EventHandler(this.MainShown);
             this.Resize += new System.EventHandler(this.MainResize);
             this.ToolStrip.ResumeLayout(false);
             this.ToolStrip.PerformLayout();

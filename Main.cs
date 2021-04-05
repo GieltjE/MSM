@@ -22,6 +22,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -85,13 +86,23 @@ namespace MSM
             _contextMenuStripTrayIcon.Items.AddRange(new ToolStripItem[] { _trayIconStripOpen, _trayIconStripExit });
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
-
+        }
+        private void MainShown(Object sender, EventArgs e)
+        {
             Boolean loadSuccess = false;
             if (File.Exists("PreviousSessions.xml"))
             {
                 try
                 {
                     DockPanel_Main.LoadFromXml("PreviousSessions.xml", GetContentFromPersistString);
+                    
+                    foreach (DockPane dockPane in DockPanel_Main.Panes)
+                    {
+                        foreach (IDockContent content in dockPane.Contents.Reverse())
+                        {
+                            dockPane.ActiveContent = content;
+                        }
+                    }
                     loadSuccess = true;
                 }
                 catch {}
@@ -102,13 +113,12 @@ namespace MSM
                 ToolStripShowServerListClick(null, null);
             }
 
-            if (Settings.Values.InitialSessions == Enumerations.InitialSessions.Predefined)
+            if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined) return;
+
+            IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
+            foreach (Server server in orderedList)
             {
-                IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
-                foreach (Server server in orderedList)
-                {
-                    AddServer(server, false);
-                }
+                AddServer(server, false);
             }
         }
         private IDockContent GetContentFromPersistString(String persistString)
