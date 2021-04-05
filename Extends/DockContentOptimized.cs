@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using MSM.Data;
@@ -17,5 +18,10 @@ namespace MSM.Extends
 
         private readonly SolidBrush _brush = new(Variables.ColorPalette.MainWindowActive.Background);
         protected override void OnPaintBackground(PaintEventArgs e) => e.Graphics.FillRectangle(_brush, DisplayRectangle);
+
+        protected override String GetPersistString()
+        {
+            return Name;
+        }
     }
 }

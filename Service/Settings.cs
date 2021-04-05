@@ -27,6 +27,7 @@ using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
 using MSM.Functions;
+using WeifenLuo.WinFormsUI.Docking;
 using String = System.String;
 
 namespace MSM.Service
@@ -289,23 +290,6 @@ namespace MSM.Service
         }
         [XmlIgnore] private Enumerations.InitialSessions _initialSessions = Enumerations.InitialSessions.Previous;
 
-        [Browsable(false)]
-        public Boolean ShowServerList
-        {
-            get => _showServerList;
-            set
-            {
-                Boolean update = _showServerList != value;
-                _showServerList = value;
-
-                if (update)
-                {
-                    Settings.Flush();
-                }
-            }
-        }
-        [XmlIgnore] private Boolean _showServerList = true;
-
         [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter)), XmlArrayItem(ElementName = "Keyword")]
         public String[] Keywords
         {
@@ -385,23 +369,6 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Node _node = new();
-
-        [Browsable(false)]
-        public Int32 ServerListWidth
-        {
-            get => _serverListWidth;
-            set
-            {
-                Boolean update = _serverListWidth != value;
-                _serverListWidth = value;
-
-                if (update)
-                {
-                    Settings.Flush();
-                }
-            }
-        }
-        [XmlIgnore] private Int32 _serverListWidth = 250;
     }
     [Serializable]
     [TypeConverter(typeof(ExpandableObjectConverter))]
@@ -638,6 +605,23 @@ namespace MSM.Service
 
         [XmlIgnore, Category("Basic"), DisplayName("Variables"), Arguments(Enumerations.CheckedListBoxSetting.ServerVariables)]
         public BasicPropertyBag VariablesInternal { get; set; } = new();
+
+        [Category("Basic"), DisplayName("Predefined start")]
+        public Int32 PredefinedStartIndex
+        {
+            get => _predefinedStart;
+            set
+            {
+                Boolean update = _predefinedStart != value;
+                _predefinedStart = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Int32 _predefinedStart = -1;
 
         [Browsable(false)]
         public Boolean Checked

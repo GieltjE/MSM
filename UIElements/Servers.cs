@@ -150,7 +150,7 @@ namespace MSM.UIElements
         {
             if (Treeview_NodesAndServers.SelectedNode is not {ImageIndex: 1}) return;
 
-            Variables.MainForm.AddServer(Service.Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name));
+            Variables.MainForm.AddServer(Service.Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name), true);
         }
     }
 }

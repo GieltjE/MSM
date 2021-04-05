@@ -19,6 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -83,12 +86,64 @@ namespace MSM
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
 
-            if (Settings.Values.ShowServerList)
+            Boolean loadSuccess = false;
+            if (File.Exists("PreviousSessions.xml"))
+            {
+                try
+                {
+                    DockPanel_Main.LoadFromXml("PreviousSessions.xml", GetContentFromPersistString);
+                    loadSuccess = true;
+                }
+                catch {}
+            }
+            if (!loadSuccess)
             {
                 ToolStrip_ShowServerList.Checked = true;
                 ToolStripShowServerListClick(null, null);
             }
-		}
+
+            if (Settings.Values.InitialSessions == Enumerations.InitialSessions.Predefined)
+            {
+                IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
+                foreach (Server server in orderedList)
+                {
+                    AddServer(server, false);
+                }
+            }
+        }
+        private IDockContent GetContentFromPersistString(String persistString)
+        {
+            Control content;
+            String displayName, internalName;
+            Boolean allowDuplicate = true;
+            if (String.Equals(persistString, "Serverlist", StringComparison.Ordinal))
+            {
+                content = new Servers();
+                internalName = "Serverlist";
+                displayName = "Serverlist";
+                allowDuplicate = false;
+            }
+            else if (String.Equals(persistString, "Settings", StringComparison.Ordinal))
+            {
+                content = new UIElements.Settings();
+                internalName = "Settings";
+                displayName = "Settings";
+                allowDuplicate = false;
+            }
+            else
+            {
+                if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Previous) return null;
+
+                Server server = Settings.FindServer(persistString);
+                if (server == null) return null;
+
+                content = new Terminal(server);
+                internalName = server.NodeID;
+                displayName = server.DisplayName;
+            }
+
+            return AddDockContent(displayName, internalName, content, allowDuplicate, DockState.Float, false, false);
+        }
         private void MainClosing(Object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason != CloseReason.UserClosing) return;
@@ -122,6 +177,11 @@ namespace MSM
                 NotifyIcon.Visible = true;
             }
         }
+        private void ShutDownFired()
+        {
+            SaveSessions();
+            NotifyIcon.Visible = false;
+        }
 
         public void TrayIconDoubleClick(Object sender, EventArgs e)
         {
@@ -152,11 +212,6 @@ namespace MSM
             BringToFront();
         }
 
-        private void ShutDownFired()
-        {
-            NotifyIcon.Visible = false;
-        }
-        
         private void ToolStripMenuItemAboutClick(Object sender, EventArgs e)
         {
             new About(this).Show();
@@ -167,13 +222,10 @@ namespace MSM
         }
         private void ToolStripShowServerListClick(Object sender, EventArgs e)
         {
-            Settings.Values.ShowServerList = ToolStrip_ShowServerList.Checked;
-            if (Settings.Values.ShowServerList)
+            if (ToolStrip_ShowServerList.Checked)
             {
-                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers { Width = 100}, false, DockState.DockRight);
-                dockContent.Width = Settings.Values.ServerListWidth;
+                DockContent dockContent = AddDockContent("Serverlist", "Serverlist", new Servers { Width = 100 }, false, DockState.DockRight);
                 dockContent.Closing += ServerListClosing;
-                dockContent.SizeChanged += (_, _) => { Settings.Values.ServerListWidth = dockContent.Width; };
             }
             else
             {
@@ -185,21 +237,23 @@ namespace MSM
             ToolStrip_ShowServerList.Checked = false;
         }
 
-        public void AddServer(Server server)
+        public void AddServer(Server server, Boolean save)
         {
             if (server == null) return;
 
             ThreadHelpers thread = new();
-            thread.ExecuteThreadParameter(AddServerHelper, server, false, false);
+            thread.ExecuteThreadParameter(AddServerHelper, (server, save), false, false);
         }
-        private void AddServerHelper(Object server)
+        private void AddServerHelper(Object startInfo)
         {
+            (Server server, Boolean save) = ((Server server, Boolean save))startInfo;
+
             Terminal terminal = new((Server)server);
-            AddDockContent(((Server)server).DisplayName, ((Server)server).NodeID, terminal, true);
+            AddDockContent(((Server)server).DisplayName, ((Server)server).NodeID, terminal, true, save: save);
         }
 
         private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);
-        private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document)
+        private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document, Boolean save = true, Boolean add = true)
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
             {
@@ -215,18 +269,26 @@ namespace MSM
             content.Margin = new Padding(0);
 
             newDockContent.Controls.Add(content);
-            if (InvokeRequired)
+            if (add)
             {
-                BeginInvoke(new Action<DockPanelOptimized, DockState>(newDockContent.Show), DockPanel_Main, dockState).AutoEndInvoke(this);
-            }
-            else
-            {
-                newDockContent.Show(DockPanel_Main, dockState);
+                if (InvokeRequired)
+                {
+                    BeginInvoke(new Action<DockPanelOptimized, DockState>(newDockContent.Show), DockPanel_Main, dockState).AutoEndInvoke(this);
+                }
+                else
+                {
+                    newDockContent.Show(DockPanel_Main, dockState);
+                }
             }
 
             if (!allowDuplicate)
             {
                 _availableDocks.Add(internalName, newDockContent);
+            }
+
+            if (save)
+            {
+                SaveSessions();
             }
 
             return newDockContent;
@@ -251,6 +313,10 @@ namespace MSM
                 _availableDocks[internalName].Dispose();
                 _availableDocks.Remove(internalName);
             }
+        }
+        private void SaveSessions()
+        {
+            DockPanel_Main.SaveAsXml("PreviousSessions.xml", Encoding.UTF8);
         }
     }
 }
