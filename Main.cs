@@ -96,6 +96,8 @@ namespace MSM
         }
         private void MainShown(Object sender, EventArgs e)
         {
+            Visible = false;
+
             Boolean loadSuccess = false;
             if (File.Exists("PreviousSessions.xml"))
             {
@@ -117,17 +119,22 @@ namespace MSM
             }
             if (!loadSuccess)
             {
-                ToolStrip_ShowServerList.Checked = true;
                 ToolStripShowServerListClick(null, null);
             }
 
-            if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined) return;
+            if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined)
+            {
+                Visible = true;
+                return;
+            }
 
             IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
             foreach (Server server in orderedList)
             {
                 AddServer(server, false);
             }
+
+            Visible = true;
         }
         private IDockContent GetContentFromPersistString(String persistString)
         {
@@ -276,8 +283,7 @@ namespace MSM
             {
                 ToolStrip_ShowServerList.Checked = false;
             }
-            else
-            if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
+            else if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
             {
                 ToolStrip_Settings.Checked = false;
             }

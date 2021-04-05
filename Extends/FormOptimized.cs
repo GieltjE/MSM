@@ -47,11 +47,7 @@ namespace MSM.Extends
         {
             if (DesignMode) return;
 
-            if (_backBrush == null)
-            {
-                _backBrush = new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
-            }
-
+            _backBrush ??= new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
             e.Graphics.FillRectangle(_backBrush, DisplayRectangle);
         }
     }

@@ -101,15 +101,14 @@ namespace MSM
             // ToolStrip_Settings
             // 
             this.ToolStrip_Settings.Name = "ToolStrip_Settings";
-            this.ToolStrip_Settings.Size = new System.Drawing.Size(148, 22);
+            this.ToolStrip_Settings.Size = new System.Drawing.Size(180, 22);
             this.ToolStrip_Settings.Text = "Settings";
             this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
             // 
             // ToolStrip_ShowServerList
             // 
-            this.ToolStrip_ShowServerList.CheckOnClick = true;
             this.ToolStrip_ShowServerList.Name = "ToolStrip_ShowServerList";
-            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(148, 22);
+            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(180, 22);
             this.ToolStrip_ShowServerList.Text = "View serverlist";
             this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripShowServerListClick);
             // 
