@@ -92,7 +92,7 @@ namespace MSM.Service
                     {
                         if (FileOperations.CreateDirectory(updateDirectory))
                         {
-                            MemoryStream stream = new(webClient.DownloadData(resultDeserialized.assets[0].browser_download_url));
+                            MemoryStream stream = new(webClient.DownloadData(asset.browser_download_url));
                             FastZip fastZip = new();
                             fastZip.ExtractZip(stream, updateDirectory, FastZip.Overwrite.Always, null, null, null, true, true);
 
