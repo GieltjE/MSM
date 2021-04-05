@@ -84,8 +84,7 @@ namespace MSM
             this.Label_SmashIcons.Name = "Label_SmashIcons";
             this.Label_SmashIcons.Size = new System.Drawing.Size(663, 18);
             this.Label_SmashIcons.TabIndex = 8;
-            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIc" +
-    "ons) (Flaticon Basic License)";
+            this.Label_SmashIcons.Text = "[Icons] (https://www.flaticon.com/packs/essential-collection, Designed by SmashIcons) (Flaticon Basic License)";
             // 
             // Label_DockPanelSuite
             // 
@@ -95,8 +94,7 @@ namespace MSM
             this.Label_DockPanelSuite.Name = "Label_DockPanelSuite";
             this.Label_DockPanelSuite.Size = new System.Drawing.Size(663, 18);
             this.Label_DockPanelSuite.TabIndex = 7;
-            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)" +
-    "";
+            this.Label_DockPanelSuite.Text = "[DockPanelSuite] (https://github.com/dockpanelsuite/dockpanelsuite) (MIT License)";
             // 
             // Label_NewtonsoftJson
             // 
@@ -116,8 +114,7 @@ namespace MSM
             this.Label_QuartzNet.Name = "Label_QuartzNet";
             this.Label_QuartzNet.Size = new System.Drawing.Size(663, 18);
             this.Label_QuartzNet.TabIndex = 5;
-            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2." +
-    "0)";
+            this.Label_QuartzNet.Text = "[Quartz.net] (https://github.com/quartznet/quartznet) (Apache License, Version 2.0)";
             // 
             // Label_GeneralCopyright
             // 
