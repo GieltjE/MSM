@@ -75,10 +75,10 @@ namespace MSM.Service
                     UI.ShowMessage(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available!", "Update check", MessageBoxIcon.Asterisk);
                 }
 #if !DEBUG
-                    else if(resultDeserialized.tag_name < currentVersion)
-                    {
-                        UI.ShowMessage(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
-                    }
+                else if(resultDeserialized.tag_name < currentVersion)
+                {
+                    UI.ShowMessage(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
+                }
 #endif
             }
             catch (Exception exception)

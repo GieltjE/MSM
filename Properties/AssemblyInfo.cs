@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MSM - Multi Server Manager")]
-[assembly: AssemblyCopyright("Copyright © 2016 - 2018, Michiel Hazelhof")]
+[assembly: AssemblyCopyright("Copyright © 2016 - 2021, Michiel Hazelhof")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
