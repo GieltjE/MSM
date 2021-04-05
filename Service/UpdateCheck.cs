@@ -35,9 +35,13 @@ namespace MSM.Service
 {
     public static class UpdateCheck
     {
-        public static void StartUpdateCheck()
+        public static void StartUpdateCronJob()
         {
             Cron.CreateJob<UpdateCheckJob>(12, 0, 0, true);
+        }
+        public static void TriggerUpdateCheckJob()
+        {
+            Cron.TriggerJob<UpdateCheckJob>();
         }
         public static void StopUpdateCheck()
         {

@@ -95,7 +95,7 @@ namespace MSM
 
             if (Settings.Values.CheckForUpdates)
             {
-                UpdateCheck.StartUpdateCheck();
+                UpdateCheck.StartUpdateCronJob();
             }
             
             Variables.MainForm.DockPanel_Main.Theme = Settings.Values.Theme switch
@@ -287,6 +287,10 @@ namespace MSM
         private void ToolStripMenuItemAboutClick(Object sender, EventArgs e)
         {
             new About(this).Show();
+        }
+        private void ToolStripMenuItemCheckForUpdateClick(Object sender, EventArgs e)
+        {
+            UpdateCheck.TriggerUpdateCheckJob();
         }
         private void ToolStripSettingsClick(Object sender, EventArgs e)
         {

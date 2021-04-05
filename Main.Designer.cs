@@ -33,6 +33,7 @@ namespace MSM
             this.DockPanel_Main = new MSM.Extends.DockPanelOptimized();
             this.ToolStrip = new MSM.Extends.ToolstripOptimized();
             this.ToolStripButton_Help = new MSM.Extends.ToolStripDropDownButtonOptimized();
+            this.ToolStripMenuItem_CheckForUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_General = new MSM.Extends.ToolStripDropDownButtonOptimized();
             this.ToolStrip_Settings = new System.Windows.Forms.ToolStripMenuItem();
@@ -74,16 +75,24 @@ namespace MSM
             this.ToolStripButton_Help.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStripButton_Help.DropDownDirection = System.Windows.Forms.ToolStripDropDownDirection.BelowLeft;
             this.ToolStripButton_Help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_CheckForUpdate,
             this.ToolStripMenuItem_About});
             this.ToolStripButton_Help.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.ToolStripButton_Help.Name = "ToolStripButton_Help";
             this.ToolStripButton_Help.Size = new System.Drawing.Size(45, 22);
             this.ToolStripButton_Help.Text = "Help";
             // 
+            // ToolStripMenuItem_CheckForUpdate
+            // 
+            this.ToolStripMenuItem_CheckForUpdate.Name = "ToolStripMenuItem_CheckForUpdate";
+            this.ToolStripMenuItem_CheckForUpdate.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_CheckForUpdate.Text = "Check for update";
+            this.ToolStripMenuItem_CheckForUpdate.Click += new System.EventHandler(this.ToolStripMenuItemCheckForUpdateClick);
+            // 
             // ToolStripMenuItem_About
             // 
             this.ToolStripMenuItem_About.Name = "ToolStripMenuItem_About";
-            this.ToolStripMenuItem_About.Size = new System.Drawing.Size(107, 22);
+            this.ToolStripMenuItem_About.Size = new System.Drawing.Size(180, 22);
             this.ToolStripMenuItem_About.Text = "About";
             this.ToolStripMenuItem_About.Click += new System.EventHandler(this.ToolStripMenuItemAboutClick);
             // 
@@ -101,14 +110,14 @@ namespace MSM
             // ToolStrip_Settings
             // 
             this.ToolStrip_Settings.Name = "ToolStrip_Settings";
-            this.ToolStrip_Settings.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_Settings.Size = new System.Drawing.Size(148, 22);
             this.ToolStrip_Settings.Text = "Settings";
             this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
             // 
             // ToolStrip_ShowServerList
             // 
             this.ToolStrip_ShowServerList.Name = "ToolStrip_ShowServerList";
-            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(148, 22);
             this.ToolStrip_ShowServerList.Text = "View serverlist";
             this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripShowServerListClick);
             // 
@@ -153,5 +162,6 @@ namespace MSM
         private ToolStripDropDownButtonOptimized ToolStrip_General;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_CheckForUpdate;
     }
 }
