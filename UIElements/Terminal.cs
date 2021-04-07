@@ -66,7 +66,7 @@ namespace MSM.UIElements
             }
             parameters.Add(_server.Hostname);
 
-            TerminalControl = new AppControl(Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+            TerminalControl = new AppControl(this, Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
             Controls.Add(TerminalControl);
             TerminalControl.Load();
         }

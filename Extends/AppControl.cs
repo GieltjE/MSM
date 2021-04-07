@@ -26,15 +26,16 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
-using MSM.Functions;
+using MSM.UIElements;
 
 namespace MSM.Extends
 {
     public class AppControl : ControlOptimized
     {
         // This is a simplified/butchered app control, Chrome doesn't like being pushed around
-        public AppControl(String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables, IntPtr windowHandle)
+        public AppControl(Terminal terminal, String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables, IntPtr windowHandle)
         {
+            _terminal = terminal;
             _windowHandle = windowHandle;
             _environment = environmentVariables;
 
@@ -91,6 +92,7 @@ namespace MSM.Extends
             _childProcess?.Dispose();
         }
 
+        private readonly Terminal _terminal;
         private Boolean _iscreated;
         private Boolean _isdisposed;
         internal IntPtr ChildHandle = IntPtr.Zero;
@@ -112,7 +114,8 @@ namespace MSM.Extends
                     Arguments = _parameters,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Maximized,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    ErrorDialogParentHandle = Variables.MainForm.Handle, 
                 };
                 foreach (KeyValuePair<String, String> keyValuePair in _environment)
                 {
@@ -156,7 +159,7 @@ namespace MSM.Extends
                 // Attach handle to our form and apply the window style
                 NativeMethods.SetWindowLongPtr(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
 
-                OnSizeChanged(null, null);
+                //OnSizeChanged(null, null);
 
                 _childProcess.EnableRaisingEvents = true;
                 _childProcess.Exited += ChildProcessExited;
@@ -174,11 +177,10 @@ namespace MSM.Extends
             _isdisposed = false;
             LoadSuccess = true;
         }
-        public event ExtensionMethods.CustomDelegate ProcessExited;
-
+        
         private void ChildProcessExited(Object sender, EventArgs e)
         {
-            ProcessExited?.Invoke();
+            Service.Events.OnProcessExited(_terminal);
         }
     }
 }

@@ -93,11 +93,6 @@ namespace MSM
             InitializeComponent();
             Variables.MainForm = this;
 
-            if (Settings.Values.CheckForUpdates)
-            {
-                UpdateCheck.StartUpdateCronJob();
-            }
-            
             Variables.MainForm.DockPanel_Main.Theme = Settings.Values.Theme switch
             {
                 Enumerations.Theme.Blue => new VS2015BlueTheme(),
@@ -113,6 +108,7 @@ namespace MSM
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
             Service.Events.ShutDownFired += ShutDownFired;
+            Service.Events.ProcessExited += EventsOnProcessExited;
 
             if (Settings.Values.MaximizeOnStart)
             {
@@ -249,9 +245,27 @@ namespace MSM
                 NotifyIcon.Visible = true;
             }
         }
+        private void EventsOnProcessExited(Terminal terminal)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Terminal>(EventsOnProcessExited), terminal);
+                return;
+            }
+            foreach (DockPane dockPane in DockPanel_Main.Panes)
+            {
+                foreach (IDockContent dockPaneContent in dockPane.Contents)
+                {
+                    if (dockPaneContent is not DockContentOptimized dockContent || dockContent.Controls[0] != terminal) continue;
+                    dockContent.Close();
+                    return;
+                }
+            }
+        }
         private void ShutDownFired()
         {
-            SaveSessions();
+            Service.Events.ShutDownFired -= ShutDownFired;
+            Service.Events.ProcessExited -= EventsOnProcessExited;
             NotifyIcon.Visible = false;
         }
 
@@ -317,32 +331,6 @@ namespace MSM
             }
         }
 
-        private void DockPanelMainContentRemoved(Object sender, DockContentEventArgs e)
-        {
-            DockContentOptimized activeContent = sender switch
-            {
-                DockPanelOptimized optimized => (DockContentOptimized)optimized.ActiveContent,
-                DockContentOptimized optimized => optimized,
-                _ => null
-            };
-            if (activeContent == null) return;
-            if (!_availableDocks.ContainsKey(activeContent.Name)) return;
-
-            if (String.Equals(activeContent.Name, "Serverlist", StringComparison.Ordinal))
-            {
-                ToolStrip_ShowServerList.Checked = false;
-            }
-            else if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
-            {
-                ToolStrip_Settings.Checked = false;
-            }
-
-            if (sender is not DockContentOptimized)
-            {
-                HideDockContent(activeContent.Name);
-            }
-        }
-
         public void AddServer(Server server, Boolean save)
         {
             if (server == null) return;
@@ -402,6 +390,32 @@ namespace MSM
 
             return newDockContent;
         }
+        
+        private void DockPanelMainContentRemoved(Object sender, DockContentEventArgs e)
+        {
+            DockContentOptimized activeContent = (DockContentOptimized)e.Content;
+
+            if (activeContent == null) return;
+            if (!_availableDocks.ContainsKey(activeContent.Name)) return;
+
+            if (String.Equals(activeContent.Name, "Serverlist", StringComparison.Ordinal))
+            {
+                ToolStrip_ShowServerList.Checked = false;
+            }
+            else if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
+            {
+                ToolStrip_Settings.Checked = false;
+            }
+
+            if (_availableDocks.ContainsKey(activeContent.Name))
+            {
+                DockContentOptimized item = _availableDocks[activeContent.Name];
+                item?.Dispose();
+                _availableDocks.Remove(activeContent.Name);
+            }
+
+            SaveSessions();
+        }
         private void HideDockContent(String internalName)
         {
             if (!_availableDocks.ContainsKey(internalName)) return;
@@ -411,11 +425,8 @@ namespace MSM
                 _availableDocks.Remove(internalName);
                 return;
             }
-
-            DockPanelMainContentRemoved(_availableDocks[internalName], null);
+            
             _availableDocks[internalName].Close();
-            _availableDocks[internalName].Dispose();
-            _availableDocks.Remove(internalName);
         }
     }
 }
