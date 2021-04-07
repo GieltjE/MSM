@@ -245,23 +245,6 @@ namespace MSM
                 NotifyIcon.Visible = true;
             }
         }
-        private void EventsOnProcessExited(Terminal terminal)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<Terminal>(EventsOnProcessExited), terminal);
-                return;
-            }
-            foreach (DockPane dockPane in DockPanel_Main.Panes)
-            {
-                foreach (IDockContent dockPaneContent in dockPane.Contents)
-                {
-                    if (dockPaneContent is not DockContentOptimized dockContent || dockContent.Controls[0] != terminal) continue;
-                    dockContent.Close();
-                    return;
-                }
-            }
-        }
         private void ShutDownFired()
         {
             Service.Events.ShutDownFired -= ShutDownFired;
@@ -331,6 +314,24 @@ namespace MSM
             }
         }
 
+        private void EventsOnProcessExited(Terminal terminal)
+        {
+            if (!Settings.Values.CloseTabOnCrash) return;
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Terminal>(EventsOnProcessExited), terminal);
+                return;
+            }
+            foreach (DockPane dockPane in DockPanel_Main.Panes)
+            {
+                foreach (IDockContent dockPaneContent in dockPane.Contents)
+                {
+                    if (dockPaneContent is not DockContentOptimized dockContent || dockContent.Controls[0] != terminal) continue;
+                    dockContent.Close();
+                    return;
+                }
+            }
+        }
         public void AddServer(Server server, Boolean save)
         {
             if (server == null) return;

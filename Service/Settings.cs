@@ -317,6 +317,23 @@ namespace MSM.Service
         }
         [XmlIgnore] private Enumerations.InitialSessions _initialSessions = Enumerations.InitialSessions.Previous;
 
+        [Category("Sessions"), DisplayName("Close session tab on crash"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean CloseTabOnCrash
+        {
+            get => _closeTabOnCrash;
+            set
+            {
+                Boolean update = _closeTabOnCrash != value;
+                _closeTabOnCrash = value;
+
+                if (update)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _closeTabOnCrash = true;
+
         [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter)), XmlArrayItem(ElementName = "Keyword")]
         public String[] Keywords
         {
