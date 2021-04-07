@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using MSM.Data;
 using MSM.Service;
 
 namespace MSM.Functions
@@ -99,9 +100,9 @@ namespace MSM.Functions
         }
         private static void HandleException(AggregateException exception)
         {
-            foreach (Exception ex in exception.Flatten().InnerExceptions)
+            foreach (Exception exception1 in exception.InnerExceptions)
             {
-                Logging.LogErrorItem(ex);
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Error, "Could not end invoke", exception1);
             }
         }
 

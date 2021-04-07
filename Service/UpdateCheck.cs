@@ -17,7 +17,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,17 +34,14 @@ namespace MSM.Service
 {
     public static class UpdateCheck
     {
-        public static void StartUpdateCronJob()
+        public static void StartUpdateCronJob() => Cron.CreateJob<UpdateCheckJob>("UpdateJob", 12, 0, 0, true);
+        public static void TriggerUpdateCheckJob() => Cron.TriggerJob<UpdateCheckJob>("UpdateJob");
+        public static void StopUpdateCheck() => Cron.RemoveJob<UpdateCheckJob>("UpdateJob");
+        public static Boolean HasUpdateCheck()
         {
-            Cron.CreateJob<UpdateCheckJob>(12, 0, 0, true);
-        }
-        public static void TriggerUpdateCheckJob()
-        {
-            Cron.TriggerJob<UpdateCheckJob>();
-        }
-        public static void StopUpdateCheck()
-        {
-            Cron.RemoveJob<UpdateCheckJob>();
+            Task<Boolean> task = Cron.HasJob<UpdateCheckJob>("UpdateJob");
+            task.Wait();
+            return task.Result;
         }
 
         internal static void CheckForUpdates()
@@ -122,7 +118,7 @@ namespace MSM.Service
             }
             catch (Exception exception)
             {
-                Logging.LogErrorItem(exception);
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Error, "Could not check for updates", exception);
             }
         }
 

@@ -19,14 +19,28 @@
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Functions;
+using MSM.UIElements;
 
 namespace MSM.Service
 {
     public static class Events
     {
+        public static event ExtensionMethods.CustomDelegate<Terminal> ProcessExited;
+        public static void OnProcessExited(Terminal terminal) => ProcessExited?.Invoke(terminal);
+
         public static event ExtensionMethods.CustomDelegate ShutDownFired;
         public static void ShutDown()
         {
+            try
+            {
+                if (Settings.Values.CheckForUpdates)
+                {
+                    UpdateCheck.StopUpdateCheck();
+                }
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch {}
+
             Variables.ShutDownFired = true;
             ShutDownFired?.Invoke();
 

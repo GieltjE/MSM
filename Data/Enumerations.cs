@@ -114,5 +114,25 @@ namespace MSM.Data
             Blue,
             Light,
         }
+
+        [Flags]
+        public enum LogTarget : Byte
+        {
+            All = Byte.MaxValue,
+            General = 1,
+            Session = 2,
+
+        }
+
+        [Flags]
+        public enum LogLevel : Byte
+        {
+            All = Byte.MaxValue,
+            Info = 1,
+            Warn = 2,
+            Error = 3,
+            Fatal = 4,
+            Debug = 5,
+        }
     }
 }

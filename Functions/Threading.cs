@@ -21,7 +21,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
-using MSM.Service;
 
 namespace MSM.Functions
 {
@@ -34,36 +33,7 @@ namespace MSM.Functions
         internal void StartThread(Boolean staThread, Object threadObject = null, ThreadPriority priority = ThreadPriority.Normal)
         {
             MasterThread = threadObject == null ? new Thread(ThreadStartFunction) { Priority = priority } : new Thread(ParameterizedThreadStartFunction) { Priority = priority };
-#if DEBUG
-            if (String.IsNullOrEmpty(MasterThread.Name))
-            {
-                try
-                {
-                    if (threadObject == null)
-                    {
-                        String name = ThreadStartFunction.Method.Name;
-                        if (ThreadStartFunction.Target != null)
-                        {
-                            name += "|" + ThreadStartFunction.Target;
-                        }
-                        MasterThread.Name = name;
-                    }
-                    else
-                    {
-                        String name = ParameterizedThreadStartFunction.Method.Name;
-                        if (ParameterizedThreadStartFunction.Target != null)
-                        {
-                            name += "|" + ParameterizedThreadStartFunction.Target;
-                        }
-                        MasterThread.Name = name;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Logging.LogErrorItem(exception);
-                }
-            }
-#endif
+
             if (staThread)
             {
                 MasterThread.SetApartmentState(ApartmentState.STA);
@@ -98,11 +68,7 @@ retry:
         private Threading _thread;
         private Threading _waitThread;
         public event ExtensionMethods.CustomDelegate EventComplete;
-
-        private void FireEventComplete()
-        {
-            EventComplete?.Invoke();
-        }
+        private void FireEventComplete() => EventComplete?.Invoke();
 
 #if DEBUG
         public void ExecuteThread(ThreadStart threadStart, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal, [CallerMemberName] String caller = null, [CallerLineNumber] Int32 lineNumber = 0)
@@ -121,7 +87,7 @@ retry:
                 }
                 else
                 {
-                    while (_thread.MasterThread != null && _thread.MasterThread.IsAlive && !Variables.ShutDownFired)
+                    while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
                     {
                         if (doEvents)
                         {
@@ -130,6 +96,7 @@ retry:
                             {
                                 Application.DoEvents();
                             }
+                            // ReSharper disable once EmptyGeneralCatchClause
                             catch {}
                         }
                         Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
@@ -151,7 +118,7 @@ retry:
 
             if (waitForCompletion)
             {
-                while (_thread.MasterThread != null && _thread.MasterThread.IsAlive && !Variables.ShutDownFired)
+                while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
                 {
                     if (doEvents) Application.DoEvents();
                     Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
@@ -168,7 +135,7 @@ retry:
 
         private void WaitForCompletion()
         {
-            while (_thread.MasterThread != null && _thread.MasterThread.IsAlive && !Variables.ShutDownFired)
+            while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
             {
                 Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
             }
@@ -182,15 +149,12 @@ retry:
             {
                 _thread.MasterThread.Abort();
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch {}
         }
         public Boolean Completed()
         {
-            if (_thread?.MasterThread == null)
-            {
-                return true;
-            }
-            return !_thread.MasterThread.IsAlive;
+            return _thread?.MasterThread == null || !_thread.MasterThread.IsAlive;
         }
     }
 }

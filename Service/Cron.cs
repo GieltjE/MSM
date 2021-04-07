@@ -65,13 +65,13 @@ namespace MSM.Service
 
         // 0/5 means 0, 5, 10, .. 1/5 means 1, 6, 11 .. 2/5 means 2, 7, 12
         // http://quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger
-        public static async void CreateJob<T>(String second, String minute, String hour, String dayOfMonth = "*", Enumerations.CronMonth month = Enumerations.CronMonth.All, Enumerations.CronDayOfTheWeek dayOfweek = Enumerations.CronDayOfTheWeek.All, String year = "*", Boolean immediatlyFireAfterMisfire = true) where T : IJob
+        public static async void CreateJob<T>(String identifier, String second, String minute, String hour, String dayOfMonth = "*", Enumerations.CronMonth month = Enumerations.CronMonth.All, Enumerations.CronDayOfTheWeek dayOfweek = Enumerations.CronDayOfTheWeek.All, String year = "*", Boolean immediatlyFireAfterMisfire = true) where T : IJob
         {
             if (Scheduler.IsShutdown) return;
 
             await SchedulerSemaphore.WaitAsync();
 
-            String name = typeof(T).Namespace + typeof(T).Name;
+            String name = GetSafeName<T>(identifier);
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (hasJob.Result)
@@ -105,25 +105,25 @@ namespace MSM.Service
                 }
                 catch (Exception exception)
                 {
-                    Logging.LogErrorItem(exception);
+                    Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Cron failure (" + name + ")", exception);
                 }
             }
             catch (Exception exception)
             {
-                Logging.LogErrorItem(exception);
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Cron failure (" + name + ")", exception);
             }
             finally
             {
                 SchedulerSemaphore.Release(1);
             }
         }
-        public static async void CreateJob<T>(Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately, Boolean refireImmediately = true) where T : IJob
+        public static async void CreateJob<T>(String identifier, Int32 intervalHours, Int32 intervalMinutes, Int32 intervalSeconds, Boolean fireImmediately, Boolean refireImmediately = true) where T : IJob
         {
             if (Scheduler.IsShutdown) return;
 
             await SchedulerSemaphore.WaitAsync();
 
-            String name = typeof(T).Namespace + typeof(T).Name;
+            String name = GetSafeName<T>(identifier);
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (hasJob.Result)
@@ -153,20 +153,20 @@ namespace MSM.Service
             }
             catch (Exception exception)
             {
-                Logging.LogErrorItem(exception);
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Cron failure (" + name + ")", exception);
             }
             finally
             {
                 SchedulerSemaphore.Release();
             }
         }
-        public static async void TriggerJob<T>()
+        public static async void TriggerJob<T>(String identifier)
         {
             if (Scheduler.IsShutdown) return;
 
             await SchedulerSemaphore.WaitAsync();
 
-            String name = typeof(T).Namespace + typeof(T).Name;
+            String name = GetSafeName<T>(identifier);
             Task<Boolean> hasJob = HasJob(name, false);
             hasJob.Wait();
             if (!hasJob.Result)
@@ -181,14 +181,14 @@ namespace MSM.Service
             }
             catch (Exception exception)
             {
-                Logging.LogErrorItem(exception);
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Cron failure (" + name + ")", exception);
             }
             finally
             {
                 SchedulerSemaphore.Release();
             }
         }
-        public static async void RemoveJob<T>()
+        public static async void RemoveJob<T>(String identifier)
         {
             if (Scheduler.IsShutdown) return;
 
@@ -196,7 +196,7 @@ namespace MSM.Service
 
             try
             {
-                String name = typeof(T).Namespace + typeof(T).Name;
+                String name = GetSafeName<T>(identifier);
                 Task<Boolean> hasJob = HasJob(name, false);
                 hasJob.Wait();
                 if (!hasJob.Result) return;
@@ -210,7 +210,7 @@ namespace MSM.Service
                 SchedulerSemaphore.Release();
             }
         }
-        public static Boolean IsRunning<T>()
+        public static Boolean IsRunning<T>(String identifier)
         {
             if (Scheduler.IsShutdown) return false;
 
@@ -218,7 +218,7 @@ namespace MSM.Service
 
             try
             {
-                String name = typeof(T).Namespace + typeof(T).Name;
+                String name = GetSafeName<T>(identifier);
                 Task<Boolean> hasJob = HasJob(name, false);
                 hasJob.Wait();
                 if (!hasJob.Result) return false;
@@ -237,9 +237,9 @@ namespace MSM.Service
 
             return false;
         }
-        public static Task<Boolean> HasJob<T>()
+        public static Task<Boolean> HasJob<T>(String identifier)
         {
-            return HasJob(typeof(T).Namespace + typeof(T).Name);
+            return HasJob(GetSafeName<T>(identifier));
         }
         private static async Task<Boolean> HasJob(String triggerIdentity, Boolean performLock = true)
         {
@@ -271,6 +271,11 @@ namespace MSM.Service
 
             return false;
         }
+
+        private static String GetSafeName<T>(String identifier)
+        {
+            return typeof(T).Namespace + "-" + typeof(T).Name + "-" + identifier;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
@@ -298,7 +303,7 @@ namespace MSM.Service
 
             if (jobException != null)
             {
-                Logging.LogErrorItem(jobException.GetBaseException());
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Cron failure (" + context.Trigger.Key.Name + ")", jobException);
             }
             return Task.CompletedTask;
         }

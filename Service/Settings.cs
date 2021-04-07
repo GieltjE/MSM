@@ -149,6 +149,20 @@ namespace MSM.Service
             {
                 Boolean update = _checkForUpdates != value;
                 _checkForUpdates = value;
+                if (!value)
+                {
+                    if (UpdateCheck.HasUpdateCheck())
+                    {
+                        UpdateCheck.StopUpdateCheck();
+                    }
+                }
+                else
+                {
+                    if (!UpdateCheck.HasUpdateCheck())
+                    {
+                        UpdateCheck.StartUpdateCronJob();
+                    }
+                }
 
                 if (update)
                 {
