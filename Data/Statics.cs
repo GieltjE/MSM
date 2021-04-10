@@ -17,12 +17,13 @@
 //
 
 using MSM.Extends;
+using MSM.Functions;
 
 namespace MSM.Data
 {
     public static class Statics
     {
         public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
-        public static readonly log4net.ILog Logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static ChildProcessManager ChildProcessManager;
     }
 }

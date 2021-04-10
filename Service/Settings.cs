@@ -344,6 +344,37 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _closeTabOnCrash = true;
 
+        [Category("Sessions"), DisplayName("Force close all sessions on application crash/closure"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean ForceCloseSessionsOnCrash
+        {
+            get => _forceCloseSessionsOnCrash;
+            set
+            {
+                Boolean update = _forceCloseSessionsOnCrash != value;
+                _forceCloseSessionsOnCrash = value;
+
+                if (Settings.Values != null)
+                {
+                    if (value || Statics.ChildProcessManager == null)
+                    {
+                        Statics.ChildProcessManager = new ChildProcessManager();
+                        Statics.ChildProcessManager.AddProcess(Process.GetCurrentProcess().SafeHandle);
+                    }
+                    else
+                    {
+                        Statics.ChildProcessManager?.Dispose();
+                        Statics.ChildProcessManager = null;
+                    }
+                }
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _forceCloseSessionsOnCrash = true;
+
         [Category("Servers"), DisplayName("Available keywords"), TypeConverter(typeof(CsvConverter)), XmlArrayItem(ElementName = "Keyword")]
         public String[] Keywords
         {

@@ -18,6 +18,7 @@
 
 using System;
 using System.Drawing;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -54,9 +55,33 @@ namespace MSM.Data
         private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong);
         public static IntPtr SetWindowLongPtr(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong) => IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
 
-        [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern Boolean DeleteFile(String name);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+        internal static extern Boolean CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        internal static extern IntPtr CreateJobObject(IntPtr a, String lpName);
+
+        [DllImport("kernel32.dll")]
+        internal static extern Boolean SetInformationJobObject(SafeJobHandle hJob, NativeMethods.JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern Boolean AssignProcessToJobObject(SafeJobHandle job, SafeProcessHandle process);
+
+        public enum JobObjectInfoType
+        {
+            AssociateCompletionPortInformation = 7,
+            BasicLimitInformation = 2,
+            BasicUIRestrictions = 4,
+            EndOfJobTimeInformation = 6,
+            ExtendedLimitInformation = 9,
+            SecurityLimitInformation = 5,
+            GroupInformation = 11
+        }
 
         public enum GWL : SByte
         {
@@ -139,6 +164,25 @@ namespace MSM.Data
             WS_EX_NOACTIVATE = 0x08000000
         }
 
+        [Flags]
+        public enum JobObjectLimitFlags : UInt32
+        {
+            JOB_OBJECT_LIMIT_ACTIVE_PROCESS = 0x00000008,
+            JOB_OBJECT_LIMIT_AFFINITY = 0x00000010,
+            JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x00000800,
+            JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION = 0x00000400,
+            JOB_OBJECT_LIMIT_JOB_MEMORY = 0x00000200,
+            JOB_OBJECT_LIMIT_JOB_TIME = 0x00000004,
+            JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000,
+            JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME = 0x00000040,
+            JOB_OBJECT_LIMIT_PRIORITY_CLASS = 0x00000020,
+            JOB_OBJECT_LIMIT_PROCESS_MEMORY = 0x00000100,
+            JOB_OBJECT_LIMIT_PROCESS_TIME = 0x00000002,
+            JOB_OBJECT_LIMIT_SCHEDULING_CLASS = 0x00000080,
+            JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK = 0x00001000,
+            JOB_OBJECT_LIMIT_WORKINGSET = 0x00000001
+        }
+
         public enum ShowWindowCommands : Byte
         {
             // Hides the window and activates another window.
@@ -201,5 +245,55 @@ namespace MSM.Data
 
             public Rect(Rectangle r) : this(r.Left, r.Top, r.Right, r.Bottom) {}
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct IO_COUNTERS
+        {
+            public UInt64 ReadOperationCount;
+            public UInt64 WriteOperationCount;
+            public UInt64 OtherOperationCount;
+            public UInt64 ReadTransferCount;
+            public UInt64 WriteTransferCount;
+            public UInt64 OtherTransferCount;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct JOBOBJECT_BASIC_LIMIT_INFORMATION
+        {
+            public Int64 PerProcessUserTimeLimit;
+            public Int64 PerJobUserTimeLimit;
+            public UInt32 LimitFlags;
+            public UIntPtr MinimumWorkingSetSize;
+            public UIntPtr MaximumWorkingSetSize;
+            public UInt32 ActiveProcessLimit;
+            public UIntPtr Affinity;
+            public UInt32 PriorityClass;
+            public UInt32 SchedulingClass;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SECURITY_ATTRIBUTES
+        {
+            public UInt32 nLength;
+            public IntPtr lpSecurityDescriptor;
+            public Int32 bInheritHandle;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+        {
+            public JOBOBJECT_BASIC_LIMIT_INFORMATION BasicLimitInformation;
+            public IO_COUNTERS IoInfo;
+            public UIntPtr ProcessMemoryLimit;
+            public UIntPtr JobMemoryLimit;
+            public UIntPtr PeakProcessMemoryUsed;
+            public UIntPtr PeakJobMemoryUsed;
+        }
+    }
+
+    internal sealed class SafeJobHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public SafeJobHandle(IntPtr handle) : base(true) => SetHandle(handle);
+        protected override Boolean ReleaseHandle() => NativeMethods.CloseHandle(handle);
     }
 }
