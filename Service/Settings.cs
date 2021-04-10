@@ -19,10 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Design;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using System.Xml;
 using System.Xml.Serialization;
 using MSM.Data;
 using MSM.Extends;
@@ -51,6 +54,7 @@ namespace MSM.Service
                 Variables.SettingsFileChosen = UI.AskQuestion(Variables.MainForm, "Create portable settings file?", "No settings file found", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes ? Variables.PortableSettingsFile : Variables.NormalSettingsFile;
                 FileOperations.CreateDirectory(Path.GetDirectoryName(Variables.SettingsFileChosen));
                 FileOperations.CreateFile(Variables.SettingsFileChosen);
+                Values = new Values();
                 Flush();
             }
         }
@@ -59,10 +63,8 @@ namespace MSM.Service
             _readingSettings = true;
             try
             {
-                using (StreamReader streamReader = new(Variables.SettingsFileChosen))
-                {
-                    Values = (Values)XMLSerializer.Deserialize(streamReader);
-                }
+                using XmlTextReader xmlReader = new(Variables.SettingsFileChosen);
+                Values = (Values)XMLSerializer.Deserialize(xmlReader);
                 UpdateNodesAndServers();
             }
             catch
@@ -72,7 +74,7 @@ namespace MSM.Service
             _readingSettings = false;
         }
 
-        public static Values Values = new();
+        public static Values Values;
         public static event ExtensionMethods.CustomDelegate OnSettingsUpdatedEvent;
         public static event ExtensionMethods.CustomDelegate OnSettingsServerUpdatedEvent;
         public static void FireOnSettingsServerUpdatedEvent()
@@ -141,7 +143,7 @@ namespace MSM.Service
     [Serializable, TypeConverter(typeof(ExpandableObjectConverter))]
     public class Values
     {
-        [Category("Basic"), DisplayName("Automatically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
+        [Category("Basic"), DisplayName("Periodically check for updates"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean CheckForUpdates
         {
             get => _checkForUpdates;
@@ -149,22 +151,26 @@ namespace MSM.Service
             {
                 Boolean update = _checkForUpdates != value;
                 _checkForUpdates = value;
-                if (!value)
+
+                if (Settings.Values != null)
                 {
-                    if (UpdateCheck.HasUpdateCheck())
+                    if (!value)
                     {
-                        UpdateCheck.StopUpdateCheck();
+                        if (UpdateCheck.HasUpdateCheck())
+                        {
+                            UpdateCheck.StopUpdateCheck();
+                        }
                     }
-                }
-                else
-                {
-                    if (!UpdateCheck.HasUpdateCheck())
+                    else
                     {
-                        UpdateCheck.StartUpdateCronJob();
+                        if (!UpdateCheck.HasUpdateCheck())
+                        {
+                            UpdateCheck.StartUpdateCronJob();
+                        }
                     }
                 }
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -181,7 +187,7 @@ namespace MSM.Service
                 Boolean update = _theme != value;
                 _theme = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -198,7 +204,7 @@ namespace MSM.Service
                 Boolean update = _minimizeToTray != value;
                 _minimizeToTray = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -213,18 +219,22 @@ namespace MSM.Service
             set
             {
                 Boolean update = _alwaysShowTrayIcon != value;
-
-                if (value)
-                {
-                    Data.Variables.MainForm.NotifyIcon.Visible = true;
-                }
-                else if (Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
-                {
-                    Data.Variables.MainForm.NotifyIcon.Visible = false;
-                }
                 _alwaysShowTrayIcon = value;
 
-                if (update)
+                if (Settings.Values != null)
+                {
+                    if (value)
+                    {
+                        Data.Variables.MainForm.NotifyIcon.Visible = true;
+                    }
+                    else if (Data.Variables.MainForm.WindowState != FormWindowState.Minimized)
+                    {
+                        Data.Variables.MainForm.NotifyIcon.Visible = false;
+                    }
+
+                }
+                
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -241,7 +251,7 @@ namespace MSM.Service
                 Boolean update = _maximizeOnStart != value;
                 _maximizeOnStart = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -258,7 +268,7 @@ namespace MSM.Service
                 Boolean update = _closeAction != value;
                 _closeAction = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -275,7 +285,7 @@ namespace MSM.Service
                 Boolean update = !String.Equals(_puttyExecutable, value, StringComparison.Ordinal);
                 _puttyExecutable = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -292,7 +302,7 @@ namespace MSM.Service
                 Boolean update = !String.Equals(_puttyExtraParamaters, value, StringComparison.Ordinal);
                 _puttyExtraParamaters = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -309,7 +319,7 @@ namespace MSM.Service
                 Boolean update = _initialSessions != value;
                 _initialSessions = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -326,7 +336,7 @@ namespace MSM.Service
                 Boolean update = _closeTabOnCrash != value;
                 _closeTabOnCrash = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -343,7 +353,7 @@ namespace MSM.Service
                 Boolean update = !_keywords.Equals(value);
                 _keywords = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -360,7 +370,7 @@ namespace MSM.Service
                 Boolean update = !_variables.Equals(value);
                 _variables = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -377,7 +387,7 @@ namespace MSM.Service
                 Boolean update = _saveCheckedNodes != value;
                 _saveCheckedNodes = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -394,7 +404,7 @@ namespace MSM.Service
                 Boolean update = _saveExpandedNodes != value;
                 _saveExpandedNodes = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -418,10 +428,7 @@ namespace MSM.Service
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class Node : ExpandableObjectConverter
     {
-        public override String ToString()
-        {
-            return String.IsNullOrEmpty(NodeName) ? "?" : NodeName;
-        }
+        public override String ToString() => String.IsNullOrEmpty(NodeName) ? "?" : NodeName;
 
         [Browsable(false)]
         public String NodeID { get; set; } = Generate.RandomUniqueID(10);
@@ -484,7 +491,7 @@ namespace MSM.Service
                 Boolean update = _checked != value;
                 _checked = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -501,7 +508,7 @@ namespace MSM.Service
                 Boolean update = _expanded != value;
                 _expanded = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -512,10 +519,7 @@ namespace MSM.Service
     [Serializable]
     public class Server
     {
-        public override String ToString()
-        {
-            return String.IsNullOrEmpty(DisplayName) ? "?" : DisplayName;
-        }
+        public override String ToString() => String.IsNullOrEmpty(DisplayName) ? "?" : DisplayName;
 
         [Browsable(false)]
         public String NodeID { get; set; } = Generate.RandomUniqueID(10);
@@ -527,7 +531,7 @@ namespace MSM.Service
             set
             {
                 Boolean update = false;
-                if (!String.Equals(_displayName, value, StringComparison.Ordinal))
+                if (!String.Equals(_displayName, value, StringComparison.Ordinal) && Settings.Values != null)
                 {
                     Settings.FireOnSettingsServerUpdatedEvent();
                     update = true;
@@ -535,7 +539,7 @@ namespace MSM.Service
 
                 _displayName = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -552,7 +556,7 @@ namespace MSM.Service
                 Boolean update = !String.Equals(_hostName, value, StringComparison.Ordinal);
                 _hostName = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -569,7 +573,7 @@ namespace MSM.Service
                 Boolean update = !String.Equals(_username, value, StringComparison.Ordinal);
                 _username = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -585,14 +589,14 @@ namespace MSM.Service
             {
                 Boolean update = !String.Equals(_password, value, StringComparison.Ordinal);
 
-                if (!String.IsNullOrWhiteSpace(value))
+                if (!String.IsNullOrWhiteSpace(value) && Settings.Values != null)
                 {
                     UI.ShowMessage(null, "Warning: passwords are NOT encrypted, please use other authentication methods!", "NO ENCRYPTION", MessageBoxIcon.Stop);
                 }
 
                 _password = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -609,7 +613,7 @@ namespace MSM.Service
                 Boolean update = _portNumber != value;
                 _portNumber = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -623,10 +627,10 @@ namespace MSM.Service
             get => _keywords;
             set
             {
-                Boolean update = !_keywords.Equals(value);
+                Boolean update = value.Length != KeywordsHashed.Count || !value.All(x => KeywordsHashed.Contains(x));
                 _keywords = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     KeywordsHashed.Clear();
                     foreach (String keyword in _keywords)
@@ -659,7 +663,7 @@ namespace MSM.Service
                 Boolean update = _predefinedStart != value;
                 _predefinedStart = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }
@@ -676,7 +680,7 @@ namespace MSM.Service
                 Boolean update = _checked != value;
                 _checked = value;
 
-                if (update)
+                if (update && Settings.Values != null)
                 {
                     Settings.Flush();
                 }

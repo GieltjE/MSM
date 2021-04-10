@@ -104,6 +104,19 @@ namespace MSM
             Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
             Variables.Measures = DockPanel_Main.Theme.Measures;
 
+            if (Settings.Values.CheckForUpdates)
+            {
+                Settings.Values.CheckForUpdates = true;
+            }
+            if (Settings.Values.AlwaysShowTrayIcon)
+            {
+                Settings.Values.AlwaysShowTrayIcon = true;
+            }
+            if (Settings.Values.ForceCloseSessionsOnCrash)
+            {
+                Settings.Values.ForceCloseSessionsOnCrash = true;
+            }
+
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
