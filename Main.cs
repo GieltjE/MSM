@@ -108,7 +108,7 @@ namespace MSM
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
             Service.Events.ShutDownFired += ShutDownFired;
-            Service.Events.ProcessExited += EventsOnProcessExited;
+            Service.Events.ProcessExited += OnServerExited;
 
             if (Settings.Values.MaximizeOnStart)
             {
@@ -248,7 +248,7 @@ namespace MSM
         private void ShutDownFired()
         {
             Service.Events.ShutDownFired -= ShutDownFired;
-            Service.Events.ProcessExited -= EventsOnProcessExited;
+            Service.Events.ProcessExited -= OnServerExited;
             NotifyIcon.Visible = false;
         }
 
@@ -314,12 +314,12 @@ namespace MSM
             }
         }
 
-        private void EventsOnProcessExited(Terminal terminal)
+        private void OnServerExited(Terminal terminal)
         {
             if (!Settings.Values.CloseTabOnCrash) return;
             if (InvokeRequired)
             {
-                Invoke(new Action<Terminal>(EventsOnProcessExited), terminal);
+                Invoke(new Action<Terminal>(OnServerExited), terminal);
                 return;
             }
             foreach (DockPane dockPane in DockPanel_Main.Panes)
