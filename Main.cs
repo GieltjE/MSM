@@ -348,6 +348,7 @@ namespace MSM
         }
         private void SaveSessions()
         {
+            if (Variables.ShutDownFired) return;
             DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
         }
 
