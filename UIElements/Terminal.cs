@@ -38,7 +38,7 @@ namespace MSM.UIElements
         }
         ~Terminal()
         {
-            TerminalControl.Stop();
+            TerminalControl?.Stop();
         }
 
         protected override void OnHandleCreated(EventArgs e)
