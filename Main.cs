@@ -392,12 +392,9 @@ namespace MSM
 
             return newDockContent;
         }
-        
         private void DockPanelMainContentRemoved(Object sender, DockContentEventArgs e)
         {
-            DockContentOptimized activeContent = (DockContentOptimized)e.Content;
-
-            if (activeContent == null) return;
+            if (e.Content is not DockContentOptimized activeContent) return;
             if (!_availableDocks.ContainsKey(activeContent.Name)) return;
 
             if (String.Equals(activeContent.Name, "Serverlist", StringComparison.Ordinal))
