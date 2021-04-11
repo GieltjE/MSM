@@ -33,7 +33,7 @@ namespace MSM.Extends
     public class AppControl : ControlOptimized
     {
         // This is a simplified/butchered app control, Chrome doesn't like being pushed around
-        public AppControl(Terminal terminal, String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables, IntPtr windowHandle)
+        public AppControl(TerminalControl terminal, String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables, IntPtr windowHandle)
         {
             _terminal = terminal;
             _windowHandle = windowHandle;
@@ -92,7 +92,7 @@ namespace MSM.Extends
             _childProcess?.Dispose();
         }
 
-        private readonly Terminal _terminal;
+        private readonly TerminalControl _terminal;
         private Boolean _iscreated;
         private Boolean _isdisposed;
         internal IntPtr ChildHandle = IntPtr.Zero;

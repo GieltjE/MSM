@@ -27,10 +27,10 @@ using MSM.Service;
 
 namespace MSM.UIElements
 {
-    public partial class Servers : UserControlOptimized
+    public partial class ServerControl : UserControlOptimized
     {
         private static ImageList _imageList;
-        public Servers()
+        public ServerControl()
         {
             InitializeComponent();
 

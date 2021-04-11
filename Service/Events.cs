@@ -25,8 +25,8 @@ namespace MSM.Service
 {
     public static class Events
     {
-        public static event ExtensionMethods.CustomDelegate<Terminal> ProcessExited;
-        public static void OnProcessExited(Terminal terminal) => ProcessExited?.Invoke(terminal);
+        public static event ExtensionMethods.CustomDelegate<TerminalControl> ProcessExited;
+        public static void OnProcessExited(TerminalControl terminal) => ProcessExited?.Invoke(terminal);
 
         public static event ExtensionMethods.CustomDelegate ShutDownFired;
         public static void ShutDown()

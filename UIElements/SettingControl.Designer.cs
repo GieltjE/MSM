@@ -1,8 +1,6 @@
-using MSM.Extends;
-
 namespace MSM.UIElements
 {
-    partial class Servers
+    partial class SettingControl
     {
         /// <summary> 
         /// Required designer variable.
@@ -29,29 +27,28 @@ namespace MSM.UIElements
         /// </summary>
         private void InitializeComponent()
         {
-            this.Treeview_NodesAndServers = new TreeViewOptimized();
+            this.PropertyGrid_Settings = new System.Windows.Forms.PropertyGrid();
             this.SuspendLayout();
             // 
-            // Treeview_NodesAndServers
+            // PropertyGrid_Settings
             // 
-            this.Treeview_NodesAndServers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Treeview_NodesAndServers.Location = new System.Drawing.Point(0, 0);
-            this.Treeview_NodesAndServers.Name = "Treeview_NodesAndServers";
-            this.Treeview_NodesAndServers.PathSeparator = "/";
-            this.Treeview_NodesAndServers.Size = new System.Drawing.Size(200, 200);
-            this.Treeview_NodesAndServers.TabIndex = 0;
-            this.Treeview_NodesAndServers.CheckBoxes = true;
+            this.PropertyGrid_Settings.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PropertyGrid_Settings.HelpVisible = false;
+            this.PropertyGrid_Settings.Location = new System.Drawing.Point(0, 0);
+            this.PropertyGrid_Settings.Name = "PropertyGrid_Settings";
+            this.PropertyGrid_Settings.Size = new System.Drawing.Size(200, 200);
+            this.PropertyGrid_Settings.TabIndex = 0;
             // 
-            // Servers
+            // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.Controls.Add(this.Treeview_NodesAndServers);
-            this.Name = "Servers";
+            this.Controls.Add(this.PropertyGrid_Settings);
+            this.Name = "Settings";
             this.Size = new System.Drawing.Size(200, 200);
             this.ResumeLayout(false);
         }
         #endregion
 
-        private TreeViewOptimized Treeview_NodesAndServers;
+        public System.Windows.Forms.PropertyGrid PropertyGrid_Settings;
     }
 }

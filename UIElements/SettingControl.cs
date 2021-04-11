@@ -21,9 +21,9 @@ using MSM.Extends;
 
 namespace MSM.UIElements
 {
-    public partial class Settings : UserControlOptimized
+    public partial class SettingControl : UserControlOptimized
     {
-        public Settings()
+        public SettingControl()
         {
             InitializeComponent();
 

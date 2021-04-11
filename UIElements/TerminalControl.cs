@@ -25,20 +25,21 @@ using MSM.Service;
 
 namespace MSM.UIElements
 {
-    public partial class Terminal : UserControlOptimized
+    public partial class TerminalControl : UserControlOptimized
     {
-        internal AppControl TerminalControl;
+        internal AppControl AppControl;
         private readonly Server _server;
-        public Terminal(Server server)
+        private String UniqueID = Functions.Generate.RandomUniqueID(5);
+        public TerminalControl(Server server)
         {
             _server = server;
 
             BorderStyle = BorderStyle.None;
             Padding = new Padding(0);
         }
-        ~Terminal()
+        ~TerminalControl()
         {
-            TerminalControl?.Stop();
+            AppControl?.Stop();
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -66,9 +67,9 @@ namespace MSM.UIElements
             }
             parameters.Add(_server.Hostname);
 
-            TerminalControl = new AppControl(this, Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
-            Controls.Add(TerminalControl);
-            TerminalControl.Load();
+            AppControl = new AppControl(this, Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+            Controls.Add(AppControl);
+            AppControl.Load();
         }
     }
 }

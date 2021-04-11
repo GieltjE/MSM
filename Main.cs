@@ -43,6 +43,8 @@ namespace MSM
         private readonly ToolStripMenuItem _trayIconStripOpen = new();
         private readonly ToolStripMenuItem _trayIconStripExit = new();
         private FormWindowState _previousWindowState = FormWindowState.Normal;
+        private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);
+        private readonly Dictionary<String, (UserControlOptimized userControlOptimized, DockState dockState, ToolStripMenuItem toolStripMenuItem)> _defaultUserControls = new(StringComparer.Ordinal);
 
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new();
 
@@ -93,17 +95,7 @@ namespace MSM
             InitializeComponent();
             Variables.MainForm = this;
 
-            Variables.MainForm.DockPanel_Main.Theme = Settings.Values.Theme switch
-            {
-                Enumerations.Theme.Blue => new VS2015BlueTheme(),
-                Enumerations.Theme.Black => new MaterialDarkTheme(),
-                Enumerations.Theme.Dark => new VS2015DarkTheme(),
-                Enumerations.Theme.Light => new VS2015LightTheme(),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-            Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
-            Variables.Measures = DockPanel_Main.Theme.Measures;
-
+            FileOperations.CreateDirectory(Variables.SettingsDirectory);
             if (Settings.Values.CheckForUpdates)
             {
                 Settings.Values.CheckForUpdates = true;
@@ -117,6 +109,17 @@ namespace MSM
                 Settings.Values.ForceCloseSessionsOnCrash = true;
             }
 
+            Variables.MainForm.DockPanel_Main.Theme = Settings.Values.Theme switch
+            {
+                Enumerations.Theme.Blue => new VS2015BlueTheme(),
+                Enumerations.Theme.Black => new MaterialDarkTheme(),
+                Enumerations.Theme.Dark => new VS2015DarkTheme(),
+                Enumerations.Theme.Light => new VS2015LightTheme(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            Variables.ColorPalette = DockPanel_Main.Theme.ColorPalette;
+            Variables.Measures = DockPanel_Main.Theme.Measures;
+
             _visualStudioToolStripExtender.SetStyle(ToolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
             _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
@@ -127,6 +130,10 @@ namespace MSM
             {
                 WindowState = FormWindowState.Maximized;
             }
+
+            _defaultUserControls.Add("Logs", (new LogControl(), DockState.DockBottomAutoHide, ToolStrip_ShowLogs));
+            _defaultUserControls.Add("Settings", (new SettingControl(), DockState.Document, ToolStrip_ShowSettings));
+            _defaultUserControls.Add("Serverlist", (new ServerControl(), DockState.DockRight, ToolStrip_ShowServerList));
 
             NotifyIcon.Icon = new Icon(Icon, 16, 16);
             NotifyIcon.ContextMenuStrip = _contextMenuStripTrayIcon;
@@ -150,8 +157,6 @@ namespace MSM
         {
             Visible = false;
 
-            FileOperations.CreateDirectory(Variables.SettingsDirectory);
-
             Boolean loadSuccess = false;
             if (File.Exists(Variables.SessionFile))
             {
@@ -161,19 +166,30 @@ namespace MSM
                     
                     foreach (DockPane dockPane in DockPanel_Main.Panes)
                     {
-                        foreach (IDockContent content in dockPane.Contents.Reverse())
+                        foreach (IDockContent content in dockPane.Contents.Reverse().Where(x => !x.DockHandler.IsHidden))
                         {
                             dockPane.ActiveContent = content;
                         }
                     }
                     loadSuccess = true;
                 }
-                // ReSharper disable once EmptyGeneralCatchClause
-                catch {}
+                catch (Exception exception)
+                {
+                    Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not reinstate (all) tabbages", exception);
+                }
             }
             if (!loadSuccess)
             {
-                ToolStripShowServerListClick(null, null);
+                ToolStripButtonDefaultControlClick(ToolStrip_ShowServerList, null);
+                ToolStripButtonDefaultControlClick(ToolStrip_ShowLogs, null);
+            }
+
+            foreach (KeyValuePair<String, DockContentOptimized> dockContentOptimized in _availableDocks.Where(x => !x.Value.IsHidden))
+            {
+                if (_defaultUserControls.ContainsKey(dockContentOptimized.Key))
+                {
+                    _defaultUserControls[dockContentOptimized.Key].toolStripMenuItem.Checked = true;
+                }
             }
 
             if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined)
@@ -195,20 +211,12 @@ namespace MSM
             Control content;
             String displayName, internalName;
             Boolean allowDuplicate = true;
-            if (String.Equals(persistString, "Serverlist", StringComparison.Ordinal))
+            if (_defaultUserControls.ContainsKey(persistString))
             {
-                ToolStrip_ShowServerList.Checked = true;
-                content = new Servers();
-                internalName = "Serverlist";
-                displayName = "Serverlist";
-                allowDuplicate = false;
-            }
-            else if (String.Equals(persistString, "Settings", StringComparison.Ordinal))
-            {
-                ToolStrip_Settings.Checked = true;
-                content = new UIElements.Settings();
-                internalName = "Settings";
-                displayName = "Settings";
+                (UserControlOptimized userControlOptimized, DockState _, ToolStripMenuItem _) = _defaultUserControls[persistString];
+                content = userControlOptimized;
+                internalName = persistString;
+                displayName = persistString;
                 allowDuplicate = false;
             }
             else
@@ -218,11 +226,11 @@ namespace MSM
                 Server server = Settings.FindServer(persistString);
                 if (server == null) return null;
 
-                content = new Terminal(server);
+                content = new TerminalControl(server);
                 internalName = server.NodeID;
                 displayName = server.DisplayName;
             }
-
+            
             return AddDockContent(displayName, internalName, content, allowDuplicate, DockState.Float, false, false);
         }
         private void MainClosing(Object sender, FormClosingEventArgs e)
@@ -294,6 +302,44 @@ namespace MSM
             BringToFront();
         }
 
+        private void ToolStripButtonDefaultControlClick(Object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = (ToolStripMenuItem)sender;
+            String tag = (String)item.Tag;
+
+            if (item.Checked)
+            {
+                item.Checked = false;
+                _availableDocks[tag].Hide();
+                SaveSessions();
+                return;
+            }
+
+            item.Checked = true;
+            (UserControlOptimized userControlOptimized, DockState dockState, ToolStripMenuItem _) = _defaultUserControls[tag];
+            if (_availableDocks.ContainsKey(tag))
+            {
+                _availableDocks[tag].Show();
+            }
+            else
+            {
+                AddDockContent(tag, tag, userControlOptimized, false, dockState);
+            }
+            SaveSessions();
+        }
+        private void ToolStripExitClick(Object sender, EventArgs e)
+        {
+            Service.Events.ShutDown();
+        }
+        private void ToolStripMenuItemGitHubClick(Object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start("https://github.com/GieltjE/MSM/");
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch {}
+        }
         private void ToolStripMenuItemAboutClick(Object sender, EventArgs e)
         {
             new About(this).Show();
@@ -302,37 +348,13 @@ namespace MSM
         {
             UpdateCheck.TriggerUpdateCheckJob();
         }
-        private void ToolStripSettingsClick(Object sender, EventArgs e)
-        {
-            if (!ToolStrip_Settings.Checked)
-            {
-                ToolStrip_Settings.Checked = true;
-                AddDockContent("Settings", "Settings", new UIElements.Settings(), false);
-            }
-            else
-            {
-                HideDockContent("Settings");
-            }
-        }
-        private void ToolStripShowServerListClick(Object sender, EventArgs e)
-        {
-            if (!ToolStrip_ShowServerList.Checked)
-            {
-                ToolStrip_ShowServerList.Checked = true;
-                AddDockContent("Serverlist", "Serverlist", new Servers(), false, DockState.DockRight);
-            }
-            else
-            {
-                HideDockContent("Serverlist");
-            }
-        }
 
-        private void OnServerExited(Terminal terminal)
+        private void OnServerExited(TerminalControl terminal)
         {
             if (!Settings.Values.CloseTabOnCrash) return;
             if (InvokeRequired)
             {
-                Invoke(new Action<Terminal>(OnServerExited), terminal);
+                Invoke(new Action<TerminalControl>(OnServerExited), terminal);
                 return;
             }
             foreach (DockPane dockPane in DockPanel_Main.Panes)
@@ -356,7 +378,7 @@ namespace MSM
         {
             (Server server, Boolean save) = ((Server server, Boolean save))startInfo;
 
-            Terminal terminal = new(server);
+            TerminalControl terminal = new(server);
             AddDockContent(server.DisplayName, server.NodeID, terminal, true, save: save);
         }
         private void SaveSessions()
@@ -365,7 +387,6 @@ namespace MSM
             DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
         }
 
-        private readonly Dictionary<String, DockContentOptimized> _availableDocks = new(StringComparer.Ordinal);
         private DockContentOptimized AddDockContent(String text, String internalName, Control content, Boolean allowDuplicate, DockState dockState = DockState.Document, Boolean save = true, Boolean add = true)
         {
             if (!allowDuplicate && _availableDocks.ContainsKey(internalName))
@@ -379,7 +400,7 @@ namespace MSM
             content.Dock = DockStyle.Fill;
             content.Padding = new Padding(0);
             content.Margin = new Padding(0);
-
+            
             newDockContent.Controls.Add(content);
             if (add)
             {
@@ -410,35 +431,22 @@ namespace MSM
             if (e.Content is not DockContentOptimized activeContent) return;
             if (!_availableDocks.ContainsKey(activeContent.Name)) return;
 
-            if (String.Equals(activeContent.Name, "Serverlist", StringComparison.Ordinal))
+            if (_defaultUserControls.ContainsKey(activeContent.Name))
             {
-                ToolStrip_ShowServerList.Checked = false;
-            }
-            else if (String.Equals(activeContent.Name, "Settings", StringComparison.Ordinal))
-            {
-                ToolStrip_Settings.Checked = false;
+                _defaultUserControls[activeContent.Name].toolStripMenuItem.Checked = false;
+                _availableDocks[activeContent.Name].Hide();
+                return;
             }
 
             if (_availableDocks.ContainsKey(activeContent.Name))
             {
                 DockContentOptimized item = _availableDocks[activeContent.Name];
+                item?.Close();
                 item?.Dispose();
                 _availableDocks.Remove(activeContent.Name);
             }
 
             SaveSessions();
-        }
-        private void HideDockContent(String internalName)
-        {
-            if (!_availableDocks.ContainsKey(internalName)) return;
-
-            if (_availableDocks[internalName].IsDisposed)
-            {
-                _availableDocks.Remove(internalName);
-                return;
-            }
-            
-            _availableDocks[internalName].Close();
         }
     }
 }

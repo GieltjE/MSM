@@ -33,11 +33,14 @@ namespace MSM
             this.DockPanel_Main = new MSM.Extends.DockPanelOptimized();
             this.ToolStrip = new MSM.Extends.ToolstripOptimized();
             this.ToolStripButton_Help = new MSM.Extends.ToolStripDropDownButtonOptimized();
+            this.ToolStripMenuItem_GitHub = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_CheckForUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_About = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_General = new MSM.Extends.ToolStripDropDownButtonOptimized();
-            this.ToolStrip_Settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStrip_ShowSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_ShowServerList = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStrip_ShowLogs = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStrip_Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new MSM.Extends.StatusStripOptimized();
             this.ToolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -75,6 +78,7 @@ namespace MSM
             this.ToolStripButton_Help.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStripButton_Help.DropDownDirection = System.Windows.Forms.ToolStripDropDownDirection.BelowLeft;
             this.ToolStripButton_Help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_GitHub,
             this.ToolStripMenuItem_CheckForUpdate,
             this.ToolStripMenuItem_About});
             this.ToolStripButton_Help.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -82,17 +86,24 @@ namespace MSM
             this.ToolStripButton_Help.Size = new System.Drawing.Size(45, 22);
             this.ToolStripButton_Help.Text = "Help";
             // 
+            // ToolStripMenuItem_GitHub
+            // 
+            this.ToolStripMenuItem_GitHub.Name = "ToolStripMenuItem_GitHub";
+            this.ToolStripMenuItem_GitHub.Size = new System.Drawing.Size(165, 22);
+            this.ToolStripMenuItem_GitHub.Text = "Open GitHub";
+            this.ToolStripMenuItem_GitHub.Click += new System.EventHandler(this.ToolStripMenuItemGitHubClick);
+            // 
             // ToolStripMenuItem_CheckForUpdate
             // 
             this.ToolStripMenuItem_CheckForUpdate.Name = "ToolStripMenuItem_CheckForUpdate";
-            this.ToolStripMenuItem_CheckForUpdate.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_CheckForUpdate.Size = new System.Drawing.Size(165, 22);
             this.ToolStripMenuItem_CheckForUpdate.Text = "Check for update";
             this.ToolStripMenuItem_CheckForUpdate.Click += new System.EventHandler(this.ToolStripMenuItemCheckForUpdateClick);
             // 
             // ToolStripMenuItem_About
             // 
             this.ToolStripMenuItem_About.Name = "ToolStripMenuItem_About";
-            this.ToolStripMenuItem_About.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_About.Size = new System.Drawing.Size(165, 22);
             this.ToolStripMenuItem_About.Text = "About";
             this.ToolStripMenuItem_About.Click += new System.EventHandler(this.ToolStripMenuItemAboutClick);
             // 
@@ -100,26 +111,45 @@ namespace MSM
             // 
             this.ToolStrip_General.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStrip_General.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStrip_Settings,
-            this.ToolStrip_ShowServerList});
+            this.ToolStrip_ShowSettings,
+            this.ToolStrip_ShowServerList,
+            this.ToolStrip_ShowLogs,
+            this.ToolStrip_Exit});
             this.ToolStrip_General.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.ToolStrip_General.Name = "ToolStrip_General";
             this.ToolStrip_General.Size = new System.Drawing.Size(60, 22);
             this.ToolStrip_General.Text = "General";
             // 
-            // ToolStrip_Settings
+            // ToolStrip_ShowSettings
             // 
-            this.ToolStrip_Settings.Name = "ToolStrip_Settings";
-            this.ToolStrip_Settings.Size = new System.Drawing.Size(148, 22);
-            this.ToolStrip_Settings.Text = "Settings";
-            this.ToolStrip_Settings.Click += new System.EventHandler(this.ToolStripSettingsClick);
+            this.ToolStrip_ShowSettings.Name = "ToolStrip_ShowSettings";
+            this.ToolStrip_ShowSettings.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowSettings.Tag = "Settings";
+            this.ToolStrip_ShowSettings.Text = "Settings";
+            this.ToolStrip_ShowSettings.Click += new System.EventHandler(this.ToolStripButtonDefaultControlClick);
             // 
             // ToolStrip_ShowServerList
             // 
             this.ToolStrip_ShowServerList.Name = "ToolStrip_ShowServerList";
-            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(148, 22);
-            this.ToolStrip_ShowServerList.Text = "View serverlist";
-            this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripShowServerListClick);
+            this.ToolStrip_ShowServerList.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowServerList.Tag = "Serverlist";
+            this.ToolStrip_ShowServerList.Text = "Serverlist";
+            this.ToolStrip_ShowServerList.Click += new System.EventHandler(this.ToolStripButtonDefaultControlClick);
+            // 
+            // ToolStrip_ShowLogs
+            // 
+            this.ToolStrip_ShowLogs.Name = "ToolStrip_ShowLogs";
+            this.ToolStrip_ShowLogs.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_ShowLogs.Tag = "Logs";
+            this.ToolStrip_ShowLogs.Text = "Logs";
+            this.ToolStrip_ShowLogs.Click += new System.EventHandler(this.ToolStripButtonDefaultControlClick);
+            // 
+            // ToolStrip_Exit
+            // 
+            this.ToolStrip_Exit.Name = "ToolStrip_Exit";
+            this.ToolStrip_Exit.Size = new System.Drawing.Size(180, 22);
+            this.ToolStrip_Exit.Text = "Exit";
+            this.ToolStrip_Exit.Click += new System.EventHandler(this.ToolStripExitClick);
             // 
             // StatusStrip
             // 
@@ -160,8 +190,11 @@ namespace MSM
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_About;
         internal DockPanelOptimized DockPanel_Main;
         private ToolStripDropDownButtonOptimized ToolStrip_General;
-        private System.Windows.Forms.ToolStripMenuItem ToolStrip_Settings;
+        private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowSettings;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowServerList;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_CheckForUpdate;
+        private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowLogs;
+        private System.Windows.Forms.ToolStripMenuItem ToolStrip_Exit;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_GitHub;
     }
 }
