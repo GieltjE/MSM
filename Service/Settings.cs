@@ -355,15 +355,15 @@ namespace MSM.Service
 
                 if (Settings.Values != null)
                 {
-                    if (value || Statics.ChildProcessManager == null)
+                    if (value || Statics.InformationObjectManager == null)
                     {
-                        Statics.ChildProcessManager = new ChildProcessManager();
-                        Statics.ChildProcessManager.AddProcess(Process.GetCurrentProcess().SafeHandle);
+                        Statics.InformationObjectManager = new InformationObjectManager();
+                        Statics.InformationObjectManager.AddProcess(Process.GetCurrentProcess().SafeHandle);
                     }
                     else
                     {
-                        Statics.ChildProcessManager?.Dispose();
-                        Statics.ChildProcessManager = null;
+                        Statics.InformationObjectManager?.Dispose();
+                        Statics.InformationObjectManager = null;
                     }
                 }
 

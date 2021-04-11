@@ -3,16 +3,15 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using MSM.Data;
-using MSM.Service;
 
-namespace MSM.Functions
+namespace MSM.Service
 {
-    public sealed class ChildProcessManager : IDisposable
+    public class InformationObjectManager : IDisposable
     {
         private SafeJobHandle _handle;
         private Boolean _disposed;
 
-        public ChildProcessManager()
+        public InformationObjectManager()
         {
             _handle = new SafeJobHandle(NativeMethods.CreateJobObject(IntPtr.Zero, null));
 

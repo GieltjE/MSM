@@ -17,13 +17,13 @@
 //
 
 using MSM.Extends;
-using MSM.Functions;
+using MSM.Service;
 
 namespace MSM.Data
 {
     public static class Statics
     {
         public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
-        public static ChildProcessManager ChildProcessManager;
+        public static InformationObjectManager InformationObjectManager;
     }
 }

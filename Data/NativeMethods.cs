@@ -67,7 +67,7 @@ namespace MSM.Data
         internal static extern IntPtr CreateJobObject(IntPtr a, String lpName);
 
         [DllImport("kernel32.dll")]
-        internal static extern Boolean SetInformationJobObject(SafeJobHandle hJob, NativeMethods.JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
+        internal static extern Boolean SetInformationJobObject(SafeJobHandle hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern Boolean AssignProcessToJobObject(SafeJobHandle job, SafeProcessHandle process);
