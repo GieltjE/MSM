@@ -74,47 +74,52 @@ namespace MSM.Service
                 ReleaseInformation resultDeserialized = Statics.NewtonsoftJsonSerializer.Deserialize<ReleaseInformation>(result);
                 FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(FileOperations.GetCurrentExecutable());
                 Version currentVersion = Version.Parse(fileVersionInfo.FileVersion);
-                Asset asset = resultDeserialized.assets.FirstOrDefault(x => x.browser_download_url.EndsWith(".zip", StringComparison.Ordinal));
-
-                if (resultDeserialized.tag_name > currentVersion && asset != null)
+                String architecturePostFix = "-x86";
+                if (Environment.Is64BitProcess)
                 {
-                    String updateDirectory = Path.Combine(FileOperations.GetRunningDirectory(), "update");
-
-                    if (Directory.Exists(updateDirectory))
-                    {
-                        while (FileOperations.DeleteDirectory(updateDirectory, true).Any())
-                        {
-                            Thread.Sleep(500);
-                        }
-                    }
-
-                    if (UI.AskQuestion(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available, would you like to upgrade?", "Upgrade available", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        if (FileOperations.CreateDirectory(updateDirectory))
-                        {
-                            MemoryStream stream = new(webClient.DownloadData(asset.browser_download_url));
-                            FastZip fastZip = new();
-                            fastZip.ExtractZip(stream, updateDirectory, FastZip.Overwrite.Always, null, null, null, true, true);
-
-                            ProcessStartInfo procInfo = new(Path.Combine(updateDirectory, Path.GetFileName(FileOperations.GetCurrentExecutable())))
-                            {
-                                WorkingDirectory = updateDirectory,
-                                Arguments = "--update",
-                                CreateNoWindow = true,
-                                WindowStyle = ProcessWindowStyle.Maximized,
-                                UseShellExecute = false
-                            };
-                            Process.Start(procInfo);
-                            Environment.Exit(1001);
-                        }
-                    }
+                    architecturePostFix = "-x64";
                 }
+                Asset asset = resultDeserialized.assets.FirstOrDefault(x => x.browser_download_url.EndsWith(architecturePostFix + ".zip", StringComparison.Ordinal));
+
 #if !DEBUG
-                else if(resultDeserialized.tag_name < currentVersion)
+                if(resultDeserialized.tag_name < currentVersion)
                 {
                     UI.ShowMessage(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
                 }
 #endif
+
+                if (resultDeserialized.tag_name <= currentVersion || asset == null) return;
+
+                String updateDirectory = Path.Combine(FileOperations.GetRunningDirectory(), "update");
+                if (Directory.Exists(updateDirectory))
+                {
+                    while (FileOperations.DeleteDirectory(updateDirectory, true).Any())
+                    {
+                        Thread.Sleep(500);
+                    }
+                }
+
+                if (UI.AskQuestion(Variables.MainForm, "A new version (" + resultDeserialized.tag_name + ") is available, would you like to upgrade?", "Upgrade available", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1, MessageBoxIcon.Question) != DialogResult.Yes)
+                {
+                    return;
+                }
+
+                if (!FileOperations.CreateDirectory(updateDirectory)) return;
+
+                MemoryStream stream = new(webClient.DownloadData(asset.browser_download_url));
+                FastZip fastZip = new();
+                fastZip.ExtractZip(stream, updateDirectory, FastZip.Overwrite.Always, null, null, null, true, true);
+
+                ProcessStartInfo procInfo = new(Path.Combine(updateDirectory, Path.GetFileName(FileOperations.GetCurrentExecutable())))
+                {
+                    WorkingDirectory = updateDirectory,
+                    Arguments = "--update",
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Maximized,
+                    UseShellExecute = false
+                };
+                Process.Start(procInfo);
+                Environment.Exit(1001);
             }
             catch (Exception exception)
             {

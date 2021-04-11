@@ -5,15 +5,14 @@ This is the README file for MSM, a simple multi server manager written in C#.
 MSM is an opensource tool aimed at easing the maintenance of multiple ssh connected servers.
 
 ## Features (some not fully complete)
+* Fully X64 compatible, fast with simple sourcecode (and properly balanced DllImports)
+* Fully portable by design, old style settings are also honoured
 * Optimized for very large server/node/variables/keyword lists and combinations
 * Cron scheduling for automated commands
 * Keywords to only run commands on certain servers
 * Variables configurable per server usable in commands
-* Works with most terminal clients
+* Works with most (terminal) clients
 * Built in updater
-* Properly balanced DllImports
-* Maintainable and expandandable codebase
-* Portable settings file
 
 ## Building
 
