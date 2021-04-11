@@ -142,22 +142,19 @@ namespace MSM.Extends
                 NativeMethods.ShowWindow(_childProcess.MainWindowHandle, NativeMethods.ShowWindowCommands.Maximize);
 
                 // Remove UI elements
-                IntPtr windowStyle = NativeMethods.GetWindowLongPtr(_childProcess.MainWindowHandle, (Int32)NativeMethods.GWL.GWL_STYLE);
-                if (IntPtr.Size == 4)
-                {
-                    Int32 style = windowStyle.ToInt32();
-                    style &= ~((Int32)NativeMethods.WindowStyles.WS_BORDER | (Int32)NativeMethods.WindowStyles.WS_THICKFRAME);
-                    windowStyle = new IntPtr(style);
-                }
-                else
-                {
-                    Int64 style = windowStyle.ToInt64();
-                    style &= ~((Int32)NativeMethods.WindowStyles.WS_BORDER | (Int32)NativeMethods.WindowStyles.WS_THICKFRAME);
-                    windowStyle = new IntPtr(style);
-                }
+                IntPtr windowStyle = NativeMethods.GetWindowLongArchitectureInvariant(_childProcess.MainWindowHandle, (Int32)NativeMethods.GWL.GWL_STYLE);
+                IntPtr windowStyleOriginal = windowStyle;
+
+                Int32 style = windowStyle.ToInt32();
+                style &= ~((Int32)NativeMethods.WindowStyles.WS_CAPTION | (Int32)NativeMethods.WindowStyles.WS_SIZEBOX);
+                windowStyle = new IntPtr(style);
 
                 // Attach handle to our form and apply the window style
-                NativeMethods.SetWindowLongPtr(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
+                IntPtr result = NativeMethods.SetWindowLongArchitectureInvariant(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
+                if (result == IntPtr.Zero || windowStyleOriginal != result)
+                {
+                    Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not set window style!", null);
+                }
 
                 //OnSizeChanged(null, null);
 
@@ -165,8 +162,9 @@ namespace MSM.Extends
                 _childProcess.Exited += ChildProcessExited;
                 ChildHandle = _childProcess.MainWindowHandle;
             }
-            catch
+            catch (Exception exception)
             {
+                Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not load AppControl!", exception);
                 LoadSuccess = false;
                 return;
             }

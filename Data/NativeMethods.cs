@@ -44,16 +44,16 @@ namespace MSM.Data
         public static extern Boolean ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-        private static extern Int32 GetWindowLong(IntPtr hWnd, Int32 nIndex);
+        private static extern Int32 GetWindowLong32(IntPtr hWnd, Int32 nIndex);
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
         private static extern IntPtr GetWindowLong64(IntPtr hWnd, Int32 nIndex);
-        public static IntPtr GetWindowLongPtr(IntPtr hWnd, Int32 nIndex) => IntPtr.Size == 8 ? GetWindowLong64(hWnd, nIndex) : new IntPtr(GetWindowLong(hWnd, nIndex));
+        public static IntPtr GetWindowLongArchitectureInvariant(IntPtr hWnd, Int32 nIndex) => IntPtr.Size == 8 ? GetWindowLong64(hWnd, nIndex) : new IntPtr(GetWindowLong32(hWnd, nIndex));
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
         private static extern Int32 SetWindowLong32(HandleRef hWnd, Int32 nIndex, Int32 dwNewLong);
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
-        private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong);
-        public static IntPtr SetWindowLongPtr(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong) => IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+        private static extern IntPtr SetWindowLong64(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong);
+        public static IntPtr SetWindowLongArchitectureInvariant(HandleRef hWnd, Int32 nIndex, IntPtr dwNewLong) => IntPtr.Size == 8 ? SetWindowLong64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
