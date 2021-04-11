@@ -395,12 +395,13 @@ namespace MSM
                 return _availableDocks[internalName];
             }
 
-            DockContentOptimized newDockContent = new() { Text = text, Name = internalName };
+            DockContentOptimized newDockContent = new() { Text = text, Name = internalName, HideOnClose = _defaultUserControls.ContainsKey(internalName) };
 
             content.Dock = DockStyle.Fill;
             content.Padding = new Padding(0);
             content.Margin = new Padding(0);
             
+            newDockContent.DockStateChanged += NewDockContentOnDockStateChanged;
             newDockContent.Controls.Add(content);
             if (add)
             {
@@ -426,6 +427,17 @@ namespace MSM
 
             return newDockContent;
         }
+        private void NewDockContentOnDockStateChanged(Object sender, EventArgs e)
+        {
+            DockContentOptimized dockContent = (DockContentOptimized)sender;
+
+            if (_defaultUserControls.ContainsKey(dockContent.Name))
+            {
+                _defaultUserControls[dockContent.Name].toolStripMenuItem.Checked = dockContent.Visible;
+            }
+
+            SaveSessions();
+        }
         private void DockPanelMainContentRemoved(Object sender, DockContentEventArgs e)
         {
             if (e.Content is not DockContentOptimized activeContent) return;
@@ -433,6 +445,8 @@ namespace MSM
 
             if (_defaultUserControls.ContainsKey(activeContent.Name))
             {
+                activeContent.Hide();
+                activeContent.HideOnClose = true;
                 _defaultUserControls[activeContent.Name].toolStripMenuItem.Checked = false;
                 _availableDocks[activeContent.Name].Hide();
                 return;
