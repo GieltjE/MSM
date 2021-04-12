@@ -1,5 +1,4 @@
 using MSM.Extends;
-using MSM.Extends.Themes;
 
 namespace MSM
 {
@@ -55,7 +54,6 @@ namespace MSM
             this.DockPanel_Main.ShowAutoHideContentOnHover = false;
             this.DockPanel_Main.Size = new System.Drawing.Size(882, 551);
             this.DockPanel_Main.TabIndex = 4;
-            this.DockPanel_Main.ContentRemoved += new System.EventHandler<WeifenLuo.WinFormsUI.Docking.DockContentEventArgs>(this.DockPanelMainContentRemoved);
             // 
             // ToolStrip
             // 

@@ -29,7 +29,7 @@ namespace MSM.UIElements
     {
         internal AppControl AppControl;
         private readonly Server _server;
-        private String UniqueID = Functions.Generate.RandomUniqueID(5);
+        private readonly String _uniqueID = Functions.Generate.GenerateRandomAlphaNumbericalString(20);
         public TerminalControl(Server server)
         {
             _server = server;
@@ -42,6 +42,8 @@ namespace MSM.UIElements
             AppControl?.Stop();
         }
 
+        public override Int32 GetHashCode() => _uniqueID.GetHashCode();
+        public override Boolean Equals(Object o) => String.Equals(((TerminalControl)o)?._uniqueID, _uniqueID, StringComparison.Ordinal);
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);

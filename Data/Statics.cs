@@ -16,6 +16,7 @@
 // If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using MSM.Extends;
 using MSM.Service;
 
@@ -23,6 +24,7 @@ namespace MSM.Data
 {
     public static class Statics
     {
+        public static readonly Random Random = new(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
         public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
         public static InformationObjectManager InformationObjectManager;
     }
