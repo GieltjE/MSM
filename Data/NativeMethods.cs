@@ -72,6 +72,9 @@ namespace MSM.Data
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern Boolean AssignProcessToJobObject(SafeJobHandle job, SafeProcessHandle process);
 
+        [DllImport("user32.dll", EntryPoint = "GetKeyboardState", SetLastError = true)]
+        internal static extern Boolean NativeGetKeyboardState([Out] Byte[] keyStates);
+
         public enum JobObjectInfoType
         {
             AssociateCompletionPortInformation = 7,

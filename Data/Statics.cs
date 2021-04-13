@@ -27,6 +27,6 @@ namespace MSM.Data
         public static readonly Random Random = new(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
         public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
         public static InformationObjectManager InformationObjectManager;
+        public static Double FormOpacityFade = .93;
     }
-
 }

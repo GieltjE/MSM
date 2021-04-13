@@ -47,6 +47,7 @@ namespace MSM
         private Boolean LoadingTab { get; set; }
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new();
         private readonly Dictionary<TerminalControl, DockContentOptimized> _terminalControls = new();
+        private readonly LogControl _logControl;
 
         public Main()
         {
@@ -94,6 +95,7 @@ namespace MSM
 
             InitializeComponent();
             Variables.MainForm = this;
+            Variables.MainSTAThreadID = Thread.CurrentThread.ManagedThreadId;
 
             FileOperations.CreateDirectory(Variables.SettingsDirectory);
             if (Settings.Values.CheckForUpdates)
@@ -125,15 +127,18 @@ namespace MSM
 
             Service.Events.ShutDownFired += ShutDownFired;
             Service.Events.ProcessExited += OnServerExited;
-
+            
             if (Settings.Values.MaximizeOnStart)
             {
                 WindowState = FormWindowState.Maximized;
             }
 
-            _defaultUserControls.Add("Logs", (new LogControl(), DockState.DockBottomAutoHide, ToolStrip_ShowLogs, null));
+            _logControl = new LogControl();
+            _defaultUserControls.Add("Logs", (_logControl, DockState.DockBottomAutoHide, ToolStrip_ShowLogs, null));
             _defaultUserControls.Add("Settings", (new SettingControl(), DockState.Document, ToolStrip_ShowSettings, null));
             _defaultUserControls.Add("Serverlist", (new ServerControl(), DockState.DockRight, ToolStrip_ShowServerList, null));
+
+            Logger.LogAdded += _logControl.LoggerOnLogAdded;
 
             NotifyIcon.Icon = new Icon(Icon, 16, 16);
             NotifyIcon.ContextMenuStrip = _contextMenuStripTrayIcon;
@@ -153,6 +158,7 @@ namespace MSM
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
         }
+
         private void MainShown(Object sender, EventArgs e)
         {
             Visible = false;
@@ -278,6 +284,7 @@ namespace MSM
         }
         private void ShutDownFired()
         {
+            Logger.LogAdded -= _logControl.LoggerOnLogAdded;
             Service.Events.ShutDownFired -= ShutDownFired;
             Service.Events.ProcessExited -= OnServerExited;
             NotifyIcon.Visible = false;

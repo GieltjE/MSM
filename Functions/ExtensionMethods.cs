@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using MSM.Data;
 using MSM.Service;
@@ -141,6 +143,28 @@ namespace MSM.Functions
                 {
                     lastIndex++;
                 }
+            }
+        }
+
+        private static void WaitHelper(Object semaphoreSlim) => ((SemaphoreSlim)semaphoreSlim).Wait();
+        public static void WaitUIFriendly(this SemaphoreSlim semaphoreSlim)
+        {
+            //if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            if (Thread.CurrentThread.ManagedThreadId == Variables.MainSTAThreadID)
+            {
+                // See if we can get in a reasonable amount of time
+                if (semaphoreSlim.Wait(Variables.ThreadAfterDoEventsSleep))
+                {
+                    return;
+                }
+
+                // Start a wait thread instead of looping and doing something like Application.DoEvents();
+                ThreadHelpers thread = new();
+                thread.ExecuteThreadParameter(WaitHelper, semaphoreSlim);
+            }
+            else
+            {
+                semaphoreSlim.Wait();
             }
         }
 

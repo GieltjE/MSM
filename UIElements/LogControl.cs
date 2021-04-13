@@ -16,6 +16,8 @@
 // If not, see <http://www.gnu.org/licenses/>.
 // 
 
+using System;
+using MSM.Data;
 using MSM.Extends;
 
 namespace MSM.UIElements
@@ -27,9 +29,9 @@ namespace MSM.UIElements
             InitializeComponent();
         }
 
-        public new void Dispose()
+        public void LoggerOnLogAdded(Enumerations.LogTarget target, Enumerations.LogLevel level, String message)
         {
-            base.Dispose();
+
         }
     }
 }

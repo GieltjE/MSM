@@ -622,7 +622,7 @@ namespace MSM.Service
 
                 if (!String.IsNullOrWhiteSpace(value) && Settings.Values != null)
                 {
-                    UI.ShowMessage(null, "Warning: passwords are NOT encrypted, please use other authentication methods!", "NO ENCRYPTION", MessageBoxIcon.Stop);
+                    UI.ShowWarning(Data.Variables.MainForm, "Warning: passwords are NOT encrypted, please use other authentication methods!", "NO ENCRYPTION", MessageBoxIcon.Stop);
                 }
 
                 _password = value;

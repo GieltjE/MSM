@@ -67,7 +67,7 @@ namespace MSM.Service
                         }
                     }
 
-                    UI.ShowMessage(Variables.MainForm, "Could not perform update check!", "Update check", MessageBoxIcon.Asterisk);
+                    UI.ShowWarning(Variables.MainForm, "Could not perform update check!", "Update check", MessageBoxIcon.Asterisk);
                     return;
                 }
                     
@@ -131,7 +131,6 @@ namespace MSM.Service
                 Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Error, "Could not check for updates", exception);
             }
         }
-
     }
 
 #pragma warning disable IDE1006 // Naming Styles
