@@ -14,9 +14,14 @@ namespace MSM.Service
         public InformationObjectManager()
         {
             _handle = new SafeJobHandle(NativeMethods.CreateJobObject(IntPtr.Zero, null));
+            SetHandle(NativeMethods.JobObjectLimitFlags.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE);
+        }
 
-            NativeMethods.JOBOBJECT_BASIC_LIMIT_INFORMATION info = new() {
-                LimitFlags = (UInt32)NativeMethods.JobObjectLimitFlags.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+        private void SetHandle(NativeMethods.JobObjectLimitFlags flags)
+        {
+            NativeMethods.JOBOBJECT_BASIC_LIMIT_INFORMATION info = new()
+            {
+                LimitFlags = (UInt32)flags,
             };
             NativeMethods.JOBOBJECT_EXTENDED_LIMIT_INFORMATION extendedInfo = new() { BasicLimitInformation = info };
 
@@ -32,6 +37,8 @@ namespace MSM.Service
         public void Dispose()
         {
             if (_disposed) return;
+
+            SetHandle(NativeMethods.JobObjectLimitFlags.JOB_NONE);
 
             _handle.Close();
             _handle.Dispose();

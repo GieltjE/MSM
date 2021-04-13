@@ -167,6 +167,7 @@ namespace MSM.Data
         [Flags]
         public enum JobObjectLimitFlags : UInt32
         {
+            JOB_NONE = 0,
             JOB_OBJECT_LIMIT_ACTIVE_PROCESS = 0x00000008,
             JOB_OBJECT_LIMIT_AFFINITY = 0x00000010,
             JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x00000800,
