@@ -119,6 +119,11 @@ namespace MSM.Service
                     UseShellExecute = false
                 };
                 Process.Start(procInfo);
+
+                // Prevent closing our updated version......
+                Statics.InformationObjectManager?.Dispose();
+
+                Events.ShutDown();
                 Environment.Exit(1001);
             }
             catch (Exception exception)
