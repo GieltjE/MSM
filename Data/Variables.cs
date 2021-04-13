@@ -38,4 +38,5 @@ namespace MSM.Data
         public static String SettingsFileChosen { get; set; }
         public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
     }
+
 }

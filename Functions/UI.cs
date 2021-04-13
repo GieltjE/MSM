@@ -25,7 +25,7 @@ namespace MSM.Functions
     {
         public static void ShowMessage(Control owner, String message, String header, MessageBoxIcon messageBoxIcon)
         {
-            if (owner != null && owner.Created && !owner.IsDisposed && owner.IsHandleCreated)
+            if (owner is { Created: true, IsDisposed: false, IsHandleCreated: true })
             {
                 ShowMessageHelper helper = new();
                 owner.Invoke(new Action<IWin32Window, String, String, MessageBoxButtons, MessageBoxIcon, MessageBoxDefaultButton>(helper.ShowMessage), owner, message, header, MessageBoxButtons.OK, messageBoxIcon, MessageBoxDefaultButton.Button1);

@@ -119,7 +119,7 @@ namespace MSM.Extends
 
         public static void HideCheckBox(TreeNode node)
         {
-            NativeMethods.TVITEM tvi = new NativeMethods.TVITEM
+            NativeMethods.TVITEM tvi = new()
             {
                 hItem = node.Handle,
                 mask = 0x8,
@@ -178,7 +178,7 @@ namespace MSM.Extends
             }
 
             // ReSharper disable once RedundantCheckBeforeAssignment
-            if (node.Parent != null && !node.Parent.Checked && allChecked)
+            if (node.Parent is { Checked: false } && allChecked)
             {
                 node.Checked = true;
                 if (node.Parent != null)

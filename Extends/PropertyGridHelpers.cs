@@ -289,4 +289,5 @@ namespace MSM.Extends
         public override Boolean IsReadOnly => false;
         public override Type ComponentType => typeof(BasicPropertyBag);
     }
+
 }

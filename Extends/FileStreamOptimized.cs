@@ -95,7 +95,7 @@ namespace MSM.Extends
             _disposed = true;
             base.Dispose();
 
-            retry2:
+retry2:
             if (!File.Exists(Name) || FileOperations.IsFileLocked(Name))
             {
                 Thread.Sleep(25);
@@ -103,4 +103,5 @@ namespace MSM.Extends
             }
         }
     }
+
 }

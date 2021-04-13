@@ -28,4 +28,5 @@ namespace MSM.Data
         public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
         public static InformationObjectManager InformationObjectManager;
     }
+
 }

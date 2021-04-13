@@ -50,7 +50,6 @@ namespace MSM.UIElements
             this.Size = new System.Drawing.Size(200, 200);
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView_Logs)).EndInit();
             this.ResumeLayout(false);
-
         }
         #endregion
 

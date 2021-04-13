@@ -32,6 +32,7 @@ namespace MSM.UIElements
         private readonly String _uniqueID = Functions.Generate.GenerateRandomAlphaNumbericalString(20);
         public TerminalControl(Server server)
         {
+            InitializeComponent();
             _server = server;
 
             BorderStyle = BorderStyle.None;
@@ -55,9 +56,9 @@ namespace MSM.UIElements
                 "-P " + _server.Port.ToString(CultureInfo.InvariantCulture),
                 "-load \"Default Settings\"",
             };
-            if (!String.IsNullOrWhiteSpace(Service.Settings.Values.PuttyExtraParamaters))
+            if (!String.IsNullOrWhiteSpace(Settings.Values.PuttyExtraParamaters))
             {
-                parameters.Insert(0, Service.Settings.Values.PuttyExtraParamaters);
+                parameters.Insert(0, Settings.Values.PuttyExtraParamaters);
             }
             if (!String.IsNullOrEmpty(_server.Password))
             {
@@ -69,7 +70,7 @@ namespace MSM.UIElements
             }
             parameters.Add(_server.Hostname);
 
-            AppControl = new AppControl(this, Service.Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+            AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
             Controls.Add(AppControl);
             AppControl.Load();
         }
