@@ -41,6 +41,7 @@ namespace MSM.Extends
                 // ReSharper disable RedundantBaseQualifier
                 base.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
                 base.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+                base.LineColor = Variables.ColorPalette.ToolWindowCaptionActive.Button;
                 // ReSharper restore RedundantBaseQualifier
             }
         }
