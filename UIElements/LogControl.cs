@@ -40,7 +40,6 @@ namespace MSM.UIElements
         private readonly DataTable _logDataTable = new();
         public LogControl()
         {
-            log4net.Util.LogLog.InternalDebugging = true;
             InitializeComponent();
 
             _logDataTable.Columns.Add("DateTime", typeof(DateTime));
