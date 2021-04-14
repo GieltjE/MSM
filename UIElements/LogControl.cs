@@ -17,21 +17,93 @@
 // 
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
+using MSM.Functions;
+using MSM.Service;
+using Quartz;
 
 namespace MSM.UIElements
 {
     public partial class LogControl : UserControlOptimized
     {
+        internal static DataGridView DataGridView;
+        internal static DataTable DataTable;
+        internal static ConcurrentQueue<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> UIQueue = new();
+        
+        private readonly DataTable _logDataTable = new();
         public LogControl()
         {
+            log4net.Util.LogLog.InternalDebugging = true;
             InitializeComponent();
+
+            _logDataTable.Columns.Add("DateTime", typeof(DateTime));
+            _logDataTable.Columns.Add("Target", typeof(Enumerations.LogTarget));
+            _logDataTable.Columns.Add("Level", typeof(Enumerations.LogLevel));
+            _logDataTable.Columns.Add("Message", typeof(String));
+
+            BindingSource bindingSource = new() { DataSource = _logDataTable };
+            DataGridView_Logs.DataSource = bindingSource;
+            DataGridView_Logs.Columns[0].MinimumWidth = 200;
+            DataGridView_Logs.Columns[1].MinimumWidth = 200;
+            DataGridView_Logs.Columns[2].MinimumWidth = 200;
+            DataGridView_Logs.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+            DataGridView = DataGridView_Logs;
+            DataTable = _logDataTable;
+
+            Cron.CreateJob<LogToUI>("LogToUI", 0, 0, 2, true);
         }
 
-        public void LoggerOnLogAdded(Enumerations.LogTarget target, Enumerations.LogLevel level, String message)
+        public void LoggerOnLogAdded(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)
         {
+            UIQueue.Enqueue((dateTime, target, level, message));
+        }
+        private static readonly List<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> ToShow = new();
+        internal static void ProcessUIQueue()
+        {
+            try
+            {
+                while (UIQueue.TryDequeue(out (DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) item))
+                {
+                    ToShow.Add(item);
+                }
 
+                if (!ToShow.Any()) return;
+
+                DataTable.BeginLoadData();
+                foreach ((DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) in ToShow.OrderByDescending(x => x.dateTime))
+                {
+                    DataRow row = DataTable.NewRow();
+                    row[0] = dateTime;
+                    row[1] = target;
+                    row[2] = level;
+                    row[3] = message;
+                    DataTable.Rows.InsertAt(row, 0);
+                }
+                DataGridView.BeginInvoke(new Action(DataTable.EndLoadData)).AutoEndInvoke(DataGridView);
+                ToShow.Clear();
+            }
+            catch (Exception exception)
+            {
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not display log line to the UI", exception);
+            }
+        }
+    }
+
+    [DisallowConcurrentExecution, ResetTimerAfterRunCompletes]
+    internal class LogToUI : IJob
+    {
+        public virtual Task Execute(IJobExecutionContext context)
+        {
+            LogControl.ProcessUIQueue();
+            return Task.CompletedTask;
         }
     }
 }

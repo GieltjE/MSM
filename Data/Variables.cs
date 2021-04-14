@@ -18,6 +18,7 @@
 
 using System;
 using System.IO;
+using System.Windows.Forms;
 using MSM.Functions;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -38,5 +39,15 @@ namespace MSM.Data
         public static String SettingsFileChosen { get; set; }
         public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
         public static Int32 MainSTAThreadID;
+
+        private static Boolean? _designMode;
+        public static Boolean DesignMode
+        {
+            get
+            {
+                _designMode ??= Application.ExecutablePath.EndsWith("devenv.exe");
+                return (Boolean)_designMode;
+            }
+        }
     }
 }

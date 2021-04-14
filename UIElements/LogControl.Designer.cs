@@ -1,3 +1,4 @@
+using System.Windows.Forms;
 using MSM.Extends;
 
 namespace MSM.UIElements
@@ -29,7 +30,7 @@ namespace MSM.UIElements
         /// </summary>
         private void InitializeComponent()
         {
-            this.DataGridView_Logs = new System.Windows.Forms.DataGridView();
+            this.DataGridView_Logs = new DataGridViewOptimized();
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView_Logs)).BeginInit();
             this.SuspendLayout();
             // 
@@ -41,6 +42,8 @@ namespace MSM.UIElements
             this.DataGridView_Logs.Name = "DataGridView_Logs";
             this.DataGridView_Logs.Size = new System.Drawing.Size(200, 200);
             this.DataGridView_Logs.TabIndex = 0;
+            this.DataGridView_Logs.EditMode = DataGridViewEditMode.EditProgrammatically;
+            this.DataGridView_Logs.AllowUserToAddRows = false;
             // 
             // Logs
             // 
@@ -53,6 +56,6 @@ namespace MSM.UIElements
         }
         #endregion
 
-        private System.Windows.Forms.DataGridView DataGridView_Logs;
+        private DataGridViewOptimized DataGridView_Logs;
     }
 }
