@@ -297,8 +297,12 @@ namespace MSM.Service
                 trigger.Wait(cancellationToken);
 
                 TriggerBuilder newTrigger = trigger.Result.GetTriggerBuilder();
-                newTrigger.StartAt(DateBuilder.FutureDate((Int32)((SimpleTriggerImpl)trigger.Result).RepeatInterval.TotalSeconds, IntervalUnit.Second));
-                context.Scheduler.RescheduleJob(triggerName, newTrigger.Build(), cancellationToken);
+                Int32 intervalSeconds = (Int32)((SimpleTriggerImpl)trigger.Result).RepeatInterval.TotalSeconds;
+                if (intervalSeconds > 0)
+                {
+                    newTrigger.StartAt(DateBuilder.FutureDate(intervalSeconds, IntervalUnit.Second));
+                    context.Scheduler.RescheduleJob(triggerName, newTrigger.Build(), cancellationToken);
+                }
             }
 
             if (jobException != null)
