@@ -18,6 +18,7 @@
 
 using System.Reflection;
 using System.Runtime.InteropServices;
+using log4net.Config;
 
 [assembly: AssemblyTitle("MSM - Multi Server Manager")]
 [assembly: AssemblyDescription("")]
@@ -30,5 +31,6 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: Guid("3d1b47b7-85f0-494e-af08-94c86c0baaa6")]
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("0.0.0.7")]
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config")]
+[assembly: AssemblyFileVersion("0.0.0.8")]
+[assembly: Repository("MSM")]
+[assembly: XmlConfigurator(ConfigFile = "log4net.config")]
