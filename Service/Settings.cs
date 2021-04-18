@@ -259,6 +259,40 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _maximizeOnStart = true;
 
+        [Category("UI"), DisplayName("Send the command in the command box on enter"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean SendCommandOnEnter
+        {
+            get => _sendCommandOnEnter;
+            set
+            {
+                Boolean update = _sendCommandOnEnter != value;
+                _sendCommandOnEnter = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _sendCommandOnEnter = true;
+
+        [Category("UI"), DisplayName("Clear the command box after sending it"), TypeConverter(typeof(BooleanYesNoConverter))]
+        public Boolean ClearCommandAfterSend
+        {
+            get => _clearCommandAfterSend;
+            set
+            {
+                Boolean update = _clearCommandAfterSend != value;
+                _clearCommandAfterSend = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Boolean _clearCommandAfterSend = false;
+
         [Category("UI"), DisplayName("Action to perform when closing"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.CloseAction>))]
         public Enumerations.CloseAction CloseAction
         {
@@ -275,6 +309,23 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private Enumerations.CloseAction _closeAction = Enumerations.CloseAction.Close;
+
+        [Category("UI"), DisplayName("Maximum number of lines to keep in the log window")]
+        public UInt32 MaxVisibleLogLines
+        {
+            get => _maxVisibleLogLines;
+            set
+            {
+                Boolean update = _maxVisibleLogLines != value;
+                _maxVisibleLogLines = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private UInt32 _maxVisibleLogLines = 2000;
 
         [Category("Putty"), DisplayName("Putty executable"), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
         public String PuttyExecutable
@@ -651,6 +702,23 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private UInt16 _portNumber = 22;
+
+        [Category("Server"), DisplayName("Newline to send after command")]
+        public String NewLine
+        {
+            get => _newLine;
+            set
+            {
+                Boolean update = _newLine != value;
+                _newLine = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private String _newLine = "\\n";
 
         [Category("Basic"), DisplayName("Keywords"), XmlArrayItem(ElementName = "Keyword"), Editor(typeof(CheckedListBoxUITypeEditor), typeof(UITypeEditor)), TypeConverter(typeof(CsvConverter)), Arguments(Enumerations.CheckedListBoxSetting.ServerKeywords)]
         public String[] Keywords
