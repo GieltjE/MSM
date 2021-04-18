@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,28 +35,33 @@ namespace MSM.UIElements
     public partial class LogControl : UserControlOptimized
     {
         internal static DataGridView DataGridView;
-        internal static DataTable DataTable;
         internal static ConcurrentQueue<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> UIQueue = new();
-        
-        private readonly DataTable _logDataTable = new();
+        private static DataTable _dataTableUsed;
+
         public LogControl()
         {
             InitializeComponent();
 
-            _logDataTable.Columns.Add("DateTime", typeof(DateTime));
-            _logDataTable.Columns.Add("Target", typeof(Enumerations.LogTarget));
-            _logDataTable.Columns.Add("Level", typeof(Enumerations.LogLevel));
-            _logDataTable.Columns.Add("Message", typeof(String));
+            _dataTableUsed = DataGridView_Logs.DataTable;
+            DataGridView_Logs.DataTable.Columns.Add("DateTime", typeof(DateTime));
+            DataGridView_Logs.DataTable.Columns.Add("Target", typeof(Enumerations.LogTarget));
+            DataGridView_Logs.DataTable.Columns.Add("Level", typeof(Enumerations.LogLevel));
+            DataGridView_Logs.DataTable.Columns.Add("Message", typeof(String));
 
-            BindingSource bindingSource = new() { DataSource = _logDataTable };
-            DataGridView_Logs.DataSource = bindingSource;
+            DataGridView_Logs.Bind();
             DataGridView_Logs.Columns[0].MinimumWidth = 200;
+            DataGridView_Logs.Columns[0].SortMode = DataGridViewColumnSortMode.Programmatic;
             DataGridView_Logs.Columns[1].MinimumWidth = 200;
+            DataGridView_Logs.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
             DataGridView_Logs.Columns[2].MinimumWidth = 200;
+            DataGridView_Logs.Columns[2].SortMode = DataGridViewColumnSortMode.NotSortable;
             DataGridView_Logs.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            DataGridView_Logs.Columns[3].SortMode = DataGridViewColumnSortMode.NotSortable;
+
+            DataGridView_Logs.Columns[0].HeaderCell.SortGlyphDirection = SortOrder.Descending;
+            DataGridView_Logs.Sort(DataGridView_Logs.Columns[0], ListSortDirection.Descending);
 
             DataGridView = DataGridView_Logs;
-            DataTable = _logDataTable;
 
             Cron.CreateJob<LogToUI>("LogToUI", 0, 0, 2, true);
         }
@@ -73,35 +79,42 @@ namespace MSM.UIElements
                 {
                     ToShow.Add(item);
                 }
-
                 if (!ToShow.Any()) return;
 
-                DataTable.BeginLoadData();
+                _dataTableUsed.BeginLoadData();
                 foreach ((DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) in ToShow.OrderByDescending(x => x.dateTime))
                 {
-                    DataRow row = DataTable.NewRow();
+                    DataRow row = _dataTableUsed.NewRow();
                     row[0] = dateTime;
                     row[1] = target;
                     row[2] = level;
                     row[3] = message;
-                    DataTable.Rows.InsertAt(row, 0);
+                    _dataTableUsed.Rows.InsertAt(row, 0);
                 }
 
-                if (DataTable.Rows.Count > Settings.Values.MaxVisibleLogLines)
+                if (_dataTableUsed.Rows.Count > Settings.Values.MaxVisibleLogLines)
                 {
-                    for (Int32 i = DataTable.Rows.Count; i > Settings.Values.MaxVisibleLogLines; i--)
+                    for (Int32 i = _dataTableUsed.Rows.Count; i > Settings.Values.MaxVisibleLogLines; i--)
                     {
-                        DataTable.Rows.RemoveAt(i);
+                        _dataTableUsed.Rows.RemoveAt(i - 1);
                     }
                 }
 
-                DataGridView.BeginInvoke(new Action(DataTable.EndLoadData)).AutoEndInvoke(DataGridView);
+                DataGridView.BeginInvoke(new Action(_dataTableUsed.EndLoadData)).AutoEndInvoke(DataGridView);
                 ToShow.Clear();
             }
             catch (Exception exception)
             {
                 Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not display log line to the UI", exception);
             }
+        }
+
+        private void ToolStripFilterKeyUp(Object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            if (ToolStrip_Filter.TextBox == null) return;
+
+            DataGridView_Logs.Search(ToolStrip_Filter.TextBox.Text);
         }
     }
 
