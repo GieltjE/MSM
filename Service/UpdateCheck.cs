@@ -84,7 +84,7 @@ namespace MSM.Service
 #if !DEBUG
                 if(resultDeserialized.tag_name < currentVersion)
                 {
-                    UI.ShowMessage(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
+                    UI.ShowWarning(Variables.MainForm, "An older version (" + resultDeserialized.tag_name + ") is currently the latest release, please consider downgrading", "Update check", MessageBoxIcon.Asterisk);
                 }
 #endif
 
