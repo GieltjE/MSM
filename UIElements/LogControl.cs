@@ -86,6 +86,15 @@ namespace MSM.UIElements
                     row[3] = message;
                     DataTable.Rows.InsertAt(row, 0);
                 }
+
+                if (DataTable.Rows.Count > Settings.Values.MaxVisibleLogLines)
+                {
+                    for (Int32 i = DataTable.Rows.Count; i > Settings.Values.MaxVisibleLogLines; i--)
+                    {
+                        DataTable.Rows.RemoveAt(i);
+                    }
+                }
+
                 DataGridView.BeginInvoke(new Action(DataTable.EndLoadData)).AutoEndInvoke(DataGridView);
                 ToShow.Clear();
             }
