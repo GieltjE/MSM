@@ -34,8 +34,8 @@ namespace MSM.Extends
             Padding = new Padding(0);
         }
 
-        private readonly SolidBrush _brush = new(Variables.ColorPalette.MainWindowActive.Background);
-        protected override void OnPaintBackground(PaintEventArgs e) => e.Graphics.FillRectangle(_brush, DisplayRectangle);
+        //private readonly SolidBrush _brush = new(Variables.ColorPalette.MainWindowActive.Background);
+        //protected override void OnPaintBackground(PaintEventArgs e) => e.Graphics.FillRectangle(_brush, DisplayRectangle);
 
         protected override String GetPersistString() => Name;
     }
