@@ -70,6 +70,18 @@ namespace MSM.Extends
             Invalidate();
         }
 
+        private readonly TerminalControl _terminal;
+        private Boolean _iscreated;
+        private Boolean _isdisposed;
+        internal IntPtr ChildHandle = IntPtr.Zero;
+        private Process _childProcess;
+        private static IntPtr _windowHandle = IntPtr.Zero;
+        private readonly String _executable;
+        private readonly String _parameters;
+        private readonly Dictionary<String, String> _environment;
+        private readonly String _path;
+        public Boolean LoadSuccess;
+
         public void Stop(Object sender, CancelEventArgs e)
         {
             Stop();
@@ -91,19 +103,6 @@ namespace MSM.Extends
             _childProcess.Kill();
             _childProcess?.Dispose();
         }
-
-        private readonly TerminalControl _terminal;
-        private Boolean _iscreated;
-        private Boolean _isdisposed;
-        internal IntPtr ChildHandle = IntPtr.Zero;
-        private Process _childProcess;
-        private static IntPtr _windowHandle = IntPtr.Zero;
-        private readonly String _executable;
-        private readonly String _parameters;
-        private readonly Dictionary<String, String> _environment;
-        private readonly String _path;
-        public Boolean LoadSuccess;
-
         internal void Load()
         {
             try
@@ -175,7 +174,14 @@ namespace MSM.Extends
             _isdisposed = false;
             LoadSuccess = true;
         }
-        
+        public void SendCommand(String command)
+        {
+            foreach (Char c in command)
+            {
+                NativeMethods.SendMessage(ChildHandle, NativeMethods.WM_CHAR, (Int32)c, IntPtr.Zero);
+            }
+        }
+
         private void ChildProcessExited(Object sender, EventArgs e)
         {
             Service.Events.OnProcessExited(_terminal);

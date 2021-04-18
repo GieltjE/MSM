@@ -40,7 +40,9 @@ namespace MSM
             this.ToolStrip_ShowServerList = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_ShowLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_Exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStrip_Command = new System.Windows.Forms.ToolStripTextBox();
             this.StatusStrip = new MSM.Extends.StatusStripOptimized();
+            this.ToolStrip_Send = new System.Windows.Forms.ToolStripButton();
             this.ToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,7 +62,9 @@ namespace MSM
             this.ToolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.ToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripButton_Help,
-            this.ToolStrip_General});
+            this.ToolStrip_General,
+            this.ToolStrip_Command,
+            this.ToolStrip_Send});
             this.ToolStrip.Location = new System.Drawing.Point(0, 0);
             this.ToolStrip.Name = "ToolStrip";
             this.ToolStrip.Padding = new System.Windows.Forms.Padding(0);
@@ -149,6 +153,13 @@ namespace MSM
             this.ToolStrip_Exit.Text = "Exit";
             this.ToolStrip_Exit.Click += new System.EventHandler(this.ToolStripExitClick);
             // 
+            // ToolStrip_Command
+            // 
+            this.ToolStrip_Command.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.ToolStrip_Command.Name = "ToolStrip_Command";
+            this.ToolStrip_Command.Size = new System.Drawing.Size(200, 25);
+            this.ToolStrip_Command.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ToolStripCommandKeyUp);
+            // 
             // StatusStrip
             // 
             this.StatusStrip.AllowMerge = false;
@@ -161,6 +172,15 @@ namespace MSM
             this.StatusStrip.Size = new System.Drawing.Size(882, 22);
             this.StatusStrip.SizingGrip = false;
             this.StatusStrip.TabIndex = 3;
+            // 
+            // ToolStrip_Send
+            // 
+            this.ToolStrip_Send.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.ToolStrip_Send.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ToolStrip_Send.Name = "ToolStrip_Send";
+            this.ToolStrip_Send.Size = new System.Drawing.Size(37, 22);
+            this.ToolStrip_Send.Text = "Send";
+            this.ToolStrip_Send.Click += new System.EventHandler(this.ToolStripSendClick);
             // 
             // Main
             // 
@@ -194,5 +214,7 @@ namespace MSM
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_ShowLogs;
         private System.Windows.Forms.ToolStripMenuItem ToolStrip_Exit;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_GitHub;
+        private System.Windows.Forms.ToolStripTextBox ToolStrip_Command;
+        private System.Windows.Forms.ToolStripButton ToolStrip_Send;
     }
 }

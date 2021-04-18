@@ -365,6 +365,28 @@ namespace MSM
         {
             UpdateCheck.TriggerUpdateCheckJob();
         }
+        private void ToolStripCommandKeyUp(Object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter || !Settings.Values.SendCommandOnEnter) return;
+            if (ToolStrip_Command.TextBox == null) return;
+
+            SendCommand(ToolStrip_Command.TextBox.Text);
+
+            if (Settings.Values.ClearCommandAfterSend)
+            {
+                ToolStrip_Command.TextBox.Text = "";
+            }
+        }
+        private void ToolStripSendClick(Object sender, EventArgs e)
+        {
+            if (ToolStrip_Command.TextBox == null) return;
+
+            SendCommand(ToolStrip_Command.TextBox.Text);
+            if (Settings.Values.ClearCommandAfterSend)
+            {
+                ToolStrip_Command.TextBox.Text = "";
+            }
+        }
 
         private void OnServerExited(TerminalControl terminal)
         {
@@ -406,6 +428,16 @@ namespace MSM
             if (Variables.ShutDownFired || !Variables.StartupComplete) return;
 
             DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
+        }
+        private void SendCommand(String command)
+        {
+            lock (_terminalControls)
+            {
+                foreach (KeyValuePair<TerminalControl, DockContentOptimized> dockContentOptimized in _terminalControls)
+                {
+                    dockContentOptimized.Key.SendCommand(command);
+                }
+            }
         }
 
         private DockContentOptimized AddDockContent(String text, String internalName, Control content, DockState dockState = DockState.Document, Boolean save = true, Boolean add = true)

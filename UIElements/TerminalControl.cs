@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MSM.Extends;
 using MSM.Service;
@@ -73,6 +74,11 @@ namespace MSM.UIElements
             AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
             Controls.Add(AppControl);
             AppControl.Load();
+        }
+
+        public void SendCommand(String command)
+        {
+            AppControl.SendCommand(command + Regex.Unescape(_server.NewLine));
         }
     }
 }
