@@ -48,6 +48,7 @@ namespace MSM
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new();
         private readonly Dictionary<TerminalControl, DockContentOptimized> _terminalControls = new();
         private readonly LogControl _logControl;
+        private readonly SemaphoreSlim _saveSessionsSemaphoreSlim = new(1, 1);
 
         public Main()
         {
@@ -425,9 +426,12 @@ namespace MSM
         }
         private void SaveSessions()
         {
+            if (LoadingTab) return;
             if (Variables.ShutDownFired || !Variables.StartupComplete) return;
 
+            _saveSessionsSemaphoreSlim.WaitUIFriendly();
             DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
+            _saveSessionsSemaphoreSlim.Release();
         }
         private void SendCommand(String command)
         {
@@ -456,20 +460,19 @@ namespace MSM
             }
 
             LoadingTab = true;
+
             DockContentOptimized newDockContent = new() { Text = text, Name = internalName, HideOnClose = _defaultUserControls.ContainsKey(internalName) };
 
             content.Dock = DockStyle.Fill;
             content.Padding = new Padding(0);
             content.Margin = new Padding(0);
 
-            newDockContent.SizeChanged += NewDockContentOnSizeChanged;
-            newDockContent.DockStateChanged += (sender, _) => NewDockContentOnDockStateChanged((DockContentOptimized)sender, content);
             newDockContent.Controls.Add(content);
             if (add)
             {
                 if (InvokeRequired)
                 {
-                    BeginInvoke(new Action<DockPanelOptimized, DockState>(newDockContent.Show), DockPanel_Main, dockState).AutoEndInvoke(this);
+                    Invoke(new Action<DockPanelOptimized, DockState>(newDockContent.Show), DockPanel_Main, dockState);
                 }
                 else
                 {
@@ -477,10 +480,8 @@ namespace MSM
                 }
             }
 
-            if (save)
-            {
-                SaveSessions();
-            }
+            newDockContent.SizeChanged += NewDockContentOnSizeChanged;
+            newDockContent.DockStateChanged += (sender, _) => NewDockContentOnDockStateChanged((DockContentOptimized)sender, content);
 
             if (_defaultUserControls.ContainsKey(internalName))
             {
@@ -489,6 +490,12 @@ namespace MSM
             }
 
             LoadingTab = false;
+
+            if (save)
+            {
+                SaveSessions();
+            }
+            
             return newDockContent;
         }
         private void NewDockContentOnSizeChanged(Object sender, EventArgs e)
