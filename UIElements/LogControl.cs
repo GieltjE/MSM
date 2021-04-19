@@ -49,11 +49,11 @@ namespace MSM.UIElements
             DataGridView_Logs.DataTable.Columns.Add("Message", typeof(String));
 
             DataGridView_Logs.Bind();
-            DataGridView_Logs.Columns[0].MinimumWidth = 200;
+            DataGridView_Logs.Columns[0].MinimumWidth = 75;
             DataGridView_Logs.Columns[0].SortMode = DataGridViewColumnSortMode.Programmatic;
-            DataGridView_Logs.Columns[1].MinimumWidth = 200;
+            DataGridView_Logs.Columns[1].MinimumWidth = 50;
             DataGridView_Logs.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
-            DataGridView_Logs.Columns[2].MinimumWidth = 200;
+            DataGridView_Logs.Columns[2].MinimumWidth = 50;
             DataGridView_Logs.Columns[2].SortMode = DataGridViewColumnSortMode.NotSortable;
             DataGridView_Logs.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             DataGridView_Logs.Columns[3].SortMode = DataGridViewColumnSortMode.NotSortable;
