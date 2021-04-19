@@ -437,10 +437,10 @@ namespace MSM
         {
             lock (_terminalControls)
             {
-                foreach (KeyValuePair<TerminalControl, DockContentOptimized> dockContentOptimized in _terminalControls)
+                Parallel.ForEach(_terminalControls, terminalControl =>
                 {
-                    dockContentOptimized.Key.SendCommand(command);
-                }
+                    terminalControl.Key.SendCommand(command);
+                });
             }
         }
 
