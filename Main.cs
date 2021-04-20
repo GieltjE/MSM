@@ -171,15 +171,12 @@ namespace MSM
                     
                     foreach (DockPane dockPane in DockPanel_Main.Panes)
                     {
-                        IDockContent previouslyActiveContent = dockPane.ActiveContent;
-                        foreach (IDockContent content in dockPane.Contents.Reverse().Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden))
+                        foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
                         {
-                            if (content == previouslyActiveContent) continue;
                             if (_defaultUserControls.ContainsKey(((DockContentOptimized)content).Name)) continue;
-                            
-                            dockPane.ActiveContent = content;
+
+                            content.DockHandler.Activate();
                         }
-                        dockPane.ActiveContent = previouslyActiveContent;
                     }
                     loadSuccess = true;
                 }
