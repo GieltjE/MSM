@@ -159,33 +159,22 @@ namespace MSM
             _contextMenuStripTrayIcon.Items.AddRange(new ToolStripItem[] { _trayIconStripOpen, _trayIconStripExit });
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
-        }
-        private void MainShown(Object sender, EventArgs e)
-        {
-            Boolean loadSuccess = false;
-            if (File.Exists(Variables.SessionFile))
+
+            Boolean loadDockPanelSuccess = false;
+            try
             {
-                try
+                if (File.Exists(Variables.SessionFile))
                 {
                     DockPanel_Main.LoadFromXml(Variables.SessionFile, GetContentFromPersistString);
-                    
-                    foreach (DockPane dockPane in DockPanel_Main.Panes)
-                    {
-                        foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
-                        {
-                            if (_defaultUserControls.ContainsKey(((DockContentOptimized)content).Name)) continue;
-
-                            content.DockHandler.Activate();
-                        }
-                    }
-                    loadSuccess = true;
                 }
-                catch (Exception exception)
-                {
-                    Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not reinstate (all) tabbages", exception);
-                }
+                loadDockPanelSuccess = true;
             }
-            if (!loadSuccess)
+            catch (Exception exception)
+            {
+                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not reinstate (all) tabbages", exception);
+            }
+
+            if (!loadDockPanelSuccess)
             {
                 ToolStripButtonDefaultControlClick(ToolStrip_ShowServerList, null);
                 ToolStripButtonDefaultControlClick(ToolStrip_ShowLogs, null);
@@ -207,7 +196,19 @@ namespace MSM
             {
                 AddServer(server, false);
             }
+        }
+        private void MainShown(Object sender, EventArgs e)
+        {
+            foreach (DockPane dockPane in DockPanel_Main.Panes)
+            {
+                foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
+                {
+                    if (_defaultUserControls.ContainsKey(((DockContentOptimized)content).Name)) continue;
 
+                    content.DockHandler.Activate();
+                }
+            }
+            
             Variables.StartupComplete = true;
         }
         private IDockContent GetContentFromPersistString(String persistString)
