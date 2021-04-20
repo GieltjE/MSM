@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Extends;
@@ -159,11 +160,8 @@ namespace MSM
 
             NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
         }
-
         private void MainShown(Object sender, EventArgs e)
         {
-            Visible = false;
-
             Boolean loadSuccess = false;
             if (File.Exists(Variables.SessionFile))
             {
@@ -174,9 +172,10 @@ namespace MSM
                     foreach (DockPane dockPane in DockPanel_Main.Panes)
                     {
                         IDockContent previouslyActiveContent = dockPane.ActiveContent;
-                        foreach (IDockContent content in dockPane.Contents.Reverse().Where(x => !x.DockHandler.IsHidden))
+                        foreach (IDockContent content in dockPane.Contents.Reverse().Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden))
                         {
                             if (content == previouslyActiveContent) continue;
+                            if (_defaultUserControls.ContainsKey(((DockContentOptimized)content).Name)) continue;
                             
                             dockPane.ActiveContent = content;
                         }
@@ -203,7 +202,6 @@ namespace MSM
             if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined)
             {
                 Variables.StartupComplete = true;
-                Visible = true;
                 return;
             }
 
@@ -214,7 +212,6 @@ namespace MSM
             }
 
             Variables.StartupComplete = true;
-            Visible = true;
         }
         private IDockContent GetContentFromPersistString(String persistString)
         {
