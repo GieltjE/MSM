@@ -77,6 +77,10 @@ namespace MSM.Data
 
         [DllImport("user32.dll", EntryPoint = "GetKeyboardState", SetLastError = true)]
         internal static extern Boolean NativeGetKeyboardState([Out] Byte[] keyStates);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern Boolean IsWindowVisible(IntPtr hWnd);
         #endregion
 
         #region Enums

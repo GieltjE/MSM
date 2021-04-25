@@ -43,13 +43,13 @@ namespace MSM
         private readonly ContextMenuStrip _contextMenuStripTrayIcon = new();
         private readonly ToolStripMenuItem _trayIconStripOpen = new();
         private readonly ToolStripMenuItem _trayIconStripExit = new();
-        private FormWindowState _previousWindowState = FormWindowState.Normal;
         private readonly Dictionary<String, (UserControlOptimized userControlOptimized, DockState dockState, ToolStripMenuItem toolStripMenuItem, DockContentOptimized dockContentOptimized)> _defaultUserControls = new(StringComparer.Ordinal);
         private Boolean LoadingTab { get; set; }
         private readonly VisualStudioToolStripExtender _visualStudioToolStripExtender = new();
         private readonly Dictionary<TerminalControl, DockContentOptimized> _terminalControls = new();
         private readonly LogControl _logControl;
         private readonly SemaphoreSlim _saveSessionsSemaphoreSlim = new(1, 1);
+        private FormWindowState _previousWindowState;
 
         public Main()
         {
@@ -130,11 +130,6 @@ namespace MSM
             Service.Events.ShutDownFired += ShutDownFired;
             Service.Events.ProcessExited += OnServerExited;
             
-            if (Settings.Values.MaximizeOnStart)
-            {
-                WindowState = FormWindowState.Maximized;
-            }
-
             _logControl = new LogControl();
             _defaultUserControls.Add("Logs", (_logControl, DockState.DockBottomAutoHide, ToolStrip_ShowLogs, null));
             _defaultUserControls.Add("Settings", (new SettingControl(), DockState.Document, ToolStrip_ShowSettings, null));
@@ -199,6 +194,45 @@ namespace MSM
         }
         private void MainShown(Object sender, EventArgs e)
         {
+            switch (Settings.Values.InitialWindowState)
+            {
+                case Enumerations.InitialWindowState.MaximizedAutomatic:
+                    _previousWindowState = FormWindowState.Maximized;
+                    MainLoadSizeAndLocation(false, true);
+                    WindowState = FormWindowState.Maximized;
+                    break;
+                case Enumerations.InitialWindowState.MaximizedPreviousWindow:
+                    _previousWindowState = FormWindowState.Maximized;
+                    MainLoadSizeAndLocation(true, true);
+                    WindowState = FormWindowState.Maximized;
+                    break;
+                case Enumerations.InitialWindowState.MinimizedMaximizedAutomatic:
+                    _previousWindowState = FormWindowState.Maximized;
+                    WindowState = FormWindowState.Maximized;
+                    WindowState = FormWindowState.Minimized;
+                    break;
+                case Enumerations.InitialWindowState.MinimizedMaximizedPreviousWindow:
+                    _previousWindowState = FormWindowState.Maximized;
+                    MainLoadSizeAndLocation(true, true);
+                    WindowState = FormWindowState.Maximized;
+                    WindowState = FormWindowState.Minimized;
+                    break;
+                case Enumerations.InitialWindowState.MinimizedAutomatic:
+                    _previousWindowState = FormWindowState.Normal;
+                    WindowState = FormWindowState.Minimized;
+                    break;
+                case Enumerations.InitialWindowState.MinimizedPrevious:
+                    _previousWindowState = Settings.Values.WindowState;
+                    MainLoadSizeAndLocation(true, true);
+                    WindowState = FormWindowState.Minimized;
+                    break;
+                case Enumerations.InitialWindowState.PreviousState:
+                    _previousWindowState = Settings.Values.WindowState;
+                    MainLoadSizeAndLocation(true, true);
+                    WindowState = Settings.Values.WindowState;
+                    break;
+            }
+            
             foreach (DockPane dockPane in DockPanel_Main.Panes)
             {
                 foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
@@ -267,16 +301,33 @@ namespace MSM
         }
         private void MainResize(Object sender, EventArgs e)
         {
-            if (WindowState != FormWindowState.Minimized)
-            {
-                _previousWindowState = WindowState;
-            }
-
             if (WindowState == FormWindowState.Minimized && Settings.Values.MinimizeToTray)
             {
                 ShowInTaskbar = false;
-                NotifyIcon.Visible = true;
+                if (!Settings.Values.AlwaysShowTrayIcon)
+                {
+                    NotifyIcon.Visible = true;
+                }
             }
+            else if (WindowState != FormWindowState.Minimized && !Settings.Values.AlwaysShowTrayIcon)
+            {
+                NotifyIcon.Visible = false;
+            }
+        }
+        private void MainResizeEnd(Object sender, EventArgs e)
+        {
+            if (!Variables.StartupComplete) return;
+            Settings.Values.WindowState = WindowState;
+
+            if (WindowState is FormWindowState.Minimized or FormWindowState.Maximized) return;
+            Settings.Values.WindowSize = Size;
+        }
+        private void MainLocationChanged(Object sender, EventArgs e)
+        {
+            if (!Variables.StartupComplete) return;
+            if (WindowState is FormWindowState.Minimized or FormWindowState.Maximized) return;
+
+            Settings.Values.WindowLocation = Location;
         }
         private void ShutDownFired()
         {
@@ -284,6 +335,22 @@ namespace MSM
             Service.Events.ShutDownFired -= ShutDownFired;
             Service.Events.ProcessExited -= OnServerExited;
             NotifyIcon.Visible = false;
+        }
+        private void MainLoadSizeAndLocation(Boolean location, Boolean size)
+        {
+            if (size)
+            {
+                Size = Settings.Values.WindowSize;
+            }
+            if (location)
+            {
+                Location = Settings.Values.WindowLocation;
+            }
+
+            if (NativeMethods.IsWindowVisible(Handle)) return;
+
+            Location = new Point(0, 0);
+            Size = new Size(500, 500);
         }
 
         public void TrayIconDoubleClick(Object sender, EventArgs e)
@@ -310,6 +377,23 @@ namespace MSM
             }
 
             ShowInTaskbar = true;
+            if (_previousWindowState == FormWindowState.Minimized)
+            {
+                switch (Settings.Values.InitialWindowState)
+                {
+                    case Enumerations.InitialWindowState.MaximizedAutomatic:
+                    case Enumerations.InitialWindowState.MaximizedPreviousWindow:
+                    case Enumerations.InitialWindowState.MinimizedMaximizedAutomatic:
+                    case Enumerations.InitialWindowState.MinimizedMaximizedPreviousWindow:
+                        _previousWindowState = FormWindowState.Maximized;
+                        break;
+                    case Enumerations.InitialWindowState.MinimizedAutomatic:
+                    case Enumerations.InitialWindowState.PreviousState:
+                    case Enumerations.InitialWindowState.MinimizedPrevious:
+                        _previousWindowState = FormWindowState.Normal;
+                        break;
+                }
+            }
             WindowState = _previousWindowState;
             Show();
             BringToFront();

@@ -1,3 +1,4 @@
+using System.Drawing;
 using MSM.Extends;
 
 namespace MSM
@@ -187,6 +188,7 @@ namespace MSM
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 598);
+            this.MinimumSize = new Size(250, 250);
             this.Controls.Add(this.DockPanel_Main);
             this.Controls.Add(this.StatusStrip);
             this.Controls.Add(this.ToolStrip);
@@ -195,6 +197,8 @@ namespace MSM
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainClosing);
             this.Shown += new System.EventHandler(this.MainShown);
             this.Resize += new System.EventHandler(this.MainResize);
+            this.LocationChanged += new System.EventHandler(this.MainLocationChanged);
+            this.ResizeEnd += new System.EventHandler(this.MainResizeEnd);
             this.ToolStrip.ResumeLayout(false);
             this.ToolStrip.PerformLayout();
             this.ResumeLayout(false);

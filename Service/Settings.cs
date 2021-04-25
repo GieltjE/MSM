@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Design;
 using System.IO;
 using System.Linq;
@@ -242,23 +243,6 @@ namespace MSM.Service
         }
         [XmlIgnore] private Boolean _alwaysShowTrayIcon;
 
-        [Category("UI"), DisplayName("Maximize on start"), TypeConverter(typeof(BooleanYesNoConverter))]
-        public Boolean MaximizeOnStart
-        {
-            get => _maximizeOnStart;
-            set
-            {
-                Boolean update = _maximizeOnStart != value;
-                _maximizeOnStart = value;
-
-                if (update && Settings.Values != null)
-                {
-                    Settings.Flush();
-                }
-            }
-        }
-        [XmlIgnore] private Boolean _maximizeOnStart = true;
-
         [Category("UI"), DisplayName("Send the command in the command box on enter"), TypeConverter(typeof(BooleanYesNoConverter))]
         public Boolean SendCommandOnEnter
         {
@@ -291,7 +275,7 @@ namespace MSM.Service
                 }
             }
         }
-        [XmlIgnore] private Boolean _clearCommandAfterSend = false;
+        [XmlIgnore] private Boolean _clearCommandAfterSend;
 
         [Category("UI"), DisplayName("Action to perform when closing"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.CloseAction>))]
         public Enumerations.CloseAction CloseAction
@@ -326,6 +310,71 @@ namespace MSM.Service
             }
         }
         [XmlIgnore] private UInt32 _maxVisibleLogLines = 2000;
+
+        [Category("UI"), DisplayName("Initial window state"), TypeConverter(typeof(EnumDescriptionConverter<Enumerations.InitialWindowState>))]
+        public Enumerations.InitialWindowState InitialWindowState
+        {
+            get => _initialWindowState;
+            set
+            {
+                Boolean update = _initialWindowState != value;
+                _initialWindowState = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Enumerations.InitialWindowState _initialWindowState = Enumerations.InitialWindowState.MaximizedPreviousWindow;
+        [Browsable(false)]
+        public FormWindowState WindowState
+        {
+            get => _windowState;
+            set
+            {
+                Boolean update = _windowState != value;
+                _windowState = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private FormWindowState _windowState = FormWindowState.Maximized;
+        [Browsable(false)]
+        public Point WindowLocation
+        {
+            get => _windowLocation;
+            set
+            {
+                Boolean update = _windowLocation != value;
+                _windowLocation = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Point _windowLocation;
+        [Browsable(false)]
+        public Size WindowSize
+        {
+            get => _windowSize;
+            set
+            {
+                Boolean update = _windowSize != value;
+                _windowSize = value;
+
+                if (update && Settings.Values != null)
+                {
+                    Settings.Flush();
+                }
+            }
+        }
+        [XmlIgnore] private Size _windowSize = new(500, 500);
 
         [Category("Putty"), DisplayName("Putty executable"), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
         public String PuttyExecutable

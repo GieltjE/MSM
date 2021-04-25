@@ -91,6 +91,26 @@ namespace MSM.Data
             MinimizeToTray,
         }
 
+        public enum InitialWindowState : Byte
+        {
+            [Description("Automatic")]
+            Automatic,
+            [Description("Minimized (automatic)")]
+            MinimizedAutomatic,
+            [Description("Minimized (maximized, automatic)")]
+            MinimizedMaximizedAutomatic,
+            [Description("Minimized (maximized, previous window)")]
+            MinimizedMaximizedPreviousWindow,
+            [Description("Minimized (previous)")]
+            MinimizedPrevious,
+            [Description("Maximized (automatic)")]
+            MaximizedAutomatic,
+            [Description("Maximized (previous window)")]
+            MaximizedPreviousWindow,
+            [Description("Previous state")]
+            PreviousState,
+        }
+
         public enum InitialSessions : Byte
         {
             [Description("None")]
