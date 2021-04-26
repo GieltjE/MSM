@@ -49,7 +49,7 @@ namespace MSM.Extends
                 Flush(true);
 
                 Int32 retries = 0;
-                retry:
+retry:
                 if (SafeFileHandle != null)
                 {
                     if (!NativeMethods.FlushFileBuffers(SafeFileHandle))
@@ -103,5 +103,4 @@ retry2:
             }
         }
     }
-
 }
