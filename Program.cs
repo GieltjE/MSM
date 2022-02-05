@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,16 +19,15 @@
 using System;
 using System.Windows.Forms;
 
-namespace MSM
+namespace MSM;
+
+internal static class Program
 {
-    internal static class Program
+    [STAThread]
+    private static void Main()
     {
-        [STAThread]
-        private static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main());
-        }
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new Main());
     }
 }

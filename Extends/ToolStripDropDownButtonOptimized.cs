@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2018 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2018-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,21 +20,20 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+[DefaultProperty("CustomDropDownDirection"), ToolboxBitmap(typeof(ToolStripDropDownButton))]
+public class ToolStripDropDownButtonOptimized : ToolStripDropDownButton
 {
-    [DefaultProperty("CustomDropDownDirection"), ToolboxBitmap(typeof(ToolStripDropDownButton))]
-    public class ToolStripDropDownButtonOptimized : ToolStripDropDownButton
+    [DefaultValue(ToolStripDropDownDirection.BelowRight), Description("Which direction to dropdown")]
+    public ToolStripDropDownDirection CustomDropDownDirection
     {
-        [DefaultValue(ToolStripDropDownDirection.BelowRight), Description("Which direction to dropdown")]
-        public ToolStripDropDownDirection CustomDropDownDirection
+        get => _customDropDownDirection;
+        set
         {
-            get => _customDropDownDirection;
-            set
-            {
-                _customDropDownDirection = value;
-                DropDownDirection = value;
-            }
+            _customDropDownDirection = value;
+            DropDownDirection = value;
         }
-        private ToolStripDropDownDirection _customDropDownDirection = ToolStripDropDownDirection.BelowRight;
     }
+    private ToolStripDropDownDirection _customDropDownDirection = ToolStripDropDownDirection.BelowRight;
 }

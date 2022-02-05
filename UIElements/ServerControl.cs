@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,132 +25,131 @@ using MSM.Extends;
 using MSM.Graphics;
 using MSM.Service;
 
-namespace MSM.UIElements
+namespace MSM.UIElements;
+
+public partial class ServerControl : UserControlOptimized
 {
-    public partial class ServerControl : UserControlOptimized
+    private static ImageList _imageList;
+    public ServerControl()
     {
-        private static ImageList _imageList;
-        public ServerControl()
+        InitializeComponent();
+
+        LoadOrUpdateTree();
+        Settings.OnSettingsServerUpdatedEvent += LoadOrUpdateTree;
+
+        if (_imageList == null)
         {
-            InitializeComponent();
+            _imageList = new ImageList();
+            _imageList.Images.Add(Resources.Folder);
+            _imageList.Images.Add(Resources.Session);
+        }
+        Treeview_NodesAndServers.ImageList = _imageList;
 
-            LoadOrUpdateTree();
-            Settings.OnSettingsServerUpdatedEvent += LoadOrUpdateTree;
+        Treeview_NodesAndServers.AfterCheck += TreeviewNodesAndServersAfterCheck;
+        Treeview_NodesAndServers.AfterExpand += TreeviewNodesAndServersAfterExpandOrCollapse;
+        Treeview_NodesAndServers.AfterCollapse += TreeviewNodesAndServersAfterExpandOrCollapse;
+        Treeview_NodesAndServers.MouseDoubleClick += TreeviewNodesAndServersMouseDoubleClick;
+    }
 
-            if (_imageList == null)
-            {
-                _imageList = new ImageList();
-                _imageList.Images.Add(Resources.Folder);
-                _imageList.Images.Add(Resources.Session);
-            }
-            Treeview_NodesAndServers.ImageList = _imageList;
-
-            Treeview_NodesAndServers.AfterCheck += TreeviewNodesAndServersAfterCheck;
-            Treeview_NodesAndServers.AfterExpand += TreeviewNodesAndServersAfterExpandOrCollapse;
-            Treeview_NodesAndServers.AfterCollapse += TreeviewNodesAndServersAfterExpandOrCollapse;
-            Treeview_NodesAndServers.MouseDoubleClick += TreeviewNodesAndServersMouseDoubleClick;
+    private Boolean _firstLoad = true;
+    private void LoadOrUpdateTree()
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke(new Action(LoadOrUpdateTree));
+            return;
         }
 
-        private Boolean _firstLoad = true;
-        private void LoadOrUpdateTree()
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new Action(LoadOrUpdateTree));
-                return;
-            }
+        Treeview_NodesAndServers.BeginUpdate();
 
-            Treeview_NodesAndServers.BeginUpdate();
-
-            AddNode(Settings.Values.Node.NodeList);
-            AddServers(Settings.Values.Node.ServerList, null);
+        AddNode(Settings.Values.Node.NodeList);
+        AddServers(Settings.Values.Node.ServerList, null);
             
-            foreach (KeyValuePair<String, TreeNode> treeNode in Treeview_NodesAndServers.TreeNodes.Where(treeNode => !Settings.AllNodes.ContainsKey(treeNode.Key) && !Settings.AllServers.ContainsKey(treeNode.Key)))
-            {
-                treeNode.Value.Remove();
-            }
-
-            Treeview_NodesAndServers.UpdateList();
-            Treeview_NodesAndServers.EndUpdate();
-
-            _firstLoad = false;
-        }
-        private void AddNode(CollectionConverter<Node> nodes, TreeNode parent = null)
+        foreach (KeyValuePair<String, TreeNode> treeNode in Treeview_NodesAndServers.TreeNodes.Where(treeNode => !Settings.AllNodes.ContainsKey(treeNode.Key) && !Settings.AllServers.ContainsKey(treeNode.Key)))
         {
-            foreach (Node nodeToUpdateOrAdd in nodes)
-            {
-                TreeNode nodeFound;
-                if (Treeview_NodesAndServers.TreeNodes.ContainsKey(nodeToUpdateOrAdd.NodeID))
-                {
-                    nodeFound = Treeview_NodesAndServers.TreeNodes[nodeToUpdateOrAdd.NodeID];
-                    nodeFound.Text = nodeToUpdateOrAdd.NodeName;
-                }
-                else
-                {
-                    nodeFound = parent == null ? Treeview_NodesAndServers.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0) : parent.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
-                }
-                if (_firstLoad && Settings.Values.SaveCheckedNodes && nodeToUpdateOrAdd.Checked)
-                {
-                    nodeFound.Checked = true;
-                }
-                if (_firstLoad && Settings.Values.SaveExpandedNodes && nodeToUpdateOrAdd.Expanded)
-                {
-                    nodeFound.Expand();
-                }
-
-                AddNode(nodeToUpdateOrAdd.NodeList, nodeFound);
-                AddServers(nodeToUpdateOrAdd.ServerList, nodeFound);
-            }
+            treeNode.Value.Remove();
         }
-        private void AddServers(CollectionConverter<Server> serverList, TreeNode node)
+
+        Treeview_NodesAndServers.UpdateList();
+        Treeview_NodesAndServers.EndUpdate();
+
+        _firstLoad = false;
+    }
+    private void AddNode(CollectionConverter<Node> nodes, TreeNode parent = null)
+    {
+        foreach (Node nodeToUpdateOrAdd in nodes)
         {
-            foreach (Server server in serverList)
+            TreeNode nodeFound;
+            if (Treeview_NodesAndServers.TreeNodes.ContainsKey(nodeToUpdateOrAdd.NodeID))
             {
-                TreeNode serverNodeFound;
-                if (Treeview_NodesAndServers.TreeNodes.ContainsKey(server.NodeID))
-                {
-                    serverNodeFound = Treeview_NodesAndServers.TreeNodes[server.NodeID];
-                    serverNodeFound.Text = server.DisplayName;
-                }
-                else
-                {
-                    serverNodeFound = node != null ? node.Nodes.Add(server.NodeID, server.DisplayName, 1, 1) : Treeview_NodesAndServers.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
-                }
-
-                if (_firstLoad && Settings.Values.SaveCheckedNodes && server.Checked)
-                {
-                    serverNodeFound.Checked = true;
-                }
+                nodeFound = Treeview_NodesAndServers.TreeNodes[nodeToUpdateOrAdd.NodeID];
+                nodeFound.Text = nodeToUpdateOrAdd.NodeName;
             }
-        }
+            else
+            {
+                nodeFound = parent == null ? Treeview_NodesAndServers.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0) : parent.Nodes.Add(nodeToUpdateOrAdd.NodeID, nodeToUpdateOrAdd.NodeName, 0, 0);
+            }
+            if (_firstLoad && Settings.Values.SaveCheckedNodes && nodeToUpdateOrAdd.Checked)
+            {
+                nodeFound.Checked = true;
+            }
+            if (_firstLoad && Settings.Values.SaveExpandedNodes && nodeToUpdateOrAdd.Expanded)
+            {
+                nodeFound.Expand();
+            }
 
-        private static void TreeviewNodesAndServersAfterCheck(Object sender, TreeViewEventArgs e)
+            AddNode(nodeToUpdateOrAdd.NodeList, nodeFound);
+            AddServers(nodeToUpdateOrAdd.ServerList, nodeFound);
+        }
+    }
+    private void AddServers(CollectionConverter<Server> serverList, TreeNode node)
+    {
+        foreach (Server server in serverList)
         {
-            Server server = Settings.FindServer(e.Node.Name);
-            if (server != null)
+            TreeNode serverNodeFound;
+            if (Treeview_NodesAndServers.TreeNodes.ContainsKey(server.NodeID))
             {
-                server.Checked = e.Node.Checked;
+                serverNodeFound = Treeview_NodesAndServers.TreeNodes[server.NodeID];
+                serverNodeFound.Text = server.DisplayName;
+            }
+            else
+            {
+                serverNodeFound = node != null ? node.Nodes.Add(server.NodeID, server.DisplayName, 1, 1) : Treeview_NodesAndServers.Nodes.Add(server.NodeID, server.DisplayName, 1, 1);
             }
 
-            Node node = Settings.FindNode(e.Node.Name);
-            if (node != null)
+            if (_firstLoad && Settings.Values.SaveCheckedNodes && server.Checked)
             {
-                node.Checked = e.Node.Checked;
+                serverNodeFound.Checked = true;
             }
         }
-        private static void TreeviewNodesAndServersAfterExpandOrCollapse(Object sender, TreeViewEventArgs e)
-        {
-            Node node = Settings.FindNode(e.Node.Name);
-            if (node != null)
-            {
-                node.Expanded = e.Node.IsExpanded;
-            }
-        }
-        private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
-        {
-            if (Treeview_NodesAndServers.SelectedNode is not {ImageIndex: 1}) return;
+    }
 
-            Variables.MainForm.AddServer(Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name), true);
+    private static void TreeviewNodesAndServersAfterCheck(Object sender, TreeViewEventArgs e)
+    {
+        Server server = Settings.FindServer(e.Node.Name);
+        if (server != null)
+        {
+            server.Checked = e.Node.Checked;
         }
+
+        Node node = Settings.FindNode(e.Node.Name);
+        if (node != null)
+        {
+            node.Checked = e.Node.Checked;
+        }
+    }
+    private static void TreeviewNodesAndServersAfterExpandOrCollapse(Object sender, TreeViewEventArgs e)
+    {
+        Node node = Settings.FindNode(e.Node.Name);
+        if (node != null)
+        {
+            node.Expanded = e.Node.IsExpanded;
+        }
+    }
+    private void TreeviewNodesAndServersMouseDoubleClick(Object sender, MouseEventArgs mouseEventArgs)
+    {
+        if (Treeview_NodesAndServers.SelectedNode is not {ImageIndex: 1}) return;
+
+        Variables.MainForm.AddServer(Settings.FindServer(Treeview_NodesAndServers.SelectedNode.Name), true);
     }
 }

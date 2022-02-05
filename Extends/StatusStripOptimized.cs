@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2018 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2018-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,14 +19,13 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+[ToolboxBitmap(typeof(StatusStrip))]
+public class StatusStripOptimized : StatusStrip
 {
-    [ToolboxBitmap(typeof(StatusStrip))]
-    public class StatusStripOptimized : StatusStrip
+    public StatusStripOptimized()
     {
-        public StatusStripOptimized()
-        {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-        }
+        SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
     }
 }

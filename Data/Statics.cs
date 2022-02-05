@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,13 +20,12 @@ using System;
 using MSM.Extends;
 using MSM.Service;
 
-namespace MSM.Data
+namespace MSM.Data;
+
+public static class Statics
 {
-    public static class Statics
-    {
-        public static readonly Random Random = new(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
-        public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
-        public static InformationObjectManager InformationObjectManager;
-        public static Double FormOpacityFade = .93;
-    }
+    public static readonly Random Random = new(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
+    public static readonly NewtonsoftJsonSerializer NewtonsoftJsonSerializer = new();
+    public static InformationObjectManager InformationObjectManager;
+    public static Double FormOpacityFade = .93;
 }

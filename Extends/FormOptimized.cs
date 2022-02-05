@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,33 +22,32 @@ using System.Windows.Forms;
 using MSM.Data;
 using SolidBrush = System.Drawing.SolidBrush;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+public class FormOptimized : Form
 {
-    public class FormOptimized : Form
+    public FormOptimized(Form masterForm)
     {
-        public FormOptimized(Form masterForm)
-        {
-            Owner = masterForm;
-            Init();
-        }
-        public FormOptimized()
-        {
-            Init();
-        }
-        private void Init()
-        {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        Owner = masterForm;
+        Init();
+    }
+    public FormOptimized()
+    {
+        Init();
+    }
+    private void Init()
+    {
+        SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
-            Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-        }
+        Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+    }
 
-        private SolidBrush _backBrush;
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            if (DesignMode) return;
+    private SolidBrush _backBrush;
+    protected override void OnPaintBackground(PaintEventArgs e)
+    {
+        if (DesignMode) return;
 
-            _backBrush ??= new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
-            e.Graphics.FillRectangle(_backBrush, DisplayRectangle);
-        }
+        _backBrush ??= new SolidBrush(Variables.ColorPalette.MainWindowActive.Background);
+        e.Graphics.FillRectangle(_backBrush, DisplayRectangle);
     }
 }

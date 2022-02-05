@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,40 +19,39 @@
 using MSM.Data;
 using MSM.Extends;
 
-namespace MSM.UIElements
+namespace MSM.UIElements;
+
+public partial class SettingControl : UserControlOptimized
 {
-    public partial class SettingControl : UserControlOptimized
+    public SettingControl()
     {
-        public SettingControl()
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            if (DesignMode || Variables.ColorPalette == null) return;
+        if (DesignMode || Variables.ColorPalette == null) return;
 
-            PropertyGrid_Settings.SelectedObject = Service.Settings.Values;
+        PropertyGrid_Settings.SelectedObject = Service.Settings.Values;
 
-            PropertyGrid_Settings.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-            PropertyGrid_Settings.CommandsBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-            PropertyGrid_Settings.HelpBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-            PropertyGrid_Settings.ViewBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.CommandsBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.HelpBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.ViewBackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
 
-            PropertyGrid_Settings.CategorySplitterColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.CategorySplitterColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
 
-            PropertyGrid_Settings.LineColor = Variables.ColorPalette.ToolWindowCaptionActive.Button;
+        PropertyGrid_Settings.LineColor = Variables.ColorPalette.ToolWindowCaptionActive.Button;
 
-            PropertyGrid_Settings.CommandsBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-            PropertyGrid_Settings.HelpBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-            PropertyGrid_Settings.ViewBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.CommandsBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.HelpBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        PropertyGrid_Settings.ViewBorderColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
 
-            PropertyGrid_Settings.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
-            PropertyGrid_Settings.CommandsForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
-            PropertyGrid_Settings.HelpForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
-            PropertyGrid_Settings.ViewForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
-            PropertyGrid_Settings.CategoryForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text; 
-            PropertyGrid_Settings.SelectedItemWithFocusForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
-            PropertyGrid_Settings.DisabledItemForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.ForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.CommandsForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.HelpForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.ViewForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.CategoryForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text; 
+        PropertyGrid_Settings.SelectedItemWithFocusForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
+        PropertyGrid_Settings.DisabledItemForeColor = Variables.ColorPalette.ToolWindowCaptionActive.Text;
 
-            PropertyGrid_Settings.ExpandAllGridItems();
-        }
+        PropertyGrid_Settings.ExpandAllGridItems();
     }
 }

@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,263 +29,262 @@ using System.Windows.Forms;
 using MSM.Data;
 using MSM.Functions;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+[ToolboxBitmap(typeof(DataGridView))]
+public class DataGridViewOptimized : DataGridView
 {
-    [ToolboxBitmap(typeof(DataGridView))]
-    public class DataGridViewOptimized : DataGridView
+    public DataGridViewOptimized()
     {
-        public DataGridViewOptimized()
+        SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw, true);
+
+        CellBorderStyle = DataGridViewCellBorderStyle.RaisedVertical;
+        RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+        ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+        BorderStyle = BorderStyle.None;
+        ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+        RowHeadersVisible = false;
+
+        // ReSharper disable once RedundantBaseQualifier
+        base.DoubleBuffered = true;
+        // ReSharper disable once RedundantBaseQualifier
+        SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        if (!Variables.DesignMode)
         {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw, true);
+            EnableHeadersVisualStyles = false;
 
-            CellBorderStyle = DataGridViewCellBorderStyle.RaisedVertical;
-            RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            BorderStyle = BorderStyle.None;
-            ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-            RowHeadersVisible = false;
+            DefaultCellStyle.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+            AlternatingRowsDefaultCellStyle.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Grip;
+            BackgroundColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+        }
+    }
 
-            // ReSharper disable once RedundantBaseQualifier
-            base.DoubleBuffered = true;
-            // ReSharper disable once RedundantBaseQualifier
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            if (!Variables.DesignMode)
+    private BindingSource _bindingSource;
+    public DataTable DataTable = new();
+    public void Bind()
+    {
+        _bindingSource = new BindingSource { DataSource = DataTable };
+        DataSource = _bindingSource;
+    }
+
+    [DefaultValue(true)]
+    public Boolean ComplexSearch { get; set; } = true;
+
+    internal SemaphoreSlim DataGridViewOptimizedSemaphoreSlim = new(1, 1);
+    private String _searchText = "";
+    public void Search(String search)
+    {
+        if (DataTable == null || DataTable.Columns.Count == 0) return;
+
+        if (InvokeRequired)
+        {
+            Invoke(new Action<String>(Search), search);
+            return;
+        }
+
+        // WARNING since the lock gets appointed to a thread (possibly the STA) the conclusion is that a user bashing the enter key will crash because the lock doesn't work!
+        DataGridViewOptimizedSemaphoreSlim.WaitUIFriendly();
+
+        CurrentCell = null;
+
+        Enabled = false;
+
+        try
+        {
+            _searchText = search ?? "";
+
+            DataTable.BeginLoadData();
+
+            ThreadHelpers threading = new();
+            threading.ExecuteThread(SearchThread, priority: ThreadPriority.AboveNormal);
+
+            DataTable.EndLoadData();
+
+            _bindingSource.ResetBindings(true);
+        }
+        catch (Exception exception)
+        {
+            Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not search DataTable", exception);
+        }
+
+        Enabled = true;
+
+        DataGridViewOptimizedSemaphoreSlim.Release();
+    }
+    private void SearchThread()
+    {
+#if !MINIMAL
+        if (DataTable == null || DataTable.Columns.Count == 0) return;
+
+        try
+        {
+            List<SearchItem> searchItemsFinal = new();
+            Boolean isDelimited = false, negativeItem = false, inItem = false;
+            Int32 startOfCurrentItem = -1;
+            String currentItem = "";
+            for (Int32 i = 0; i < _searchText.Length; i++)
             {
-                EnableHeadersVisualStyles = false;
+                if (inItem)
+                {
+                    if (i - 1 == startOfCurrentItem && _searchText[i] == '"' && negativeItem)
+                    {
+                        isDelimited = true;
+                        continue;
+                    }
 
-                DefaultCellStyle.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
-                AlternatingRowsDefaultCellStyle.BackColor = Variables.ColorPalette.ToolWindowCaptionActive.Grip;
-                BackgroundColor = Variables.ColorPalette.ToolWindowCaptionActive.Background;
+                    if (isDelimited)
+                    {
+                        if (_searchText[i] != '"')
+                        {
+                            currentItem += _searchText[i];
+                            continue;
+                        }
+
+                        isDelimited = false;
+                        inItem = false;
+                    }
+
+                    if (String.IsNullOrWhiteSpace(_searchText[i].ToString()) || !inItem)
+                    {
+                        inItem = false;
+                        searchItemsFinal.Add(new SearchItem { Negative = negativeItem, SearchText = currentItem });
+                        currentItem = "";
+                        continue;
+                    }
+
+                    currentItem += _searchText[i];
+                }
+
+                if (inItem || String.IsNullOrWhiteSpace(_searchText[i].ToString())) continue;
+
+                inItem = true;
+                currentItem = "";
+                negativeItem = _searchText[i] == '-';
+                isDelimited = _searchText[i] == '"';
+                startOfCurrentItem = i;
+                if (!negativeItem && !isDelimited)
+                {
+                    currentItem += _searchText[i];
+                }
             }
-        }
-
-        private BindingSource _bindingSource;
-        public DataTable DataTable = new();
-        public void Bind()
-        {
-            _bindingSource = new BindingSource { DataSource = DataTable };
-            DataSource = _bindingSource;
-        }
-
-        [DefaultValue(true)]
-        public Boolean ComplexSearch { get; set; } = true;
-
-        internal SemaphoreSlim DataGridViewOptimizedSemaphoreSlim = new(1, 1);
-        private String _searchText = "";
-        public void Search(String search)
-        {
-            if (DataTable == null || DataTable.Columns.Count == 0) return;
-
-            if (InvokeRequired)
+            if (!String.IsNullOrWhiteSpace(currentItem))
             {
-                Invoke(new Action<String>(Search), search);
+                searchItemsFinal.Add(new SearchItem { Negative = negativeItem, SearchText = currentItem });
+            }
+
+            // Attempt to optimize the search
+            List<SearchItem> searchItemsFinalCloned = new(searchItemsFinal.Count);
+            searchItemsFinalCloned.AddRange(searchItemsFinal);
+            searchItemsFinal.Clear();
+            searchItemsFinal.AddRange(searchItemsFinalCloned.Where(searchItem => !searchItem.SearchText.IsNumeric(true)).OrderByDescending(searchItem => searchItem.SearchText.Length));
+            searchItemsFinal.AddRange(searchItemsFinalCloned.Where(searchItem => searchItem.SearchText.IsNumeric(true)).OrderByDescending(x => x.SearchText.Length));
+                
+            if (String.IsNullOrWhiteSpace(_searchText))
+            {
+                DataTable.DefaultView.RowFilter = "";
                 return;
             }
 
-            // WARNING since the lock gets appointed to a thread (possibly the STA) the conclusion is that a user bashing the enter key will crash because the lock doesn't work!
-            DataGridViewOptimizedSemaphoreSlim.WaitUIFriendly();
-
-            CurrentCell = null;
-
-            Enabled = false;
-
-            try
+            List<(Boolean negative, List<String> search)> searchItems = new();
+            foreach (SearchItem item in searchItemsFinal)
             {
-                _searchText = search ?? "";
+                List<String> searchItemsNew = new();
 
-                DataTable.BeginLoadData();
+                for (Int32 j = 0; j < DataTable.Columns.Count; j++)
+                {
+                    String columnName = "[" + DataTable.Columns[j].ColumnName.Replace(@"\", @"\\").Replace("]", @"\]") + "]";
+                    String invert = "", invert2 = "=", operator1 = "OR";
+                    if (item.Negative)
+                    {
+                        invert = "NOT ";
+                        invert2 = "<>";
+                        operator1 = "AND";
+                    }
 
-                ThreadHelpers threading = new();
-                threading.ExecuteThread(SearchThread, priority: ThreadPriority.AboveNormal);
+                    if (DataTable.Columns[j].DataType == typeof(String))
+                    {
+                        searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert + "LIKE '%" + item.SearchText.EscapeLikeValue() + "%')");
+                    }
+                    else if (DataTable.Columns[j].DataType == typeof(DateTime) && item.SearchText.Replace(":", "").Replace("-", "").Replace(" ", "").IsNumeric(false))
+                    {
+                        if (ComplexSearch)
+                        {
+                            searchItemsNew.Add("(CONVERT(" + columnName + ", 'System.String') " + invert + " LIKE '%" + item.SearchText.EscapeLikeValue() + "%')");
+                        }
+                    }
+                    else if (DataTable.Columns[j].DataType == typeof(Decimal) && item.SearchText.IsDecimal(UInt32.MaxValue, Byte.MaxValue, true))
+                    {
+                        String extra = "";
+                        if (ComplexSearch)
+                        {
+                            extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + $"{item.SearchText.ToDecimal():0.#######}".ToString(CultureInfo.InvariantCulture) + "%'";
+                        }
 
-                DataTable.EndLoadData();
+                        searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + $"{item.SearchText.ToDecimal():0.#######}'" + extra + ")");
+                    }
+                    else if (item.SearchText.IsNumeric(false) && ((DataTable.Columns[j].DataType == typeof(UInt64) && item.SearchText.ToUInt64() != 0) || (DataTable.Columns[j].DataType == typeof(UInt32) && item.SearchText.ToUInt32() != 0) || (DataTable.Columns[j].DataType == typeof(UInt16) && item.SearchText.ToUInt16() != 0)))
+                    {
+                        String extra = "";
+                        if (ComplexSearch)
+                        {
+                            extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + item.SearchText + "%'";
+                        }
 
-                _bindingSource.ResetBindings(true);
+                        searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + item.SearchText + "'" + extra + ")");
+                    }
+                    else if (item.SearchText.IsNumeric(true) && ((DataTable.Columns[j].DataType == typeof(Int64) && item.SearchText.ToInt64() != 0) || (DataTable.Columns[j].DataType == typeof(Int32) && item.SearchText.ToInt32() != 0) || (DataTable.Columns[j].DataType == typeof(Int16) && item.SearchText.ToInt16() != 0)))
+                    {
+                        String extra = "";
+                        if (ComplexSearch)
+                        {
+                            extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + item.SearchText + "%'";
+                        }
+
+                        searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + item.SearchText + "'" + extra + ")");
+                    }
+                }
+
+                searchItems.Add((item.Negative, searchItemsNew));
             }
-            catch (Exception exception)
+
+            String search = "";
+            foreach ((Boolean negative, List<String> searchList) in searchItems)
             {
-                Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not search DataTable", exception);
+                if (!searchList.Any() || negative) continue;
+
+                if (!String.IsNullOrWhiteSpace(search))
+                {
+                    search += " AND ";
+                }
+
+                search += "(" + String.Join(" OR ", searchList) + ")";
             }
 
-            Enabled = true;
+            foreach ((Boolean negative, List<String> searchList) in searchItems)
+            {
+                if (!searchList.Any() || !negative) continue;
 
-            DataGridViewOptimizedSemaphoreSlim.Release();
+                if (!String.IsNullOrWhiteSpace(search))
+                {
+                    search += " AND ";
+                }
+
+                search += String.Join(" AND ", searchList);
+            }
+                
+            DataTable.DefaultView.RowFilter = search;
         }
-        private void SearchThread()
+        catch (Exception exception)
         {
-#if !MINIMAL
-            if (DataTable == null || DataTable.Columns.Count == 0) return;
-
-            try
-            {
-                List<SearchItem> searchItemsFinal = new();
-                Boolean isDelimited = false, negativeItem = false, inItem = false;
-                Int32 startOfCurrentItem = -1;
-                String currentItem = "";
-                for (Int32 i = 0; i < _searchText.Length; i++)
-                {
-                    if (inItem)
-                    {
-                        if (i - 1 == startOfCurrentItem && _searchText[i] == '"' && negativeItem)
-                        {
-                            isDelimited = true;
-                            continue;
-                        }
-
-                        if (isDelimited)
-                        {
-                            if (_searchText[i] != '"')
-                            {
-                                currentItem += _searchText[i];
-                                continue;
-                            }
-
-                            isDelimited = false;
-                            inItem = false;
-                        }
-
-                        if (String.IsNullOrWhiteSpace(_searchText[i].ToString()) || !inItem)
-                        {
-                            inItem = false;
-                            searchItemsFinal.Add(new SearchItem { Negative = negativeItem, SearchText = currentItem });
-                            currentItem = "";
-                            continue;
-                        }
-
-                        currentItem += _searchText[i];
-                    }
-
-                    if (inItem || String.IsNullOrWhiteSpace(_searchText[i].ToString())) continue;
-
-                    inItem = true;
-                    currentItem = "";
-                    negativeItem = _searchText[i] == '-';
-                    isDelimited = _searchText[i] == '"';
-                    startOfCurrentItem = i;
-                    if (!negativeItem && !isDelimited)
-                    {
-                        currentItem += _searchText[i];
-                    }
-                }
-                if (!String.IsNullOrWhiteSpace(currentItem))
-                {
-                    searchItemsFinal.Add(new SearchItem { Negative = negativeItem, SearchText = currentItem });
-                }
-
-                // Attempt to optimize the search
-                List<SearchItem> searchItemsFinalCloned = new(searchItemsFinal.Count);
-                searchItemsFinalCloned.AddRange(searchItemsFinal);
-                searchItemsFinal.Clear();
-                searchItemsFinal.AddRange(searchItemsFinalCloned.Where(searchItem => !searchItem.SearchText.IsNumeric(true)).OrderByDescending(searchItem => searchItem.SearchText.Length));
-                searchItemsFinal.AddRange(searchItemsFinalCloned.Where(searchItem => searchItem.SearchText.IsNumeric(true)).OrderByDescending(x => x.SearchText.Length));
-                
-                if (String.IsNullOrWhiteSpace(_searchText))
-                {
-                    DataTable.DefaultView.RowFilter = "";
-                    return;
-                }
-
-                List<(Boolean negative, List<String> search)> searchItems = new();
-                foreach (SearchItem item in searchItemsFinal)
-                {
-                    List<String> searchItemsNew = new();
-
-                    for (Int32 j = 0; j < DataTable.Columns.Count; j++)
-                    {
-                        String columnName = "[" + DataTable.Columns[j].ColumnName.Replace(@"\", @"\\").Replace("]", @"\]") + "]";
-                        String invert = "", invert2 = "=", operator1 = "OR";
-                        if (item.Negative)
-                        {
-                            invert = "NOT ";
-                            invert2 = "<>";
-                            operator1 = "AND";
-                        }
-
-                        if (DataTable.Columns[j].DataType == typeof(String))
-                        {
-                            searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert + "LIKE '%" + item.SearchText.EscapeLikeValue() + "%')");
-                        }
-                        else if (DataTable.Columns[j].DataType == typeof(DateTime) && item.SearchText.Replace(":", "").Replace("-", "").Replace(" ", "").IsNumeric(false))
-                        {
-                            if (ComplexSearch)
-                            {
-                                searchItemsNew.Add("(CONVERT(" + columnName + ", 'System.String') " + invert + " LIKE '%" + item.SearchText.EscapeLikeValue() + "%')");
-                            }
-                        }
-                        else if (DataTable.Columns[j].DataType == typeof(Decimal) && item.SearchText.IsDecimal(UInt32.MaxValue, Byte.MaxValue, true))
-                        {
-                            String extra = "";
-                            if (ComplexSearch)
-                            {
-                                extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + $"{item.SearchText.ToDecimal():0.#######}".ToString(CultureInfo.InvariantCulture) + "%'";
-                            }
-
-                            searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + $"{item.SearchText.ToDecimal():0.#######}'" + extra + ")");
-                        }
-                        else if (item.SearchText.IsNumeric(false) && ((DataTable.Columns[j].DataType == typeof(UInt64) && item.SearchText.ToUInt64() != 0) || (DataTable.Columns[j].DataType == typeof(UInt32) && item.SearchText.ToUInt32() != 0) || (DataTable.Columns[j].DataType == typeof(UInt16) && item.SearchText.ToUInt16() != 0)))
-                        {
-                            String extra = "";
-                            if (ComplexSearch)
-                            {
-                                extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + item.SearchText + "%'";
-                            }
-
-                            searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + item.SearchText + "'" + extra + ")");
-                        }
-                        else if (item.SearchText.IsNumeric(true) && ((DataTable.Columns[j].DataType == typeof(Int64) && item.SearchText.ToInt64() != 0) || (DataTable.Columns[j].DataType == typeof(Int32) && item.SearchText.ToInt32() != 0) || (DataTable.Columns[j].DataType == typeof(Int16) && item.SearchText.ToInt16() != 0)))
-                        {
-                            String extra = "";
-                            if (ComplexSearch)
-                            {
-                                extra = " " + operator1 + " CONVERT(" + columnName + ", 'System.String') " + invert + "LIKE '%" + item.SearchText + "%'";
-                            }
-
-                            searchItemsNew.Add("(ISNULL(" + columnName + ", '') " + invert2 + " '" + item.SearchText + "'" + extra + ")");
-                        }
-                    }
-
-                    searchItems.Add((item.Negative, searchItemsNew));
-                }
-
-                String search = "";
-                foreach ((Boolean negative, List<String> searchList) in searchItems)
-                {
-                    if (!searchList.Any() || negative) continue;
-
-                    if (!String.IsNullOrWhiteSpace(search))
-                    {
-                        search += " AND ";
-                    }
-
-                    search += "(" + String.Join(" OR ", searchList) + ")";
-                }
-
-                foreach ((Boolean negative, List<String> searchList) in searchItems)
-                {
-                    if (!searchList.Any() || !negative) continue;
-
-                    if (!String.IsNullOrWhiteSpace(search))
-                    {
-                        search += " AND ";
-                    }
-
-                    search += String.Join(" AND ", searchList);
-                }
-                
-                DataTable.DefaultView.RowFilter = search;
-            }
-            catch (Exception exception)
-            {
-                Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not search DataTable", exception);
-            }
+            Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not search DataTable", exception);
+        }
 #endif
-        }
+    }
         
-        [StructLayout(LayoutKind.Auto)]
-        internal struct SearchItem
-        {
-            public String SearchText;
-            public Boolean Negative;
-        }
+    [StructLayout(LayoutKind.Auto)]
+    internal struct SearchItem
+    {
+        public String SearchText;
+        public Boolean Negative;
     }
 }

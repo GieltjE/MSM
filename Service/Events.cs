@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,30 +21,29 @@ using MSM.Data;
 using MSM.Functions;
 using MSM.UIElements;
 
-namespace MSM.Service
+namespace MSM.Service;
+
+public static class Events
 {
-    public static class Events
+    public static event ExtensionMethods.CustomDelegate<TerminalControl> ProcessExited;
+    public static void OnProcessExited(TerminalControl terminal) => ProcessExited?.Invoke(terminal);
+
+    public static event ExtensionMethods.CustomDelegate ShutDownFired;
+    public static void ShutDown()
     {
-        public static event ExtensionMethods.CustomDelegate<TerminalControl> ProcessExited;
-        public static void OnProcessExited(TerminalControl terminal) => ProcessExited?.Invoke(terminal);
-
-        public static event ExtensionMethods.CustomDelegate ShutDownFired;
-        public static void ShutDown()
+        try
         {
-            try
+            if (Settings.Values.CheckForUpdates)
             {
-                if (Settings.Values.CheckForUpdates)
-                {
-                    UpdateCheck.StopUpdateCheck();
-                }
+                UpdateCheck.StopUpdateCheck();
             }
-            // ReSharper disable once EmptyGeneralCatchClause
-            catch {}
-
-            Variables.ShutDownFired = true;
-            ShutDownFired?.Invoke();
-
-            Application.Exit();
         }
+        // ReSharper disable once EmptyGeneralCatchClause
+        catch {}
+
+        Variables.ShutDownFired = true;
+        ShutDownFired?.Invoke();
+
+        Application.Exit();
     }
 }

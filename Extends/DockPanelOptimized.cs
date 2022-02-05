@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,22 +20,21 @@ using System.Windows.Forms;
 using MSM.Data;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+internal class DockPanelOptimized : DockPanel
 {
-    internal class DockPanelOptimized : DockPanel
+    public DockPanelOptimized()
     {
-        public DockPanelOptimized()
+        SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+
+        BorderStyle = BorderStyle.None;
+        Padding = new Padding(0);
+
+        if (!DesignMode && Variables.ColorPalette != null)
         {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
-
-            BorderStyle = BorderStyle.None;
-            Padding = new Padding(0);
-
-            if (!DesignMode && Variables.ColorPalette != null)
-            {
-                // ReSharper disable once RedundantBaseQualifier
-                base.BackColor = Variables.ColorPalette.DockTarget.Background;
-            }
+            // ReSharper disable once RedundantBaseQualifier
+            base.BackColor = Variables.ColorPalette.DockTarget.Background;
         }
     }
 }

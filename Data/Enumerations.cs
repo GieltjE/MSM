@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,140 +19,139 @@
 using System;
 using System.ComponentModel;
 
-namespace MSM.Data
+namespace MSM.Data;
+
+public static class Enumerations
 {
-    public static class Enumerations
+    [Flags]
+    public enum CronMonth
     {
-        [Flags]
-        public enum CronMonth
-        {
-            All = 1,
-            January = 2,
-            February = 4,
-            March = 8,
-            April = 16,
-            May = 32,
-            June = 64,
-            Juli = 128,
-            Augustus = 256,
-            September = 512,
-            October = 1024,
-            November = 2048,
-            December = 4096
-        }
-        public static readonly String[] CronMonthString =
-        {
-            "*",
-            "jan",
-            "feb",
-            "mar",
-            "apr",
-            "may",
-            "jun",
-            "jul",
-            "aug",
-            "sep",
-            "oct",
-            "nov",
-            "dec"
-        };
+        All = 1,
+        January = 2,
+        February = 4,
+        March = 8,
+        April = 16,
+        May = 32,
+        June = 64,
+        Juli = 128,
+        Augustus = 256,
+        September = 512,
+        October = 1024,
+        November = 2048,
+        December = 4096
+    }
+    public static readonly String[] CronMonthString =
+    {
+        "*",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "may",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "oct",
+        "nov",
+        "dec"
+    };
 
-        [Flags]
-        public enum CronDayOfTheWeek : Byte
-        {
-            All = 1,
-            Monday = 2,
-            Tuesday = 4,
-            Wednesday = 8,
-            Thursday = 16,
-            Friday = 32,
-            Saturday = 64,
-            Sunday = 128
-        }
-        public static readonly String[] CronDayOfTheWeekString =
-        {
-            "?",
-            "mon",
-            "tue",
-            "wed",
-            "thu",
-            "fri",
-            "sat",
-            "sun"
-        };
+    [Flags]
+    public enum CronDayOfTheWeek : Byte
+    {
+        All = 1,
+        Monday = 2,
+        Tuesday = 4,
+        Wednesday = 8,
+        Thursday = 16,
+        Friday = 32,
+        Saturday = 64,
+        Sunday = 128
+    }
+    public static readonly String[] CronDayOfTheWeekString =
+    {
+        "?",
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+    };
 
-        public enum CloseAction : Byte
-        {
-            [Description("Close normally")]
-            Close,
-            [Description("Minimize")]
-            Minimize,
-            [Description("Minimize to the tray")]
-            MinimizeToTray,
-        }
+    public enum CloseAction : Byte
+    {
+        [Description("Close normally")]
+        Close,
+        [Description("Minimize")]
+        Minimize,
+        [Description("Minimize to the tray")]
+        MinimizeToTray,
+    }
 
-        public enum InitialWindowState : Byte
-        {
-            [Description("Automatic")]
-            Automatic,
-            [Description("Minimized (automatic)")]
-            MinimizedAutomatic,
-            [Description("Minimized (maximized, automatic)")]
-            MinimizedMaximizedAutomatic,
-            [Description("Minimized (maximized, previous window)")]
-            MinimizedMaximizedPreviousWindow,
-            [Description("Minimized (previous)")]
-            MinimizedPrevious,
-            [Description("Maximized (automatic)")]
-            MaximizedAutomatic,
-            [Description("Maximized (previous window)")]
-            MaximizedPreviousWindow,
-            [Description("Previous state")]
-            PreviousState,
-        }
+    public enum InitialWindowState : Byte
+    {
+        [Description("Automatic")]
+        Automatic,
+        [Description("Minimized (automatic)")]
+        MinimizedAutomatic,
+        [Description("Minimized (maximized, automatic)")]
+        MinimizedMaximizedAutomatic,
+        [Description("Minimized (maximized, previous window)")]
+        MinimizedMaximizedPreviousWindow,
+        [Description("Minimized (previous)")]
+        MinimizedPrevious,
+        [Description("Maximized (automatic)")]
+        MaximizedAutomatic,
+        [Description("Maximized (previous window)")]
+        MaximizedPreviousWindow,
+        [Description("Previous state")]
+        PreviousState,
+    }
 
-        public enum InitialSessions : Byte
-        {
-            [Description("None")]
-            None,
-            [Description("Previous sessions")]
-            Previous,
-            [Description("Predefined")]
-            Predefined,
-        }
+    public enum InitialSessions : Byte
+    {
+        [Description("None")]
+        None,
+        [Description("Previous sessions")]
+        Previous,
+        [Description("Predefined")]
+        Predefined,
+    }
 
-        public enum CheckedListBoxSetting : Byte
-        {
-            ServerKeywords,
-            ServerVariables,
-        }
+    public enum CheckedListBoxSetting : Byte
+    {
+        ServerKeywords,
+        ServerVariables,
+    }
 
-        public enum Theme : Byte
-        {
-            Black,
-            Dark,
-            Blue,
-            Light,
-        }
+    public enum Theme : Byte
+    {
+        Black,
+        Dark,
+        Blue,
+        Light,
+    }
 
-        [Flags]
-        public enum LogTarget : Byte
-        {
-            All = Byte.MaxValue,
-            General = 1,
-            Session = 2,
+    [Flags]
+    public enum LogTarget : Byte
+    {
+        All = Byte.MaxValue,
+        General = 1,
+        Session = 2,
 
-        }
+    }
 
-        [Flags]
-        public enum LogLevel : Byte
-        {
-            All = Byte.MaxValue,
-            Info = 1,
-            Warn = 2,
-            Error = 3,
-            Fatal = 4,
-            Debug = 5,
-        }
+    [Flags]
+    public enum LogLevel : Byte
+    {
+        All = Byte.MaxValue,
+        Info = 1,
+        Warn = 2,
+        Error = 3,
+        Fatal = 4,
+        Debug = 5,
     }
 }

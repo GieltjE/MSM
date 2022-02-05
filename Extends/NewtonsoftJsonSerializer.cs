@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,29 +20,28 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace MSM.Extends
+namespace MSM.Extends;
+
+public class NewtonsoftJsonSerializer
 {
-    public class NewtonsoftJsonSerializer
+    private readonly JsonSerializer _jsonSerializer;
+
+    public NewtonsoftJsonSerializer()
     {
-        private readonly JsonSerializer _jsonSerializer;
+        _jsonSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Include };
+    }
 
-        public NewtonsoftJsonSerializer()
-        {
-            _jsonSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Include };
-        }
-
-        public String Serialize(Object obj)
-        {
-            using StringWriter stringWriter = new();
-            using JsonTextWriter jsonTextWriter = new(stringWriter);
-            _jsonSerializer.Serialize(jsonTextWriter, obj);
-            return stringWriter.ToString();
-        }
-        public T Deserialize<T>(String input)
-        {
-            using StringReader stringReader = new(input);
-            using JsonTextReader jsonTextReader = new(stringReader);
-            return _jsonSerializer.Deserialize<T>(jsonTextReader);
-        }
+    public String Serialize(Object obj)
+    {
+        using StringWriter stringWriter = new();
+        using JsonTextWriter jsonTextWriter = new(stringWriter);
+        _jsonSerializer.Serialize(jsonTextWriter, obj);
+        return stringWriter.ToString();
+    }
+    public T Deserialize<T>(String input)
+    {
+        using StringReader stringReader = new(input);
+        using JsonTextReader jsonTextReader = new(stringReader);
+        return _jsonSerializer.Deserialize<T>(jsonTextReader);
     }
 }

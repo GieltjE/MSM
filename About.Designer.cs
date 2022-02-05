@@ -124,7 +124,7 @@ namespace MSM
             this.Label_GeneralCopyright.Name = "Label_GeneralCopyright";
             this.Label_GeneralCopyright.Size = new System.Drawing.Size(663, 18);
             this.Label_GeneralCopyright.TabIndex = 4;
-            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2021 - Michiel Hazelhof (michiel@hazelhof.nl)";
+            this.Label_GeneralCopyright.Text = "Copyright (C) 2016-2022 - Michiel Hazelhof (michiel@hazelhof.nl)";
             // 
             // About
             // 

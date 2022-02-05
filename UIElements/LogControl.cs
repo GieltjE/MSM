@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,101 +30,100 @@ using MSM.Functions;
 using MSM.Service;
 using Quartz;
 
-namespace MSM.UIElements
+namespace MSM.UIElements;
+
+public partial class LogControl : UserControlOptimized
 {
-    public partial class LogControl : UserControlOptimized
+    internal static DataGridView DataGridView;
+    internal static ConcurrentQueue<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> UIQueue = new();
+    private static DataTable _dataTableUsed;
+
+    public LogControl()
     {
-        internal static DataGridView DataGridView;
-        internal static ConcurrentQueue<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> UIQueue = new();
-        private static DataTable _dataTableUsed;
+        InitializeComponent();
 
-        public LogControl()
+        _dataTableUsed = DataGridView_Logs.DataTable;
+        DataGridView_Logs.DataTable.Columns.Add("DateTime", typeof(DateTime));
+        DataGridView_Logs.DataTable.Columns.Add("Target", typeof(Enumerations.LogTarget));
+        DataGridView_Logs.DataTable.Columns.Add("Level", typeof(Enumerations.LogLevel));
+        DataGridView_Logs.DataTable.Columns.Add("Message", typeof(String));
+
+        DataGridView_Logs.Bind();
+        DataGridView_Logs.Columns[0].MinimumWidth = 75;
+        DataGridView_Logs.Columns[0].SortMode = DataGridViewColumnSortMode.Programmatic;
+        DataGridView_Logs.Columns[1].MinimumWidth = 50;
+        DataGridView_Logs.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
+        DataGridView_Logs.Columns[2].MinimumWidth = 50;
+        DataGridView_Logs.Columns[2].SortMode = DataGridViewColumnSortMode.NotSortable;
+        DataGridView_Logs.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        DataGridView_Logs.Columns[3].SortMode = DataGridViewColumnSortMode.NotSortable;
+
+        DataGridView_Logs.Columns[0].HeaderCell.SortGlyphDirection = SortOrder.Descending;
+        DataGridView_Logs.Sort(DataGridView_Logs.Columns[0], ListSortDirection.Descending);
+
+        DataGridView = DataGridView_Logs;
+
+        Cron.CreateJob<LogToUI>("LogToUI", 0, 0, 2, true);
+    }
+
+    public void LoggerOnLogAdded(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)
+    {
+        UIQueue.Enqueue((dateTime, target, level, message));
+    }
+    private static readonly List<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> ToShow = new();
+    internal static void ProcessUIQueue()
+    {
+        try
         {
-            InitializeComponent();
-
-            _dataTableUsed = DataGridView_Logs.DataTable;
-            DataGridView_Logs.DataTable.Columns.Add("DateTime", typeof(DateTime));
-            DataGridView_Logs.DataTable.Columns.Add("Target", typeof(Enumerations.LogTarget));
-            DataGridView_Logs.DataTable.Columns.Add("Level", typeof(Enumerations.LogLevel));
-            DataGridView_Logs.DataTable.Columns.Add("Message", typeof(String));
-
-            DataGridView_Logs.Bind();
-            DataGridView_Logs.Columns[0].MinimumWidth = 75;
-            DataGridView_Logs.Columns[0].SortMode = DataGridViewColumnSortMode.Programmatic;
-            DataGridView_Logs.Columns[1].MinimumWidth = 50;
-            DataGridView_Logs.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
-            DataGridView_Logs.Columns[2].MinimumWidth = 50;
-            DataGridView_Logs.Columns[2].SortMode = DataGridViewColumnSortMode.NotSortable;
-            DataGridView_Logs.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            DataGridView_Logs.Columns[3].SortMode = DataGridViewColumnSortMode.NotSortable;
-
-            DataGridView_Logs.Columns[0].HeaderCell.SortGlyphDirection = SortOrder.Descending;
-            DataGridView_Logs.Sort(DataGridView_Logs.Columns[0], ListSortDirection.Descending);
-
-            DataGridView = DataGridView_Logs;
-
-            Cron.CreateJob<LogToUI>("LogToUI", 0, 0, 2, true);
-        }
-
-        public void LoggerOnLogAdded(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)
-        {
-            UIQueue.Enqueue((dateTime, target, level, message));
-        }
-        private static readonly List<(DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message)> ToShow = new();
-        internal static void ProcessUIQueue()
-        {
-            try
+            while (UIQueue.TryDequeue(out (DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) item))
             {
-                while (UIQueue.TryDequeue(out (DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) item))
-                {
-                    ToShow.Add(item);
-                }
-                if (!ToShow.Any()) return;
-
-                _dataTableUsed.BeginLoadData();
-                foreach ((DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) in ToShow.OrderByDescending(x => x.dateTime))
-                {
-                    DataRow row = _dataTableUsed.NewRow();
-                    row[0] = dateTime;
-                    row[1] = target;
-                    row[2] = level;
-                    row[3] = message;
-                    _dataTableUsed.Rows.InsertAt(row, 0);
-                }
-
-                if (_dataTableUsed.Rows.Count > Settings.Values.MaxVisibleLogLines)
-                {
-                    for (Int32 i = _dataTableUsed.Rows.Count; i > Settings.Values.MaxVisibleLogLines; i--)
-                    {
-                        _dataTableUsed.Rows.RemoveAt(i - 1);
-                    }
-                }
-
-                DataGridView.BeginInvoke(new Action(_dataTableUsed.EndLoadData)).AutoEndInvoke(DataGridView);
-                ToShow.Clear();
+                ToShow.Add(item);
             }
-            catch (Exception exception)
+            if (!ToShow.Any()) return;
+
+            _dataTableUsed.BeginLoadData();
+            foreach ((DateTime dateTime, Enumerations.LogTarget target, Enumerations.LogLevel level, String message) in ToShow.OrderByDescending(x => x.dateTime))
             {
-                Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not display log line to the UI", exception);
+                DataRow row = _dataTableUsed.NewRow();
+                row[0] = dateTime;
+                row[1] = target;
+                row[2] = level;
+                row[3] = message;
+                _dataTableUsed.Rows.InsertAt(row, 0);
             }
+
+            if (_dataTableUsed.Rows.Count > Settings.Values.MaxVisibleLogLines)
+            {
+                for (Int32 i = _dataTableUsed.Rows.Count; i > Settings.Values.MaxVisibleLogLines; i--)
+                {
+                    _dataTableUsed.Rows.RemoveAt(i - 1);
+                }
+            }
+
+            DataGridView.BeginInvoke(new Action(_dataTableUsed.EndLoadData)).AutoEndInvoke(DataGridView);
+            ToShow.Clear();
         }
-
-        private void ToolStripFilterKeyUp(Object sender, KeyEventArgs e)
+        catch (Exception exception)
         {
-            if (e.KeyCode != Keys.Enter) return;
-            if (ToolStrip_Filter.TextBox == null) return;
-
-            DataGridView_Logs.Search(ToolStrip_Filter.TextBox.Text);
+            Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not display log line to the UI", exception);
         }
     }
 
-    [DisallowConcurrentExecution, ResetTimerAfterRunCompletes]
-    internal class LogToUI : IJob
+    private void ToolStripFilterKeyUp(Object sender, KeyEventArgs e)
     {
-        public virtual Task Execute(IJobExecutionContext context)
-        {
-            LogControl.ProcessUIQueue();
-            return Task.CompletedTask;
-        }
+        if (e.KeyCode != Keys.Enter) return;
+        if (ToolStrip_Filter.TextBox == null) return;
+
+        DataGridView_Logs.Search(ToolStrip_Filter.TextBox.Text);
+    }
+}
+
+[DisallowConcurrentExecution, ResetTimerAfterRunCompletes]
+internal class LogToUI : IJob
+{
+    public virtual Task Execute(IJobExecutionContext context)
+    {
+        LogControl.ProcessUIQueue();
+        return Task.CompletedTask;
     }
 }

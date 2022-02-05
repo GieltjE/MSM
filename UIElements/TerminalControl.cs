@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,61 +24,60 @@ using System.Windows.Forms;
 using MSM.Extends;
 using MSM.Service;
 
-namespace MSM.UIElements
+namespace MSM.UIElements;
+
+public partial class TerminalControl : UserControlOptimized
 {
-    public partial class TerminalControl : UserControlOptimized
+    internal AppControl AppControl;
+    private readonly Server _server;
+    private readonly String _uniqueID = Functions.Generate.GenerateRandomAlphaNumbericalString(20);
+    public TerminalControl(Server server)
     {
-        internal AppControl AppControl;
-        private readonly Server _server;
-        private readonly String _uniqueID = Functions.Generate.GenerateRandomAlphaNumbericalString(20);
-        public TerminalControl(Server server)
+        InitializeComponent();
+        _server = server;
+
+        BorderStyle = BorderStyle.None;
+        Padding = new Padding(0);
+    }
+    ~TerminalControl()
+    {
+        AppControl?.Stop();
+    }
+
+    public override Int32 GetHashCode() => _uniqueID.GetHashCode();
+    public override Boolean Equals(Object o) => String.Equals(((TerminalControl)o)?._uniqueID, _uniqueID, StringComparison.Ordinal);
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+
+        //-ssh -P 222 -load "Default Settings"  -l root prolis.fyn.nl
+        List<String> parameters = new()
         {
-            InitializeComponent();
-            _server = server;
-
-            BorderStyle = BorderStyle.None;
-            Padding = new Padding(0);
-        }
-        ~TerminalControl()
+            "-ssh",
+            "-P " + _server.Port.ToString(CultureInfo.InvariantCulture),
+            "-load \"Default Settings\"",
+        };
+        if (!String.IsNullOrWhiteSpace(Settings.Values.PuttyExtraParamaters))
         {
-            AppControl?.Stop();
+            parameters.Insert(0, Settings.Values.PuttyExtraParamaters);
         }
-
-        public override Int32 GetHashCode() => _uniqueID.GetHashCode();
-        public override Boolean Equals(Object o) => String.Equals(((TerminalControl)o)?._uniqueID, _uniqueID, StringComparison.Ordinal);
-        protected override void OnHandleCreated(EventArgs e)
+        if (!String.IsNullOrEmpty(_server.Password))
         {
-            base.OnHandleCreated(e);
-
-            //-ssh -P 222 -load "Default Settings"  -l root prolis.fyn.nl
-            List<String> parameters = new()
-            {
-                "-ssh",
-                "-P " + _server.Port.ToString(CultureInfo.InvariantCulture),
-                "-load \"Default Settings\"",
-            };
-            if (!String.IsNullOrWhiteSpace(Settings.Values.PuttyExtraParamaters))
-            {
-                parameters.Insert(0, Settings.Values.PuttyExtraParamaters);
-            }
-            if (!String.IsNullOrEmpty(_server.Password))
-            {
-                parameters.Add("-pw " + _server.Password);
-            }
-            if (!String.IsNullOrEmpty(_server.Username))
-            {
-                parameters.Add("-l " + _server.Username);
-            }
-            parameters.Add(_server.Hostname);
-
-            AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
-            Controls.Add(AppControl);
-            AppControl.Load();
+            parameters.Add("-pw " + _server.Password);
         }
-
-        public void SendCommand(String command)
+        if (!String.IsNullOrEmpty(_server.Username))
         {
-            AppControl.SendCommand(command + Regex.Unescape(_server.NewLine));
+            parameters.Add("-l " + _server.Username);
         }
+        parameters.Add(_server.Hostname);
+
+        AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+        Controls.Add(AppControl);
+        AppControl.Load();
+    }
+
+    public void SendCommand(String command)
+    {
+        AppControl.SendCommand(command + Regex.Unescape(_server.NewLine));
     }
 }

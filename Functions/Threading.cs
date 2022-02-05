@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,139 +22,138 @@ using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
 
-namespace MSM.Functions
+namespace MSM.Functions;
+
+public class Threading
 {
-    public class Threading
+    internal Thread MasterThread;
+    public ThreadStart ThreadStartFunction;
+    public ParameterizedThreadStart ParameterizedThreadStartFunction;
+
+    internal void StartThread(Boolean staThread, Object threadObject = null, ThreadPriority priority = ThreadPriority.Normal)
     {
-        internal Thread MasterThread;
-        public ThreadStart ThreadStartFunction;
-        public ParameterizedThreadStart ParameterizedThreadStartFunction;
+        MasterThread = threadObject == null ? new Thread(ThreadStartFunction) { Priority = priority } : new Thread(ParameterizedThreadStartFunction) { Priority = priority };
 
-        internal void StartThread(Boolean staThread, Object threadObject = null, ThreadPriority priority = ThreadPriority.Normal)
+        if (staThread)
         {
-            MasterThread = threadObject == null ? new Thread(ThreadStartFunction) { Priority = priority } : new Thread(ParameterizedThreadStartFunction) { Priority = priority };
+            MasterThread.SetApartmentState(ApartmentState.STA);
+        }
 
-            if (staThread)
+        Boolean retried = false;
+        retry:
+        try
+        {
+            if (threadObject != null)
             {
-                MasterThread.SetApartmentState(ApartmentState.STA);
+                MasterThread.Start(threadObject);
             }
-
-            Boolean retried = false;
-retry:
-            try
+            else
             {
-                if (threadObject != null)
-                {
-                    MasterThread.Start(threadObject);
-                }
-                else
-                {
-                    MasterThread.Start();
-                }
-            }
-            catch (OutOfMemoryException)
-            {
-                if (retried) throw;
-
-                retried = true;
-                Thread.Sleep(250);
-                goto retry;
+                MasterThread.Start();
             }
         }
-    }
+        catch (OutOfMemoryException)
+        {
+            if (retried) throw;
 
-    public class ThreadHelpers
-    {
-        private Threading _thread;
-        private Threading _waitThread;
-        public event ExtensionMethods.CustomDelegate EventComplete;
-        private void FireEventComplete() => EventComplete?.Invoke();
+            retried = true;
+            Thread.Sleep(250);
+            goto retry;
+        }
+    }
+}
+
+public class ThreadHelpers
+{
+    private Threading _thread;
+    private Threading _waitThread;
+    public event ExtensionMethods.CustomDelegate EventComplete;
+    private void FireEventComplete() => EventComplete?.Invoke();
 
 #if DEBUG
-        public void ExecuteThread(ThreadStart threadStart, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal, [CallerMemberName] String caller = null, [CallerLineNumber] Int32 lineNumber = 0)
+    public void ExecuteThread(ThreadStart threadStart, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal, [CallerMemberName] String caller = null, [CallerLineNumber] Int32 lineNumber = 0)
 #else
         public void ExecuteThread(ThreadStart threadStart, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal)
 #endif
-        {
-            _thread = new Threading { ThreadStartFunction = threadStart };
-            _thread.StartThread(staThread, null, priority);
+    {
+        _thread = new Threading { ThreadStartFunction = threadStart };
+        _thread.StartThread(staThread, null, priority);
 
-            if (waitForCompletion)
+        if (waitForCompletion)
+        {
+            if (staThread)
             {
-                if (staThread)
-                {
-                    _thread.MasterThread.Join();
-                }
-                else
-                {
-                    while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
-                    {
-                        if (doEvents)
-                        {
-                            // Produces NPE when disposing
-                            try
-                            {
-                                Application.DoEvents();
-                            }
-                            // ReSharper disable once EmptyGeneralCatchClause
-                            catch {}
-                        }
-                        Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
-                    }
-                }
-
-                FireEventComplete();
-                return;
+                _thread.MasterThread.Join();
             }
-
-            if (EventComplete == null) return;
-            _waitThread = new Threading { ThreadStartFunction = WaitForCompletion };
-            _waitThread.StartThread(false);
-        }
-        public void ExecuteThreadParameter(ParameterizedThreadStart threadStart, Object threadObject, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal)
-        {
-            _thread = new Threading { ParameterizedThreadStartFunction = threadStart };
-            _thread.StartThread(staThread, threadObject, priority);
-
-            if (waitForCompletion)
+            else
             {
                 while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
                 {
-                    if (doEvents) Application.DoEvents();
+                    if (doEvents)
+                    {
+                        // Produces NPE when disposing
+                        try
+                        {
+                            Application.DoEvents();
+                        }
+                        // ReSharper disable once EmptyGeneralCatchClause
+                        catch {}
+                    }
                     Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
                 }
-
-                FireEventComplete();
-                return;
             }
 
-            if (EventComplete == null) return;
-            _waitThread = new Threading { ThreadStartFunction = WaitForCompletion };
-            _waitThread.StartThread(false);
+            FireEventComplete();
+            return;
         }
 
-        private void WaitForCompletion()
+        if (EventComplete == null) return;
+        _waitThread = new Threading { ThreadStartFunction = WaitForCompletion };
+        _waitThread.StartThread(false);
+    }
+    public void ExecuteThreadParameter(ParameterizedThreadStart threadStart, Object threadObject, Boolean waitForCompletion = true, Boolean doEvents = true, Boolean staThread = false, ThreadPriority priority = ThreadPriority.Normal)
+    {
+        _thread = new Threading { ParameterizedThreadStartFunction = threadStart };
+        _thread.StartThread(staThread, threadObject, priority);
+
+        if (waitForCompletion)
         {
             while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
             {
+                if (doEvents) Application.DoEvents();
                 Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
             }
 
             FireEventComplete();
+            return;
         }
 
-        public void Abort()
+        if (EventComplete == null) return;
+        _waitThread = new Threading { ThreadStartFunction = WaitForCompletion };
+        _waitThread.StartThread(false);
+    }
+
+    private void WaitForCompletion()
+    {
+        while (_thread.MasterThread is { IsAlive: true } && !Variables.ShutDownFired)
         {
-            try
-            {
-                _thread.MasterThread.Abort();
-            }
-            // ReSharper disable once EmptyGeneralCatchClause
-            catch {}
+            Thread.Sleep(Variables.ThreadAfterDoEventsSleep);
         }
-        public Boolean Completed()
+
+        FireEventComplete();
+    }
+
+    public void Abort()
+    {
+        try
         {
-            return _thread?.MasterThread == null || !_thread.MasterThread.IsAlive;
+            _thread.MasterThread.Abort();
         }
+        // ReSharper disable once EmptyGeneralCatchClause
+        catch {}
+    }
+    public Boolean Completed()
+    {
+        return _thread?.MasterThread == null || !_thread.MasterThread.IsAlive;
     }
 }

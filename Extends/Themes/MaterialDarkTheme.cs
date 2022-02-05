@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,36 +18,35 @@
 
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MSM.Extends.Themes
+namespace MSM.Extends.Themes;
+
+public class MaterialDarkTheme : VS2015DarkTheme
 {
-    public class MaterialDarkTheme : VS2015DarkTheme
+    public MaterialDarkTheme()
     {
-        public MaterialDarkTheme()
-        {
-            System.Drawing.Color background = System.Drawing.Color.FromArgb(255, 27, 27, 27);
-            System.Drawing.Color text = System.Drawing.Color.FromArgb(255, 200, 200, 200);
+        System.Drawing.Color background = System.Drawing.Color.FromArgb(255, 27, 27, 27);
+        System.Drawing.Color text = System.Drawing.Color.FromArgb(255, 200, 200, 200);
 
-            ColorPalette.MainWindowActive.Background = background;
-            ColorPalette.DockTarget.Background = background;
-            ColorPalette.MainWindowStatusBarDefault.Background = background;
-            ColorPalette.ToolWindowCaptionButtonActiveHovered.Background = background;
-            ColorPalette.ToolWindowCaptionButtonInactiveHovered.Background = background;
-            ColorPalette.ToolWindowCaptionButtonPressed.Background = background;
+        ColorPalette.MainWindowActive.Background = background;
+        ColorPalette.DockTarget.Background = background;
+        ColorPalette.MainWindowStatusBarDefault.Background = background;
+        ColorPalette.ToolWindowCaptionButtonActiveHovered.Background = background;
+        ColorPalette.ToolWindowCaptionButtonInactiveHovered.Background = background;
+        ColorPalette.ToolWindowCaptionButtonPressed.Background = background;
 
-            ColorPalette.ToolWindowCaptionActive.Background = background;
-            ColorPalette.ToolWindowCaptionActive.Grip = background;
-            ColorPalette.ToolWindowCaptionActive.Button = background;
-            ColorPalette.ToolWindowCaptionActive.Text = text;
+        ColorPalette.ToolWindowCaptionActive.Background = background;
+        ColorPalette.ToolWindowCaptionActive.Grip = background;
+        ColorPalette.ToolWindowCaptionActive.Button = background;
+        ColorPalette.ToolWindowCaptionActive.Text = text;
 
-            ColorPalette.ToolWindowCaptionInactive.Background = background;
-            ColorPalette.ToolWindowCaptionInactive.Grip = background;
-            ColorPalette.ToolWindowCaptionInactive.Text = text;
+        ColorPalette.ToolWindowCaptionInactive.Background = background;
+        ColorPalette.ToolWindowCaptionInactive.Grip = background;
+        ColorPalette.ToolWindowCaptionInactive.Text = text;
 
-            ColorPalette.ToolWindowTabSelectedActive.Background = background;
-            ColorPalette.ToolWindowTabSelectedInactive.Background = background;
-            ColorPalette.ToolWindowTabUnselected.Background = background;
-            ColorPalette.ToolWindowTabUnselectedHovered.Background = background;
-            ColorPalette.ToolWindowBorder = background;
-        }
+        ColorPalette.ToolWindowTabSelectedActive.Background = background;
+        ColorPalette.ToolWindowTabSelectedInactive.Background = background;
+        ColorPalette.ToolWindowTabUnselected.Background = background;
+        ColorPalette.ToolWindowTabUnselectedHovered.Background = background;
+        ColorPalette.ToolWindowBorder = background;
     }
 }

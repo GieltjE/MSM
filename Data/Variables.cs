@@ -1,6 +1,6 @@
 // 
 // This file is a part of MSM (Multi Server Manager)
-// Copyright (C) 2016-2021 Michiel Hazelhof (michiel@hazelhof.nl)
+// Copyright (C) 2016-2022 Michiel Hazelhof (michiel@hazelhof.nl)
 // 
 // MSM is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,32 +22,31 @@ using System.Windows.Forms;
 using MSM.Functions;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MSM.Data
-{
-    public static class Variables
-    {
-        public static Int32 ThreadAfterDoEventsSleep = 50;
-        public static Main MainForm;
-        public static DockPanelColorPalette ColorPalette;
-        public static Measures Measures;
-        public static Boolean ShutDownFired;
-        public static Boolean StartupComplete;
-        public static String SettingsDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "settings");
-        public static String SessionFile => Path.Combine(SettingsDirectory, "PreviousSessions.xml");
-        public static String PortableSettingsFile => Path.Combine(SettingsDirectory, "Settings.xml");
-        public static String NormalSettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
-        public static String SettingsFileChosen { get; set; }
-        public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
-        public static Int32 MainSTAThreadID;
+namespace MSM.Data;
 
-        private static Boolean? _designMode;
-        public static Boolean DesignMode
+public static class Variables
+{
+    public static Int32 ThreadAfterDoEventsSleep = 50;
+    public static Main MainForm;
+    public static DockPanelColorPalette ColorPalette;
+    public static Measures Measures;
+    public static Boolean ShutDownFired;
+    public static Boolean StartupComplete;
+    public static String SettingsDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "settings");
+    public static String SessionFile => Path.Combine(SettingsDirectory, "PreviousSessions.xml");
+    public static String PortableSettingsFile => Path.Combine(SettingsDirectory, "Settings.xml");
+    public static String NormalSettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
+    public static String SettingsFileChosen { get; set; }
+    public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
+    public static Int32 MainSTAThreadID;
+
+    private static Boolean? _designMode;
+    public static Boolean DesignMode
+    {
+        get
         {
-            get
-            {
-                _designMode ??= Application.ExecutablePath.EndsWith("devenv.exe");
-                return (Boolean)_designMode;
-            }
+            _designMode ??= Application.ExecutablePath.EndsWith("devenv.exe");
+            return (Boolean)_designMode;
         }
     }
 }
