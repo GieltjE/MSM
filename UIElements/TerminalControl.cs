@@ -76,6 +76,8 @@ public partial class TerminalControl : UserControlOptimized
 
     public void SendCommand(String command)
     {
+        if (!AppControl.LoadComplete || !AppControl.LoadSuccess || !AppControl.Iscreated) return;
+
         AppControl.SendCommand(command + Regex.Unescape(_server.NewLine));
     }
 }
