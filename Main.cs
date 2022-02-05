@@ -128,6 +128,7 @@ public partial class Main : FormOptimized
         _visualStudioToolStripExtender.SetStyle(StatusStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, DockPanel_Main.Theme);
 
         Service.Events.ShutDownFired += ShutDownFired;
+        Service.Events.PreShutDownFired += SaveSessions;
         Service.Events.ProcessExited += OnServerExited;
             
         _logControl = new LogControl();
@@ -233,15 +234,15 @@ public partial class Main : FormOptimized
                 break;
         }
             
-        foreach (DockPane dockPane in DockPanel_Main.Panes)
+        Parallel.ForEach(DockPanel_Main.Panes, dockPane =>
         {
             foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
             {
                 if (_defaultUserControls.ContainsKey(((DockContentOptimized)content).Name)) continue;
 
-                content.DockHandler.Activate();
+                BeginInvoke(new Action(content.DockHandler.Activate)).AutoEndInvoke(this);
             }
-        }
+        });
             
         Variables.StartupComplete = true;
     }
@@ -335,6 +336,7 @@ public partial class Main : FormOptimized
         Service.Events.ShutDownFired -= ShutDownFired;
         Service.Events.ProcessExited -= OnServerExited;
         NotifyIcon.Visible = false;
+        SaveSessions();
     }
     private void MainLoadSizeAndLocation(Boolean location, Boolean size)
     {
@@ -505,8 +507,7 @@ public partial class Main : FormOptimized
     }
     private void SaveSessions()
     {
-        if (LoadingTab) return;
-        if (Variables.ShutDownFired || !Variables.StartupComplete) return;
+        if (LoadingTab || Variables.ShutDownFired || !Variables.StartupComplete) return;
 
         _saveSessionsSemaphoreSlim.WaitUIFriendly();
         DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);

@@ -28,6 +28,7 @@ public static class Events
     public static event ExtensionMethods.CustomDelegate<TerminalControl> ProcessExited;
     public static void OnProcessExited(TerminalControl terminal) => ProcessExited?.Invoke(terminal);
 
+    public static event ExtensionMethods.CustomDelegate PreShutDownFired;
     public static event ExtensionMethods.CustomDelegate ShutDownFired;
     public static void ShutDown()
     {
@@ -41,6 +42,7 @@ public static class Events
         // ReSharper disable once EmptyGeneralCatchClause
         catch {}
 
+        PreShutDownFired?.Invoke();
         Variables.ShutDownFired = true;
         ShutDownFired?.Invoke();
 
