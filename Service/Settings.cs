@@ -442,7 +442,7 @@ public class Values
             }
         }
     }
-    [XmlIgnore] private Boolean _closeTabOnCrash = true;
+    [XmlIgnore] private Boolean _closeTabOnCrash = false;
 
     [Category("Sessions"), DisplayName("Force close all sessions on application crash/closure"), TypeConverter(typeof(BooleanYesNoConverter))]
     public Boolean ForceCloseSessionsOnCrash
