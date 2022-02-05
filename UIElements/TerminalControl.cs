@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MSM.Extends;
+using MSM.Functions;
 using MSM.Service;
 
 namespace MSM.UIElements;
@@ -39,10 +40,7 @@ public partial class TerminalControl : UserControlOptimized
         BorderStyle = BorderStyle.None;
         Padding = new Padding(0);
     }
-    ~TerminalControl()
-    {
-        AppControl?.Stop();
-    }
+    ~TerminalControl() => AppControl?.Stop();
 
     public override Int32 GetHashCode() => _uniqueID.GetHashCode();
     public override Boolean Equals(Object o) => String.Equals(((TerminalControl)o)?._uniqueID, _uniqueID, StringComparison.Ordinal);

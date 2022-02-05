@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
+using MSM.Functions;
 using MSM.UIElements;
 
 namespace MSM.Extends;
@@ -81,6 +82,7 @@ public class AppControl : ControlOptimized
     private readonly Dictionary<String, String> _environment;
     private readonly String _path;
     public Boolean LoadSuccess;
+    private ProcessStartInfo _processStartInfo;
 
     public void Stop(Object sender, CancelEventArgs e)
     {
@@ -107,7 +109,7 @@ public class AppControl : ControlOptimized
     {
         try
         {
-            ProcessStartInfo procInfo = new(_executable)
+            _processStartInfo = new ProcessStartInfo(_executable)
             {
                 WorkingDirectory = _path,
                 Arguments = _parameters,
@@ -118,10 +120,23 @@ public class AppControl : ControlOptimized
             };
             foreach (KeyValuePair<String, String> keyValuePair in _environment)
             {
-                procInfo.EnvironmentVariables[keyValuePair.Key] = keyValuePair.Value;
+                _processStartInfo.EnvironmentVariables[keyValuePair.Key] = keyValuePair.Value;
             }
 
-            _childProcess = Process.Start(procInfo);
+            ThreadHelpers thread = new();
+            thread.ExecuteThread(StartProcess, false, false);
+        }
+        catch (Exception exception)
+        {
+            Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not load AppControl!", exception);
+            LoadSuccess = false;
+        }
+    }
+    private void StartProcess()
+    {
+        try
+        {
+            _childProcess = Process.Start(_processStartInfo);
             if (_childProcess == null)
             {
                 LoadSuccess = false;
@@ -160,19 +175,18 @@ public class AppControl : ControlOptimized
             _childProcess.EnableRaisingEvents = true;
             _childProcess.Exited += ChildProcessExited;
             ChildHandle = _childProcess.MainWindowHandle;
+
+            OnSizeChanged(null, null);
+
+            _iscreated = true;
+            _isdisposed = false;
+            LoadSuccess = true;
         }
         catch (Exception exception)
         {
             Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not load AppControl!", exception);
             LoadSuccess = false;
-            return;
         }
-
-        OnSizeChanged(null, null);
-
-        _iscreated = true;
-        _isdisposed = false;
-        LoadSuccess = true;
     }
     public void SendCommand(String command)
     {
