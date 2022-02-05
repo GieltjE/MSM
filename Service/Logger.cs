@@ -17,6 +17,9 @@
 //
 
 using System;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Reflection;
 using log4net;
 using MSM.Data;
@@ -38,6 +41,10 @@ public static class Logger
 
         logMessage = $"[{target}] {logMessage}";
             
+#if DEBUG
+        Debug.WriteLine(logMessage);
+#endif
+
         switch (level)
         {
             case Enumerations.LogLevel.Info:
