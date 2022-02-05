@@ -1,4 +1,4 @@
-$bindir="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
+$bindir="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
 
 & $bindir\MSBuild.exe /nr:True .\MSM.sln /target:Clean /p:Platform=x64 /p:Configuration=Release
 & $bindir\MSBuild.exe /nr:True .\MSM.sln /target:Restore /p:Platform=x64 /p:Configuration=Release
