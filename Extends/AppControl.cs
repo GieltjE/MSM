@@ -23,7 +23,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 using MSM.Data;
 using MSM.Functions;
@@ -34,10 +33,9 @@ namespace MSM.Extends;
 public class AppControl : ControlOptimized
 {
     // This is a simplified/butchered app control, Chrome doesn't like being pushed around
-    public AppControl(TerminalControl terminal, String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables, IntPtr windowHandle)
+    public AppControl(TerminalControl terminal, String executable, IEnumerable<String> arguments, Dictionary<String, String> environmentVariables)
     {
         _terminal = terminal;
-        _windowHandle = windowHandle;
         _environment = environmentVariables;
 
         if (File.Exists(executable))
@@ -52,15 +50,20 @@ public class AppControl : ControlOptimized
         }
 
         Padding = new Padding(0);
-
-        SizeChanged += OnSizeChanged;
     }
     ~AppControl()
     {
         Stop();
         Dispose();
     }
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
 
+        if (!Variables.StartupComplete) return;
+
+        LoadHelper();
+    }
     protected void OnSizeChanged(Object s, EventArgs eventArgs)
     {
         if (ChildHandle != IntPtr.Zero && Width != 0 && Height != 0)
@@ -72,31 +75,25 @@ public class AppControl : ControlOptimized
     }
 
     private readonly TerminalControl _terminal;
-    private Boolean _iscreated;
-    private Boolean _isdisposed;
+    internal Boolean Iscreated;
     internal IntPtr ChildHandle = IntPtr.Zero;
     private Process _childProcess;
-    private static IntPtr _windowHandle = IntPtr.Zero;
     private readonly String _executable;
     private readonly String _parameters;
     private readonly Dictionary<String, String> _environment;
     private readonly String _path;
     public Boolean LoadSuccess;
+    public Boolean LoadComplete;
     private ProcessStartInfo _processStartInfo;
 
-    public void Stop(Object sender, CancelEventArgs e)
-    {
-        Stop();
-    }
     internal void Stop()
     {
-        if (!_iscreated || _isdisposed || ChildHandle == IntPtr.Zero || _childProcess.HasExited)
+        if (!Iscreated || ChildHandle == IntPtr.Zero || _childProcess.HasExited)
         {
             return;
         }
 
-        _iscreated = false;
-        _isdisposed = true;
+        Iscreated = false;
         NativeMethods.SetParent(ChildHandle, IntPtr.Zero);
         ChildHandle = IntPtr.Zero;
 
@@ -105,38 +102,34 @@ public class AppControl : ControlOptimized
         _childProcess.Kill();
         _childProcess?.Dispose();
     }
-    internal void Load()
+    public void LoadHelper()
     {
-        try
+        _processStartInfo = new ProcessStartInfo(_executable)
         {
-            _processStartInfo = new ProcessStartInfo(_executable)
-            {
-                WorkingDirectory = _path,
-                Arguments = _parameters,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Maximized,
-                UseShellExecute = false,
-                ErrorDialogParentHandle = Variables.MainForm.Handle, 
-            };
-            foreach (KeyValuePair<String, String> keyValuePair in _environment)
-            {
-                _processStartInfo.EnvironmentVariables[keyValuePair.Key] = keyValuePair.Value;
-            }
+            WorkingDirectory = _path,
+            Arguments = _parameters,
+            CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Maximized,
+            UseShellExecute = false,
+            ErrorDialogParentHandle = Variables.MainForm.Handle,
+        };
 
-            ThreadHelpers thread = new();
-            thread.ExecuteThread(StartProcess, false, false);
-        }
-        catch (Exception exception)
-        {
-            Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not load AppControl!", exception);
-            LoadSuccess = false;
-        }
+        ThreadHelpers thread = new();
+        thread.ExecuteThread(StartProcess, false, false);
+
+        SizeChanged += OnSizeChanged;
     }
     private void StartProcess()
     {
         try
         {
+            foreach (KeyValuePair<String, String> keyValuePair in _environment)
+            {
+                _processStartInfo.EnvironmentVariables[keyValuePair.Key] = keyValuePair.Value;
+            }
+
             _childProcess = Process.Start(_processStartInfo);
+
             if (_childProcess == null)
             {
                 LoadSuccess = false;
@@ -145,48 +138,46 @@ public class AppControl : ControlOptimized
 
             _childProcess.WaitForInputIdle();
 
-            while (_childProcess.MainWindowHandle == IntPtr.Zero)
-            {
-                Thread.Sleep(25);
-            }
-
-            // Set window handle to us
-            NativeMethods.SetParent(_childProcess.MainWindowHandle, _windowHandle);
-            // Maximize the window
-            NativeMethods.ShowWindow(_childProcess.MainWindowHandle, NativeMethods.ShowWindowCommands.Maximize);
-
-            // Remove UI elements
-            IntPtr windowStyle = NativeMethods.GetWindowLongArchitectureInvariant(_childProcess.MainWindowHandle, (Int32)NativeMethods.GWL.GWL_STYLE);
-            IntPtr windowStyleOriginal = windowStyle;
-
-            Int32 style = windowStyle.ToInt32();
-            style &= ~((Int32)NativeMethods.WindowStyles.WS_CAPTION | (Int32)NativeMethods.WindowStyles.WS_SIZEBOX);
-            windowStyle = new IntPtr(style);
-
-            // Attach handle to our form and apply the window style
-            IntPtr result = NativeMethods.SetWindowLongArchitectureInvariant(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
-            if (result == IntPtr.Zero || windowStyleOriginal != result)
-            {
-                Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not set window style!", null);
-            }
-
-            //OnSizeChanged(null, null);
-
-            _childProcess.EnableRaisingEvents = true;
-            _childProcess.Exited += ChildProcessExited;
-            ChildHandle = _childProcess.MainWindowHandle;
-
-            OnSizeChanged(null, null);
-
-            _iscreated = true;
-            _isdisposed = false;
-            LoadSuccess = true;
+            BeginInvoke(new Action(BindProcess)).AutoEndInvoke(this);
         }
         catch (Exception exception)
         {
             Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not load AppControl!", exception);
             LoadSuccess = false;
         }
+
+        LoadComplete = true;
+    }
+    private void BindProcess()
+    {
+        // Set window handle to us
+        NativeMethods.SetParent(_childProcess.MainWindowHandle, Handle);
+        // Maximize the window
+        NativeMethods.ShowWindow(_childProcess.MainWindowHandle, NativeMethods.ShowWindowCommands.Maximize);
+
+        // Remove UI elements
+        IntPtr windowStyle = NativeMethods.GetWindowLongArchitectureInvariant(_childProcess.MainWindowHandle, (Int32)NativeMethods.GWL.GWL_STYLE);
+        IntPtr windowStyleOriginal = windowStyle;
+
+        Int32 style = windowStyle.ToInt32();
+        style &= ~((Int32)NativeMethods.WindowStyles.WS_CAPTION | (Int32)NativeMethods.WindowStyles.WS_SIZEBOX);
+        windowStyle = new IntPtr(style);
+
+        // Attach handle to our form and apply the window style
+        IntPtr result = NativeMethods.SetWindowLongArchitectureInvariant(new HandleRef(this, _childProcess.MainWindowHandle), (Int32)NativeMethods.GWL.GWL_STYLE, windowStyle);
+        if (result == IntPtr.Zero || windowStyleOriginal != result)
+        {
+            Service.Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not set window style!", null);
+        }
+
+        _childProcess.EnableRaisingEvents = true;
+        _childProcess.Exited += ChildProcessExited;
+        ChildHandle = _childProcess.MainWindowHandle;
+
+        OnSizeChanged(null, null);
+
+        Iscreated = true;
+        LoadSuccess = true;
     }
     public void SendCommand(String command)
     {
@@ -198,6 +189,8 @@ public class AppControl : ControlOptimized
 
     private void ChildProcessExited(Object sender, EventArgs e)
     {
+        _childProcess.Exited -= ChildProcessExited;
+        _childProcess?.Dispose();
         Service.Events.OnProcessExited(_terminal);
     }
 }

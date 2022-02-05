@@ -156,41 +156,9 @@ public partial class Main : FormOptimized
 
         NotifyIcon.Visible = Settings.Values.AlwaysShowTrayIcon;
 
-        Boolean loadDockPanelSuccess = false;
-        try
-        {
-            if (File.Exists(Variables.SessionFile))
-            {
-                DockPanel_Main.LoadFromXml(Variables.SessionFile, GetContentFromPersistString);
-            }
-            loadDockPanelSuccess = true;
-        }
-        catch (Exception exception)
-        {
-            Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not reinstate (all) tabbages", exception);
-        }
-
-        if (!loadDockPanelSuccess)
-        {
-            ToolStripButtonDefaultControlClick(ToolStrip_ShowServerList, null);
-            ToolStripButtonDefaultControlClick(ToolStrip_ShowLogs, null);
-        }
-
         foreach (KeyValuePair<String, (UserControlOptimized _, DockState _d, ToolStripMenuItem toolStripMenuItem, DockContentOptimized _c)> dockContentOptimized in _defaultUserControls.Where(x => x.Value.dockContentOptimized is { IsHidden: false }))
         {
             dockContentOptimized.Value.toolStripMenuItem.Checked = true;
-        }
-
-        if (Settings.Values.InitialSessions != Enumerations.InitialSessions.Predefined)
-        {
-            Variables.StartupComplete = true;
-            return;
-        }
-
-        IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
-        foreach (Server server in orderedList)
-        {
-            AddServer(server, false);
         }
     }
     private void MainShown(Object sender, EventArgs e)
@@ -233,8 +201,38 @@ public partial class Main : FormOptimized
                 WindowState = Settings.Values.WindowState;
                 break;
         }
-            
-        Parallel.ForEach(DockPanel_Main.Panes, dockPane =>
+        
+        try
+        {
+            if (File.Exists(Variables.SessionFile))
+            {
+                DockPanel_Main.LoadFromXml(Variables.SessionFile, GetContentFromPersistString);
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.Log(Enumerations.LogTarget.General, Enumerations.LogLevel.Fatal, "Could not reinstate (all) tabbages", exception);
+        }
+
+        IOrderedEnumerable<Server> orderedList = Settings.AllServers.Values.Where(allServersValue => allServersValue.PredefinedStartIndex != -1).OrderBy(x => x.PredefinedStartIndex);
+        foreach (Server server in orderedList)
+        {
+            AddServer(server, false);
+        }
+
+        ToolStripButtonDefaultControlClick(ToolStrip_ShowServerList, null);
+        ToolStripButtonDefaultControlClick(ToolStrip_ShowLogs, null);
+
+        lock (_terminalControls)
+        {
+            foreach (KeyValuePair<TerminalControl, DockContentOptimized> terminalControl in _terminalControls)
+            {
+                terminalControl.Value.Show();
+                terminalControl.Key.AppControl.LoadHelper();
+            }
+        }
+
+        foreach (DockPane dockPane in DockPanel_Main.Panes)
         {
             foreach (IDockContent content in dockPane.Contents.Where(x => !x.DockHandler.IsHidden && x.DockHandler.VisibleState != DockState.Hidden && x != dockPane.ActiveContent))
             {
@@ -242,8 +240,7 @@ public partial class Main : FormOptimized
 
                 BeginInvoke(new Action(content.DockHandler.Activate)).AutoEndInvoke(this);
             }
-        });
-            
+        }
         Variables.StartupComplete = true;
     }
     private IDockContent GetContentFromPersistString(String persistString)
@@ -251,9 +248,11 @@ public partial class Main : FormOptimized
         Boolean add = false;
         Control content;
         String displayName, internalName;
+        DockState dockState = DockState.Document;
         if (_defaultUserControls.ContainsKey(persistString))
         {
-            (UserControlOptimized userControlOptimized, DockState _, ToolStripMenuItem _, DockContentOptimized _) = _defaultUserControls[persistString];
+            (UserControlOptimized userControlOptimized, DockState dockState2, ToolStripMenuItem _, DockContentOptimized _) = _defaultUserControls[persistString];
+            dockState = dockState2;
             content = userControlOptimized;
             internalName = persistString;
             displayName = persistString;
@@ -271,7 +270,7 @@ public partial class Main : FormOptimized
             displayName = server.DisplayName;
         }
 
-        DockContentOptimized dockContent = AddDockContent(displayName, internalName, content, DockState.Float, false, false);
+        DockContentOptimized dockContent = AddDockContent(displayName, internalName, content, dockState, false, false);
         if (!add) return dockContent;
 
         lock (_terminalControls)
@@ -336,7 +335,6 @@ public partial class Main : FormOptimized
         Service.Events.ShutDownFired -= ShutDownFired;
         Service.Events.ProcessExited -= OnServerExited;
         NotifyIcon.Visible = false;
-        SaveSessions();
     }
     private void MainLoadSizeAndLocation(Boolean location, Boolean size)
     {
@@ -492,7 +490,7 @@ public partial class Main : FormOptimized
         if (server == null) return;
 
         ThreadHelpers thread = new();
-        thread.ExecuteThreadParameter(AddServerHelper, (server, save), false, false);
+        thread.ExecuteThreadParameter(AddServerHelper, (server, save));
     }
     private void AddServerHelper(Object startInfo)
     {
@@ -508,6 +506,14 @@ public partial class Main : FormOptimized
     private void SaveSessions()
     {
         if (LoadingTab || Variables.ShutDownFired || !Variables.StartupComplete) return;
+
+        lock (_terminalControls)
+        {
+            if (_terminalControls.Any(x => x.Key.AppControl is not {LoadComplete: true}))
+            {
+                return;
+            }
+        }
 
         _saveSessionsSemaphoreSlim.WaitUIFriendly();
         DockPanel_Main.SaveAsXml(Variables.SessionFile, Encoding.UTF8);
@@ -560,14 +566,14 @@ public partial class Main : FormOptimized
             }
         }
 
-        newDockContent.SizeChanged += NewDockContentOnSizeChanged;
-        newDockContent.DockStateChanged += (sender, _) => NewDockContentOnDockStateChanged((DockContentOptimized)sender, content);
-
         if (_defaultUserControls.ContainsKey(internalName))
         {
             result.dockContentOptimized = newDockContent;
             _defaultUserControls[internalName] = result;
         }
+
+        newDockContent.SizeChanged += NewDockContentOnSizeChanged;
+        newDockContent.DockStateChanged += (sender, _) => NewDockContentOnDockStateChanged((DockContentOptimized)sender, content);
 
         LoadingTab = false;
 
@@ -578,12 +584,7 @@ public partial class Main : FormOptimized
             
         return newDockContent;
     }
-    private void NewDockContentOnSizeChanged(Object sender, EventArgs e)
-    {
-        if (!Variables.StartupComplete || Variables.ShutDownFired) return;
-
-        SaveSessions();
-    }
+    private void NewDockContentOnSizeChanged(Object sender, EventArgs e) => SaveSessions();
     private void NewDockContentOnDockStateChanged(DockContentOptimized dockContent, IDisposable content)
     {
         if (LoadingTab || !Variables.StartupComplete || Variables.ShutDownFired) return;

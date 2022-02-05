@@ -31,7 +31,7 @@ public partial class TerminalControl : UserControlOptimized
 {
     internal AppControl AppControl;
     private readonly Server _server;
-    private readonly String _uniqueID = Functions.Generate.GenerateRandomAlphaNumbericalString(20);
+    private readonly String _uniqueID = Generate.GenerateRandomAlphaNumbericalString(20);
     public TerminalControl(Server server)
     {
         InitializeComponent();
@@ -48,7 +48,6 @@ public partial class TerminalControl : UserControlOptimized
     {
         base.OnHandleCreated(e);
 
-        //-ssh -P 222 -load "Default Settings"  -l root prolis.fyn.nl
         List<String> parameters = new()
         {
             "-ssh",
@@ -69,9 +68,8 @@ public partial class TerminalControl : UserControlOptimized
         }
         parameters.Add(_server.Hostname);
 
-        AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>(), Handle) { Dock = DockStyle.Fill };
+        AppControl = new AppControl(this, Settings.Values.PuttyExecutable, parameters, new Dictionary<String, String>()) { Dock = DockStyle.Fill };
         Controls.Add(AppControl);
-        AppControl.Load();
     }
 
     public void SendCommand(String command)
