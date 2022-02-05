@@ -37,7 +37,6 @@ public static class Variables
     public static String PortableSettingsFile => Path.Combine(SettingsDirectory, "Settings.xml");
     public static String NormalSettingsFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MSM", "Settings.xml");
     public static String SettingsFileChosen { get; set; }
-    public static String LogDirectory => Path.Combine(FileOperations.GetRunningDirectory(), "logs");
     public static Int32 MainSTAThreadID;
 
     private static Boolean? _designMode;
